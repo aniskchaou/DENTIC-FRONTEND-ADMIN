@@ -1,5 +1,6 @@
 import React from 'react';
 import Header from '../Header/Header';
+import {  Link } from "react-router-dom"
 
 class Navigation extends React.Component {
   constructor(props) {
@@ -16,25 +17,25 @@ class Navigation extends React.Component {
         <div id="main-menu" className="main-menu collapse navbar-collapse">
           <ul className="nav navbar-nav">
             <li className="active">
-              <a href="/dashboard"><i className="menu-icon fa fa-laptop"></i>Tableau de bord </a>
+              <Link to="/dashboard"><i className="menu-icon fa fa-laptop"></i>Tableau de bord </Link>
             </li>
             <li>
-              <a href="/prescription"><i className="menu-icon fa fa-laptop"></i>Prescriptions </a>
+              <Link to="/prescription"><i className="menu-icon fa fa-laptop"></i>Prescriptions </Link>
             </li>
             <li>
-              <a href="/patient"><i className="menu-icon fa fa-laptop"></i>Patients </a>
+              <Link to="/patient"><i className="menu-icon fa fa-laptop"></i>Patients </Link>
             </li>
             <li>
-              <a href="/medicaments"><i className="menu-icon fa fa-laptop"></i>Médicments </a>
+              <Link to="/medicaments"><i className="menu-icon fa fa-laptop"></i>Médicments </Link>
             </li>
             <li>
-              <a href="/rendezvous"><i className="menu-icon fa fa-laptop"></i>Rendez vous </a>
+              <Link to="/rendezvous"><i className="menu-icon fa fa-laptop"></i>Rendez vous </Link>
             </li>
             <li>
-              <a href="/payment"><i className="menu-icon fa fa-laptop"></i>Paiement </a>
+              <Link to="/payment"><i className="menu-icon fa fa-laptop"></i>Paiement </Link>
             </li>
             <li>
-              <a href="/configuration"><i className="menu-icon fa fa-laptop"></i>Paramètres </a>
+              <Link to="/configuration"><i className="menu-icon fa fa-laptop"></i>Paramètres </Link>
             </li>
           </ul>
         </div>

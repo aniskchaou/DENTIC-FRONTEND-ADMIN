@@ -5,7 +5,6 @@ import Content from '../Content/Content';
 
 import { BrowserRouter as Router, Route } from "react-router-dom"
 import Footer from '../Footer/Footer';
-import Path from '../Path/Path';
 
 class Root extends React.Component {
   constructor(props) {
@@ -15,29 +14,31 @@ class Root extends React.Component {
   render() {
     return (
       <div>
-        <Navigation />
-        <Header/>
-        
-        
-        <div id="right-panel" className="right-panel">
-          <Path/>
-
-          <div className="content">
-            <div className="animated fadeIn">
-              <div className="row">
-
-                <Content/>
+        <Router>
+          <Navigation />
+          <Header />
 
 
+          <div id="right-panel" className="right-panel">
+
+
+            <div className="content">
+              <div className="animated fadeIn">
+                <div className="row">
+
+                  <Content />
+
+
+                </div>
               </div>
             </div>
+
+            <div className="clearfix"></div>
+            <Footer />
+
+
           </div>
-
-          <div className="clearfix"></div>
-          <Footer/>
-          
-
-        </div>
+        </Router>
       </div>
     );
   }

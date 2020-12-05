@@ -13,7 +13,7 @@ import Medicament from '../Medicament/Medicament';
 
 const Content = () => (
   <div className="col-md-12">
-    <Router>
+  
         <div>
         <Route exact path="/" component={Dashbord} />
         <Route exact path="/dashboard" component={Dashbord} />
@@ -26,7 +26,7 @@ const Content = () => (
          
           
         </div>
-      </Router>
+      
    
 </div>
 );
