@@ -3,8 +3,14 @@ import PropTypes from 'prop-types';
 import './Configuration.css';
 
 const Configuration = () => (
-  <div className="Configuration">
-    Configuration Component
+<div className="card">
+    <div className="card-header">
+      <strong className="card-title">Paramètres</strong>
+    </div>
+    <div className="card-body">
+
+    
+    </div>
   </div>
 );
 

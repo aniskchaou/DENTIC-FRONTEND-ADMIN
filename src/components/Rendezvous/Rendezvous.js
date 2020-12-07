@@ -5,7 +5,7 @@ import './Rendezvous.css';
 const Rendezvous = () => (
   <div className="card">
     <div className="card-header">
-      <strong className="card-title">Candidats</strong>
+      <strong className="card-title">Rendez vous</strong>
     </div>
     <div className="card-body">
 

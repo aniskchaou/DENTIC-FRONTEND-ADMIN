@@ -21,7 +21,7 @@ const Content = () => (
           <Route exact path="/prescription" component={Prescription} />
           <Route exact path="/payment" component={Payment} />
           <Route exact path="/patient" component={Patient} />
-          <Route exact path="/medicament" component={Medicament} />
+          <Route exact path="/medicaments" component={Medicament} />
           <Route exact path="/configuration" component={Configuration} />
          
           
