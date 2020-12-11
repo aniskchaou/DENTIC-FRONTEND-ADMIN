@@ -15,6 +15,7 @@ const Patient = () => (
           <th> Nom Patient</th>
           <th> Téléphone</th>
           <th>Sexe </th>
+          <th>Actions</th>
         </thead>
         <tbody>
           <tr>
@@ -30,11 +31,14 @@ const Patient = () => (
             <td>
               Homme
                           </td>
-
+                          <td><button disabled type="button" className="btn btn-primary btn-sm">voir</button>
+              <button disabled type="button" className="btn btn-warning btn-sm">editer</button>
+              <button disabled type="button" className="btn btn-danger btn-sm">Supprimer</button></td>
           </tr>
-
+          
         </tbody>
       </table>
+      <button  type="button" className="btn btn-success btn-sm">Ajouter</button>
     </div>
   </div>
 );

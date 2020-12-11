@@ -10,12 +10,13 @@ import Prescription from '../Prescription/Prescription';
 import Payment from '../Payment/Payment';
 import Patient from '../Patient/Patient';
 import Medicament from '../Medicament/Medicament';
+import Login from '../Login/Login';
 
 const Content = () => (
   <div className="col-md-12">
   
         <div>
-        <Route exact path="/" component={Dashbord} />
+        <Route exact path="/" component={Login} />
         <Route exact path="/dashboard" component={Dashbord} />
           <Route exact path="/rendezvous" component={Rendezvous} />
           <Route exact path="/prescription" component={Prescription} />

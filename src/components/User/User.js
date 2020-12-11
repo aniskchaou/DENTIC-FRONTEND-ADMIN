@@ -14,7 +14,7 @@ const User = () => (
                   <th>Nom</th>
                   <th>Email</th>
                   <th>Téléphone</th>
-                 
+                  <th>Actions</th>
               </tr>
           </thead>
           <tbody>
@@ -22,11 +22,14 @@ const User = () => (
                   <td>Tiger Nixon</td>
                   <td>tiger@gmail.com</td>
                   <td>355355353</td>
-                  
+                  <td><button disabled type="button" className="btn btn-primary btn-sm">voir</button>
+              <button disabled type="button" className="btn btn-warning btn-sm">editer</button>
+              <button disabled type="button" className="btn btn-danger btn-sm">Supprimer</button></td>
               </tr>
              
           </tbody>
       </table>
+      <button  type="button" className="btn btn-success btn-sm">Ajouter</button>
   </div>
 </div>
 );
