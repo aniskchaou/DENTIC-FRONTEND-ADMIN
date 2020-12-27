@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '../Header/Header';
-import {  Link } from "react-router-dom"
+import {  NavLink } from "react-router-dom"
 
 class Navigation extends React.Component {
   constructor(props) {
@@ -16,26 +16,26 @@ class Navigation extends React.Component {
 
         <div id="main-menu" className="main-menu collapse navbar-collapse">
           <ul className="nav navbar-nav">
-            <li className="active">
-              <Link to="/dashboard"><i className="menu-icon fa fa-laptop"></i>Tableau de bord </Link>
+            <li >
+              <NavLink to="/dashboard" activeClassName="activeNavLink"><i className="menu-icon fa fa-laptop"></i>Tableau de bord </NavLink>
             </li>
             <li>
-              <Link to="/prescription"><i className="menu-icon fa fa-laptop"></i>Prescriptions </Link>
+              <NavLink to="/prescription" activeClassName="activeNavLink"><i className="menu-icon fa fa-clipboard"></i>Prescriptions </NavLink>
             </li>
             <li>
-              <Link to="/patient"><i className="menu-icon fa fa-laptop"></i>Patients </Link>
+              <NavLink to="/patient" activeClassName="activeNavLink"><i className="menu-icon fa fa-head-side-cough"></i>Patients </NavLink>
             </li>
             <li>
-              <Link to="/medicaments"><i className="menu-icon fa fa-laptop"></i>Médicments </Link>
+              <NavLink to="/medicaments" activeClassName="activeNavLink"><i className="menu-icon fa fa-capsules"></i>Médicaments </NavLink>
             </li>
             <li>
-              <Link to="/rendezvous"><i className="menu-icon fa fa-laptop"></i>Rendez vous </Link>
+              <NavLink to="/rendezvous" activeClassName="activeNavLink"><i className="menu-icon fa fa-user-md"></i>Rendez vous </NavLink>
             </li>
             <li>
-              <Link to="/payment"><i className="menu-icon fa fa-laptop"></i>Paiement </Link>
+              <NavLink to="/payment" activeClassName="activeNavLink"><i className="menu-icon fa fa-money-bill-alt"></i>Paiement </NavLink>
             </li>
             <li>
-              <Link to="/configuration"><i className="menu-icon fa fa-laptop"></i>Paramètres </Link>
+              <NavLink to="/configuration" activeClassName="activeNavLink"><i className="menu-icon fa fa-cog"></i>Paramètres </NavLink>
             </li>
           </ul>
         </div>

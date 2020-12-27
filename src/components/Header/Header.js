@@ -7,7 +7,7 @@ const Header = () => (
       <header id="header" className="header">
           <div className="top-left">
               <div className="navbar-header">
-                  <a className="navbar-brand" href="./"><img src="images/logo.png" alt="Logo" width="90" height="40"/></a>
+                  <a className="navbar-brand" href="./"><img src="images/logo.png" alt="Logo"/></a>
                   <a className="navbar-brand hidden" href="./"><img src="images/logo2.png" alt="Logo" /></a>
                   <a id="menuToggle" className="menutoggle"><i className="fa fa-bars"></i></a>
               </div>
@@ -60,7 +60,7 @@ const Header = () => (
 
                   <div className="user-area dropdown float-right">
                       <a href="#" className="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                          <img className="user-avatar rounded-circle" src="images/admin.jpg" alt="User Avatar"/>
+                          <img className="user-avatar rounded-circle" src="images/admin.png" alt="User Avatar"/>
                       </a>
 
                       <div className="user-menu dropdown-menu">

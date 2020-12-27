@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './User.css';
-
+const deleteTask=()=>{
+    return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
+ }
 const User = () => (
   <div className="card">
   <div className="card-header">
@@ -22,9 +24,9 @@ const User = () => (
                   <td>Tiger Nixon</td>
                   <td>tiger@gmail.com</td>
                   <td>355355353</td>
-                  <td><button disabled type="button" className="btn btn-primary btn-sm">voir</button>
-              <button disabled type="button" className="btn btn-warning btn-sm">editer</button>
-              <button disabled type="button" className="btn btn-danger btn-sm">Supprimer</button></td>
+                  <td><button type="button" data-toggle="modal" data-target="#viewTask" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
+              <button type="button" data-toggle="modal" data-target="#editTask"class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+              <button type="button" class="btn btn-danger btn-sm" onClick={deleteTask}><i class="fas fa-trash-alt"></i></button></td>
               </tr>
              
           </tbody>

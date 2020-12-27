@@ -11,7 +11,7 @@ import Payment from '../Payment/Payment';
 import Patient from '../Patient/Patient';
 import Medicament from '../Medicament/Medicament';
 import Login from '../Login/Login';
-
+import AddPrescription from "../AddPrescription/AddPrescription";
 const Content = () => (
   <div className="col-md-12">
   
@@ -20,6 +20,7 @@ const Content = () => (
         <Route exact path="/dashboard" component={Dashbord} />
           <Route exact path="/rendezvous" component={Rendezvous} />
           <Route exact path="/prescription" component={Prescription} />
+          <Route exact path="/addprescription" component={AddPrescription} />
           <Route exact path="/payment" component={Payment} />
           <Route exact path="/patient" component={Patient} />
           <Route exact path="/medicaments" component={Medicament} />
