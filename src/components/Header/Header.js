@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Header.css';
+import { Link } from 'react-router-dom';
+
 
 const Header = () => (
   <div id="right-panel" className="right-panel">
@@ -64,13 +66,11 @@ const Header = () => (
                       </a>
 
                       <div className="user-menu dropdown-menu">
-                          <a className="nav-link" href="#"><i className="fa fa-user"></i>Mon Profile</a>
+                        
 
-                          <a className="nav-link" href="#"><i className="fa fa-bell-o"></i>Notifications <span className="count">13</span></a>
+                          <Link to="/configuration" className="nav-link" href="#"><i className="fa fa-cog"></i>Paramétres</Link>
 
-                          <a className="nav-link" href="#"><i className="fa fa-cog"></i>Paramétres</a>
-
-                          <a className="nav-link" href="#"><i className="fa fa-power-off"></i>Déconnexion</a>
+                          <Link to="/" className="nav-link" href="#"><i className="fa fa-power-off"></i>Déconnexion</Link>
                       </div>
                   </div>
               </div>
