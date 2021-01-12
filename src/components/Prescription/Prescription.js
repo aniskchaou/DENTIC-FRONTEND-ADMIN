@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Prescription.css';
 import {  Link } from "react-router-dom"
 import AddPrescription from '../AddPrescription/AddPrescription';
+import { LoadJS } from './../init';
+import ViewPrescription from './../ViewPrescription/ViewPrescription';
+import EditPrescription from './../EditPrescription/EditPrescription';
 
 const deleteTask=()=>{
   return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
 
-const Prescription = () => (
+const Prescription = ()  => {
+  useEffect(() => {
+    // Runs ONCE after initial rendering
+    LoadJS()
+  }, []);
+
+
+  return(
   <div className="card">
     <div className="card-header">
       <strong className="card-title">Préscription</strong>
@@ -77,7 +87,7 @@ const Prescription = () => (
               </button>
             </div>
             <div class="modal-body">
-              
+              <EditPrescription/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -97,7 +107,7 @@ const Prescription = () => (
               </button>
             </div>
             <div class="modal-body">
-              
+              <ViewPrescription/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -110,7 +120,7 @@ const Prescription = () => (
 
     </div>
   </div>
-);
+)};
 
 Prescription.propTypes = {};
 

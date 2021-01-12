@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Patient.css';
+import { LoadJS } from './../init';
+import AddPatient from './../AddPatient/AddPatient';
+import ViewPatient from './../ViewPatient/ViewPatient';
+import EditPatient from './../EditPatient/EditPatient';
 const deleteTask=()=>{
   return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
-const Patient = () => (
+const Patient = ()  => {
+  useEffect(() => {
+    // Runs ONCE after initial rendering
+    LoadJS()
+  }, []);
+
+
+  return(
   <div className="card">
     <div className="card-header">
       <strong className="card-title">Patients</strong>
@@ -53,7 +64,7 @@ const Patient = () => (
               </button>
             </div>
             <div class="modal-body">
-            
+            <AddPatient/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -74,7 +85,7 @@ const Patient = () => (
               </button>
             </div>
             <div class="modal-body">
-              
+              <ViewPatient/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -95,7 +106,7 @@ const Patient = () => (
               </button>
             </div>
             <div class="modal-body">
-              
+              <EditPatient/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -108,7 +119,7 @@ const Patient = () => (
 
     </div>
   </div>
-);
+)};
 
 Patient.propTypes = {};
 

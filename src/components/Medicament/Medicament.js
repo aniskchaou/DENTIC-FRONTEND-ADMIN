@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Medicament.css';
+import { LoadJS } from './../init';
+import ViewMedicament from './../ViewMedicament/ViewMedicament';
+import EditMedicament from './../EditMedicament/EditMedicament';
+import AddMedicament from './../AddMedicament/AddMedicament';
 const deleteTask=()=>{
   return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
 
-const Medicament = () => (
-  
+const Medicament = () => {
+  useEffect(() => {
+    // Runs ONCE after initial rendering
+    LoadJS()
+  }, []);
+
+
+  return(
   <div className="card">
     <div className="card-header">
       <strong className="card-title">Médicaments</strong>
@@ -36,7 +46,7 @@ const Medicament = () => (
               Oud-Turnhout
                           </td>
 
-                          <td><button type="button" data-toggle="modal" data-target="#viewMedicament" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
+                          <td>
               <button type="button" data-toggle="modal" data-target="#editMedicament"class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
               <button type="button" class="btn btn-danger btn-sm" onClick={deleteTask}><i class="fas fa-trash-alt"></i></button></td>
           </tr>
@@ -55,7 +65,7 @@ const Medicament = () => (
               </button>
             </div>
             <div class="modal-body">
-              
+              <AddMedicament/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -75,7 +85,7 @@ const Medicament = () => (
               </button>
             </div>
             <div class="modal-body">
-            
+            <ViewMedicament/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -95,7 +105,7 @@ const Medicament = () => (
               </button>
             </div>
             <div class="modal-body">
-          
+          <EditMedicament/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -106,7 +116,7 @@ const Medicament = () => (
       </div>
     </div>
   </div>
-);
+)};
 
 Medicament.propTypes = {};
 

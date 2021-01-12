@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Rendezvous.css';
+import { LoadJS } from './../init';
+import ViewAppointment from './../ViewAppointment/ViewAppointment';
 const deleteTask=()=>{
   return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
 
-const Rendezvous = () => (
+const Rendezvous = ()  => {
+  useEffect(() => {
+    // Runs ONCE after initial rendering
+    LoadJS()
+  }, []);
+
+
+  return(
   <div className="card">
     <div className="card-header">
       <strong className="card-title">Rendez vous</strong>
@@ -43,7 +52,7 @@ const Rendezvous = () => (
               impayé
                           </td>
                           <td><button type="button" data-toggle="modal" data-target="#viewRendezvous" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
-              <button type="button" data-toggle="modal" data-target="#editRendezvous"class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+             
               <button type="button" class="btn btn-danger btn-sm" onClick={deleteTask}><i class="fas fa-trash-alt"></i></button></td>
           </tr>
 
@@ -101,7 +110,7 @@ const Rendezvous = () => (
               </button>
             </div>
             <div class="modal-body">
-            
+            <ViewAppointment/>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -113,7 +122,7 @@ const Rendezvous = () => (
     
     </div>
   </div>
-);
+)};
 
 Rendezvous.propTypes = {};
 

@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './User.css';
+import { LoadJS } from './../init';
 const deleteTask=()=>{
     return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
  }
-const User = () => (
+const User = ()  => {
+    useEffect(() => {
+      // Runs ONCE after initial rendering
+      LoadJS()
+    }, []);
+  
+  
+    return(
   <div className="card">
   <div className="card-header">
       <strong className="card-title">Utilisateurs</strong>
@@ -34,7 +42,7 @@ const User = () => (
       <button  type="button" className="btn btn-success btn-sm">Ajouter</button>
   </div>
 </div>
-);
+)};
 
 User.propTypes = {};
 

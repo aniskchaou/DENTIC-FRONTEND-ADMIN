@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './Payment.css';
+import { LoadJS } from './../init';
 const deleteTask=()=>{
   return  window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
 
-const Payment = () => (
+const Payment = ()  => {
+  useEffect(() => {
+    // Runs ONCE after initial rendering
+    LoadJS()
+  }, []);
+
+
+  return(
   <div className="card">
     <div className="card-header">
       <strong className="card-title">Paiement</strong>
@@ -100,7 +108,7 @@ const Payment = () => (
       </div>
     </div>
   </div>
-);
+)};
 
 Payment.propTypes = {};
 

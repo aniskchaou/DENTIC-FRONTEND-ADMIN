@@ -10,11 +10,11 @@ const Login = () => (
       </a>
     </div>
     <div className="login-form">
-      <label>login : admin  / mp : admin</label>
+     
       <form action="/dashboard" method="get">
         <div className="form-group">
           <label>Email</label>
-          <input type="text" className="form-control" placeholder="Email" value="admin" />
+          <input type="text" className="form-control" placeholder="Email" value="admin@admin.com" />
         </div>
         <div className="form-group">
           <label>Mot de passe</label>
