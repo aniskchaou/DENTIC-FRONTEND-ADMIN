@@ -23,33 +23,34 @@ const Rendezvous = ()  => {
 
       <table id="example1" className="table table-striped table-bordered">
         <thead class=" text-primary">
+          <tr>
           <th>Nom </th>
           <th> Téléphone</th>
           <th> Date</th>
           <th>Heure </th>
           <th>SMS </th>
           <th>Statut </th>
-          <th>Actions</th>
+          <th>Actions</th></tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              KCHAOU Anis
+            Benoît Grandbois
                           </td>
             <td>
-              342342334
+            03.39.93.54.49
                           </td>
             <td>
               12/11/2020
                           </td>
             <td>
-              12:00
+              12h00
                           </td>
             <td>
               <button class="btn btn-primary">Envoyer un SMS</button>
             </td>
-            <td>
-              impayé
+            <td><span class="badge badge-danger">impayé</span>
+              
                           </td>
                           <td><button type="button" data-toggle="modal" data-target="#viewRendezvous" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
              

@@ -22,20 +22,21 @@ const Payment = ()  => {
 
       <table id="example1" className="table table-striped table-bordered">
         <thead class=" text-primary">
+          <tr>
           <th>ID Patient </th>
           <th>ID de rendez-vous</th>
           <th> email</th>
           <th>Montant </th>
           <th>Date </th>
           <th>Remarque </th>
-          <th>Actions</th>
+          <th>Actions</th></tr>
         </thead>
         <tbody>
           <tr>
             <td>12E323</td>
             <td>32E3A3</td>
-            <td>kchaouanis25@gmail.com</td>
-            <td>300$</td>
+            <td>BenoitGrandbois@teleworm.us</td>
+            <td> <span class="badge badge-primary">300$</span></td>
             <td>22/10/2020</td>
             <td>a tester</td>
             <td><button type="button" data-toggle="modal" data-target="#viewPayment" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>

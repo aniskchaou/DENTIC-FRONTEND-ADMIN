@@ -27,11 +27,12 @@ const Prescription = ()  => {
 
       <table id="example1" className="table table-striped table-bordered">
         <thead class=" text-primary">
+          <tr>
           <th>ID Patient </th>
           <th> Nom Patient</th>
           <th> Téléphone</th>
           <th>Sexe </th>
-          <th>Actions</th>
+          <th>Actions</th></tr>
         </thead>
         <tbody>
           <tr>
@@ -39,10 +40,11 @@ const Prescription = ()  => {
               123423
                           </td>
             <td>
-              Anis KCHAOU
+            Benoît Grandbois
+
                           </td>
             <td>
-              243423423
+            03.39.93.54.49
                           </td>
             <td>
               Homme

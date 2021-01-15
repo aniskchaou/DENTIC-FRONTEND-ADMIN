@@ -6,17 +6,9 @@ const ViewPrescription = () => (
   <div className="ViewPrescription">
     <div id="default">
 
-      <link href="https://doctorssnew.bdtask.com/web_assets/css/inline.css" rel="stylesheet" />
+
       <div id="dif_p" class="container">
-        <div class="row">
-          <a class="btn btn-primary" href="https://doctorssnew.bdtask.com/admin/Prescription_controller/create_new_prescription"><i class="fa fa-plus" aria-hidden="true"></i> Create (Trade) </a>
-          <div class="social-icons pull-right">
-            <label class="radio-inline btn btn btn-primary" id="pad">Pad Print</label>
-            <ul>
-              <li><a href="" title="Print"><i class="fa fa-print"></i></a></li>
-            </ul>
-          </div>
-        </div>
+
       </div>
       <div id="div1">
 
@@ -44,7 +36,7 @@ MBBS, FRCS <br />
               </div>
               <div class="a-two">
                 <b>Manan Tower</b><br />
-                          Khilkhet, dhaka-1229,
+
 56465644846 </div>
             </div>
             <div class="row patient_area">

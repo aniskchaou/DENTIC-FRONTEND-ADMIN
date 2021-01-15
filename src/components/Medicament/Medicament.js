@@ -25,16 +25,17 @@ const Medicament = () => {
 
       <table id="example1" className="table table-striped table-bordered">
         <thead class=" text-primary">
+          <tr>
           <th>Nom </th>
           <th> Compagnie</th>
           <th> Groupe</th>
           <th>Description </th>
-          <th>Actions</th>
+          <th>Actions</th></tr>
         </thead>
         <tbody>
           <tr>
             <td>
-              AEZED
+              Euphytose
                           </td>
             <td>
               Dakota Rice
