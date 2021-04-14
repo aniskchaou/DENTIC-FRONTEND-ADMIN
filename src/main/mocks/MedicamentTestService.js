@@ -1,4 +1,4 @@
-const _medicament = []
+const _medicament = [{ "medicine_name": "Euphytose", "company_name": "pfizer", "group_name": "Oud-Turnhout", "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." }]
 
 const getAll = () => {
     return _medicament;

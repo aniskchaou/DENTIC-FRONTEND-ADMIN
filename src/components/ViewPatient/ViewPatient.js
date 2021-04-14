@@ -4,7 +4,31 @@ import './ViewPatient.css';
 
 const ViewPatient = () => (
   <div className="ViewPatient">
-  Nom du patient: Jenifer ,   âge: 26-Y: 6-H: 29-D,   sexe: femme,   poids du patient: 59,   PA du patient:
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Nom du patient</th>
+          <th scope="col">Jenifer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Age
+               </th>
+          <td>26 ans</td>
+        </tr>
+        <tr>
+          <th scope="row"> sexe</th>
+          <td>Femme</td>
+        </tr>
+        <tr>
+          <th scope="row">poids</th>
+          <td>59 kg</td>
+        </tr>
+      </tbody>
+    </table>
+
   </div>
 );
 

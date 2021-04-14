@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import './Rendezvous.css';
 import { LoadJS } from './../init';
 import ViewAppointment from './../ViewAppointment/ViewAppointment';
+import AddAppointment from '../AddAppointment/AddAppointment';
+import EdiTAppointement from './../EditAppointment/EditAppointment'
+
 const deleteTask = () => {
   return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
@@ -71,7 +74,7 @@ const Rendezvous = () => {
                 </button>
               </div>
               <div class="modal-body">
-                cette fonctionnalité est en cours de développement
+                <AddAppointment />
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
@@ -91,7 +94,7 @@ const Rendezvous = () => {
                 </button>
               </div>
               <div class="modal-body">
-
+                <EdiTAppointement />
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>

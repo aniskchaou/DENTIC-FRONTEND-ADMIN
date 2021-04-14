@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './AddAppointement.css';
+import './AddAppointment.css';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages'
 import appointementMessage from '../../main/messages/appointementMessage'

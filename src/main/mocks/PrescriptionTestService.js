@@ -1,4 +1,5 @@
-const _prescription = []
+const _prescription = [{ "prescription": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." }]
+
 
 const getAll = () => {
     return _prescription;

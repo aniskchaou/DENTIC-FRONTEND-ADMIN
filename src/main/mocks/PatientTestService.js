@@ -1,4 +1,8 @@
-const _patient = []
+const _patient = [{
+    "patient_id": "123423", "name": "Benoît Grandbois",
+    "phone": "03.39.93.54.49", "sexe": "Homme", "venue": "", "phone": "",
+    "blood_group": "", "address": "", "email": "", "date": "", "old": ""
+}]
 
 const getAll = () => {
     return _patient;

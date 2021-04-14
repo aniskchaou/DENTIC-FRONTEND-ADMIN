@@ -6,20 +6,29 @@ import Content from '../Content/Content';
 import { BrowserRouter as Router, Route } from "react-router-dom"
 import Footer from '../Footer/Footer';
 import Login from '../Login/Login';
+import CurrentUser from '../../main/config/user';
 
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { connected: CurrentUser.CONNECTED_USER };
   }
+  rerender = () => {
+    this.forceUpdate();
+  };
+  forceUpdate = () => {
+    this.setState((state) => ({
+      connected: CurrentUser.CONNECTED_USER
+    }));
+  };
   render() {
-  
+
 
     return (
       <div>
-        <Router>
+        <Router >
           <Navigation />
-          <Header />
+          <Header rerender={this.rerender} />
 
 
           <div id="right-panel" className="right-panel">
@@ -38,7 +47,7 @@ class Root extends React.Component {
 
             <div className="clearfix"></div>
             <Footer />
-
+            <Login rerender={this.rerender} />
 
           </div>
         </Router>

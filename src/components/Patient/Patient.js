@@ -108,15 +108,7 @@ const Patient = () => {
             )}
 
 
-            <tr>
-              <td> 123423</td>
-              <td>Benoît Grandbois </td>
-              <td>03.39.93.54.49</td>
-              <td>Homme</td>
-              <td><button type="button" data-toggle="modal" data-target="#viewPatient" class="btn btn-primary btn-sm"><i class="fas fa-address-book"></i></button>
-                <button type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                <button type="button" class="btn btn-danger btn-sm" onClick={deleteTask}><i class="fas fa-trash-alt"></i></button></td>
-            </tr>
+
 
           </tbody>
         </table>

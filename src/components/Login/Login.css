@@ -1,1 +1,8 @@
 .Login {}
+
+.login-content
+ {
+     position: absolute;
+    top: 10%;
+    left: 40%;
+}

@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Footer.css';
+import CurrentUser from '../../main/config/user';
 
 const Footer = () => (
 
 
-  <footer className="site-footer">
+  <footer className="site-footer" style={{ display: (CurrentUser.CONNECTED_USER ? 'block' : 'none') }}>
     <div className="footer-inner bg-white">
       <div className="row">
         <div className="col-sm-6">
