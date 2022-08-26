@@ -3,9 +3,8 @@ import './AddPrescription.css';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages'
 import prescriptionMessage from '../../main/messages/prescriptionMessage'
-import prescriptionValidation from '../../main/validations/prescriptionValidation'
 import PrescriptionTestService from '../../main/mocks/PrescriptionTestService';
-import HTTPService from '../../main/services/HTTPService';
+import prescriptionHTTPService from '../../main/services/prescriptionHTTPService';
 
 const AddPrescription = () => {
 
@@ -30,7 +29,7 @@ const AddPrescription = () => {
 
     const savePrescription = (data) => {
 
-        HTTPService.create(data)
+        prescriptionHTTPService.create(data)
             .then(response => {
                 setPrescription(initialState)
             })
@@ -69,58 +68,7 @@ const AddPrescription = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group row">
-                                        <label for="text1" class="col-4 col-form-label">Téléphone</label>
-                                        <div class="col-8">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <div class="input-group-text">
-                                                        <i class="fa fa-phone"></i>
-                                                    </div>
-                                                </div>
-                                                <input id="text1" name="text1" type="text" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="text2" class="col-4 col-form-label">Date de naissance</label>
-                                        <div class="col-8">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <div class="input-group-text">
-                                                        <i class="fa fa-birthday-cake"></i>
-                                                    </div>
-                                                </div>
-                                                <input id="text2" name="text2" type="text" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="text3" class="col-4 col-form-label">Age</label>
-                                        <div class="col-8">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <div class="input-group-text">
-                                                        <i class="fa fa-sign-language"></i>
-                                                    </div>
-                                                </div>
-                                                <input id="text3" name="text3" type="text" class="form-control" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label class="col-4">Sexe</label>
-                                        <div class="col-8">
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input name="radio" id="radio_0" type="radio" class="custom-control-input" value="Masculin" />
-                                                <label for="radio_0" class="custom-control-label">Masculin</label>
-                                            </div>
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input name="radio" id="radio_1" type="radio" class="custom-control-input" value="Feminin" />
-                                                <label for="radio_1" class="custom-control-label">Feminin</label>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                     <div class="form-group row">
                                         <label for="text4" class="col-4 col-form-label">Pression</label>
                                         <div class="col-8">
@@ -218,7 +166,7 @@ const AddPrescription = () => {
                                                 <thead>
                                                     <tr>
                                                         <td colspan="6" className="t_add_btn">Tester
-                                                                <a href="javascript:void(0);" className="btn btn-primary pull-right" title="Ajouter le champ"><span className="glyphicon glyphicon-plus"></span>Ajouter</a>
+                                                            <a href="javascript:void(0);" className="btn btn-primary pull-right" title="Ajouter le champ"><span className="glyphicon glyphicon-plus"></span>Ajouter</a>
                                                         </td>
                                                     </tr>
                                                 </thead>
@@ -255,7 +203,7 @@ const AddPrescription = () => {
                                                 <thead>
                                                     <tr>
                                                         <td colspan="6" className="a_btn">Conseil
-                                                                <a href="javascript:void(0);" className="btn btn-primary add_advice pull-right" title="Add field">
+                                                            <a href="javascript:void(0);" className="btn btn-primary add_advice pull-right" title="Add field">
                                                                 <span className="glyphicon glyphicon-plus"></span>Ajouter</a>
                                                         </td>
                                                     </tr>

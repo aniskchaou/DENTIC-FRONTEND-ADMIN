@@ -1,21 +1,21 @@
 import * as Chart from 'chart.js';
 
 
-  export function drawChart() {
-   
-    let data = [20000, 14000, 12000, 15000, 18000, 19000, 22000];
-    let labels =  ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    var ctx1 = document.getElementsByClassName("book-chart");
+export function drawChart() {
+  /*  
+     let data = [20000, 14000, 12000, 15000, 18000, 19000, 22000];
+     let labels =  ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+     var ctx1 = document.getElementsByClassName("book-chart");
+ 
+     renderChart(data, labels,ctx1,'rgb(255, 99, 132)');
+    */
+}
 
-    renderChart(data, labels,ctx1,'rgb(255, 99, 132)');
-   
-  }
+
+export function renderChart(data, labels, ctx, color) {
 
 
-export function renderChart(data, labels,ctx,color){
-   
-   
-    var myChart = new Chart(ctx, {
+  /*  var myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
@@ -26,5 +26,5 @@ export function renderChart(data, labels,ctx,color){
                 borderColor: color,
             }]
         },
-    })
-  }
+    })*/
+} 

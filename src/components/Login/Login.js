@@ -5,14 +5,14 @@ import CurrentUser from '../../main/config/user';
 import showMessage from '../../libraries/messages/messages';
 import { useHistory } from 'react-router';
 import { useForm } from 'react-hook-form';
-import { LoadJS } from '../init';
+import { LoadJS, LoadJSFiles } from '../init';
 
 const Login = (props) => {
   let history = useHistory()
   const { register, handleSubmit, errors } = useForm()
 
   useEffect(() => {
-    LoadJS()
+    LoadJSFiles()
   }, []);
 
   const onSubmit = (data) => {

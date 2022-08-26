@@ -1,64 +1,107 @@
-import React from 'react';
+
 import PropTypes from 'prop-types';
 import './EditAppointment.css';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import appointementHTTPService from '../../main/services/appointementHTTPService';
+import showMessage from '../../libraries/messages/messages';
+import patientHTTPService from '../../main/services/patientHTTPService';
 
-const EditAppointment = () => (
-  <div className="EditAppointment">
-      <form action="https://doctorssnew.bdtask.com/admin/Appointment_controller/save_appointment" class="form-horizontal" target="_blank" name="p_info" method="post" accept-charset="utf-8">
+const EditAppointment = (props) => {
+    const { register, handleSubmit, errors } = useForm() // initialise the hook
+    const [appointement, setAppointement] = useState(props.event);
+    const [patients, setPatients] = useState([]);
+
+    useEffect(() => {
+
+        setAppointement(props.appointement)
+        getAllPatient()
+    }, [props.appointement]);
+
+
+    const onSubmit = (data) => {
+
+        //EventTestService.update(props.event, data)
+        // showMessage('Confirmation', eventMessage.edit, 'success')
+        appointementHTTPService.editAppointement(props.appointement.id, data).then(data => {
+            showMessage('Confirmation', 'eventMessage.edit', 'success')
+            props.closeModal()
+        })
+    }
+
+    const handleInputChange = event => {
+        const { name, value } = event.target;
+        setAppointement({ ...event, [name]: value });
+    };
+    const getAllPatient = () => {
+
+        patientHTTPService.getAllPatient()
+            .then(response => {
+                console.log(response.data)
+                setPatients(response.data);
+
+            })
+            .catch(e => {
+                showMessage('Confirmation', e, 'info')
+            });
+    };
+
+
+    return (
+        <form onSubmit={handleSubmit(onSubmit)} class="form-horizontal" target="_blank" name="p_info" method="post" accept-charset="utf-8">
             <div class="form-body">
 
                 <div class="form-group">
                     <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Date:</font></font></label>
-                    <div class="col-md-5">
-                        <input type="text" id="date" value="" name="date" class="form-control datepicker3 hasDatepicker" autocomplete="off" placeholder="aaaa-mm-jj" required="" />
-                        <span class="text-danger"> </span>
+                    <div class="col-md-12">
+                        <input onChange={handleInputChange} value={appointement?.datee} ref={register({ required: true })}
+                            type="date" id="date" name="date" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" />
+
+
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > ID du patient:</font></font></label>
-                    <div class="col-md-5">
-                        <input type="text" name="p_id" id="patient_id" onkeyup="if (!window.__cfRLUnblockHandlers) return false; loadName(this.value);" class="form-control" autocomplete="off" placeholder="ID du patient" value="" required="" />
-                        <span class="text-danger"> </span>
-                        <span class="p_name"></span>
+                    <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Patient:</font></font></label>
+                    <div class="col-md-12">
+                        <select onChange={handleInputChange} value={appointement?.patient} ref={register({ required: true })}
+                            name="patient" id="patient_id" class="form-control" autocomplete="off" required="">
+                            {patients.map(response =>
+                                <option value={response?.id}>{response?.namepatient}</option>
+                            )}
+                        </select>
+
                     </div>
                 </div>
 
+
+
+
+
                 <div class="form-group">
-                    <label class="col-md-3 control-label "><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Lieu:</font></font></label>
-                    <div class="col-md-5">
-                        <select class="form-control v_name" id="venue" name="venue" value="" required="" >
-                        <option value=""><font  ><font  >--Sélectionnez le lieu--</font></font></option>
-                        <option value="1"><font  ><font  >Démo Medical Collage</font></font></option><option value="3"><font  ><font  >Tour verte</font></font></option><option value="4"><font  ><font  >Tour de Manan</font></font></option>
-                                        </select>
-                                    <span class="text-danger"> </span>
+                    <label class="col-md-3 control-label"><font  ><font  >Problem:</font></font></label>
+                    <div class="col-md-12">
+                        <textarea onChange={handleInputChange} value={appointement?.problem} ref={register({ required: true })}
+                            name="problem" class="form-control" rows="3"></textarea>
+
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Choisissez Série:</font></font></label>
-                    <div class="col-md-5 schedul"></div>
-                </div>
 
                 <div class="form-group">
-                    <label class="col-md-3 control-label"><font  ><font  >CC du patient:</font></font></label>
-                    <div class="col-md-5">
-                        <textarea name="problem" class="form-control" rows="3"></textarea>
-                        <span class="text-danger"> </span>
-                    </div>
-                </div>
+                    <div class="col-8">
+                        <button name="submit" type="submit" class="btn btn-primary">
+                            <i className="fa fa-check"></i><font><font> Save</font></font></button>
 
-                <div class="form-group row">
-                    <div class="col-sm-offset-3 col-sm-6">
-                        <button type="reset" class="btn btn-danger"><font  ><font  >Réinitialiser</font></font></button>
-                        <button type="button" disabled="" class="btn btn-success"><font  ><font  >Rendez-vous</font></font></button>
                     </div>
                 </div>
 
             </div>
         </form>
-  </div>
-);
+    )
+}
+
+
 
 EditAppointment.propTypes = {};
 

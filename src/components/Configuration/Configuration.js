@@ -4,14 +4,8 @@ import './Configuration.css';
 import ConfigurationContent from '../ConfigurationContent/ConfigurationContent';
 
 const Configuration = () => (
-  <div className="card">
-    <div className="card-header">
-      <strong className="card-title">Paramètres</strong>
-    </div>
-    <div className="card-body">
-      <ConfigurationContent />
-
-    </div>
+  <div class="container">
+    <ConfigurationContent />
   </div>
 
 );

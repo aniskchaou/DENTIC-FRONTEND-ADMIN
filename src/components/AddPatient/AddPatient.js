@@ -3,16 +3,16 @@ import './AddPatient.css';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages'
 import patientMessage from '../../main/messages/patientMessage'
-import PatientTestService from '../../main/mocks/PatientTestService';
-import HTTPService from '../../main/services/HTTPService';
+
 import patientValidation from '../../main/validations/patientValidation'
-const AddPatient = () => {
+import patientHTTPService from '../../main/services/patientHTTPService';
+const AddPatient = (props) => {
     const initialState = {
-        name: '',
-        patient_id: '',
-        venue: '',
-        phone: '',
-        blood_group: '',
+        namepatient: '',
+        emailpatient: '',
+        birth: '',
+        telephone: '',
+        gender: '',
         address: '',
     };
 
@@ -20,24 +20,18 @@ const AddPatient = () => {
     const [patient, setPatient] = useState(initialState);
 
     const onSubmit = (data) => {
-        //savePatient(data)
-        PatientTestService.create(data)
-        setPatient(initialState)
-        showMessage('Confirmation', patientMessage.add, 'success')
-    }
-
-    const savePatient = (data) => {
-
-        HTTPService.create(data)
+        patientHTTPService.createPatient(data)
             .then(response => {
                 setPatient(initialState)
+                showMessage('Confirmation', patientMessage.add, 'success')
+                props.closeModal(data)
+
             })
             .catch(e => {
-                console.log(e);
+                showMessage('Confirmation', e, 'warning')
             });
 
-    };
-
+    }
 
     const handleInputChange = event => {
         const { name, value } = event.target;
@@ -49,103 +43,57 @@ const AddPatient = () => {
 
                 <div class="form-body">
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Nom complet </label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={patient.name} ref={register({ required: true })}
-                                type="text" name="name" class="form-control" placeholder="Nom complet" />
+                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Fullname </label>
+                        <div class="col-md-12">
+                            <input onChange={handleInputChange} value={patient.namepatient} ref={register({ required: true })}
+                                type="text" name="namepatient" class="form-control" />
                             <div className="error text-danger">
-                                {errors.name && patientValidation.name}
+                                {errors.namepatient && patientValidation.namepatient}
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Id du patient </label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={patient.patient_id} ref={register({ required: true })}
-                                type="text" id="patient_id" autocomplete="off" name="patient_id"
-                                class="form-control" placeholder="ID du patient" />
+                        <label class="col-md-3 control-label"><span class="text-danger"> * </span> Email</label>
+                        <div class="col-md-12">
+                            <input onChange={handleInputChange} value={patient.emailpatient} ref={register({ required: true })}
+                                type="text" id="emailpatient" autocomplete="off" name="emailpatient"
+                                class="form-control" />
                             <div className="error text-danger">
-                                {errors.patient_id && patientValidation.patient_id}
+                                {errors.emailpatient && patientValidation.emailpatient}
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Adresse e-mail </label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={patient.email} ref={register({ required: true })}
-                                type="text" name="email" class="form-control" placeholder="Adresse e-mail" />
+                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Date Of Birth </label>
+                        <div class="col-md-12">
+                            <input onChange={handleInputChange} value={patient.birth} ref={register({ required: true })}
+                                type="date" name="birth" class="form-control" />
                             <div className="error text-danger">
-                                {errors.email && patientValidation.email}
+                                {errors.birth && patientValidation.birth}
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Date de naissance </label>
-                        <div class="col-md-6 ">
-                            <input type="date" name="birth_date" class="form-control datepicker1 birth_date hasDatepicker" placeholder="aaaa-mm-jj" id="dp1608289894893" />
+                        <label class="col-md-3 control-label"><span class="text-danger"> * </span>  Telephone </label>
+                        <div class="col-md-12">
 
-                            <input disabled onChange={handleInputChange} value={patient.old} ref={register({ required: true })}
-                                type="text" name="old" id="old" value="15" class="form-control" placeholder="Âge" />
+                            <input onChange={handleInputChange} value={patient.telephone} ref={register({ required: true })}
+                                type="text" name="telephone" id="old" class="form-control" />
                             <div className="error text-danger">
-                                {errors.old && patientValidation.old}
+                                {errors.telephone && patientValidation.telephone}
                             </div>
 
                         </div>
                     </div>
 
 
-                    <div class="form-group">
-                        <label class="col-md-3 control-label"> <span class="text-danger"> * </span>  Téléphone </label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={patient.phone} ref={register({ required: true })}
-                                type="number" name="phone" class="form-control" required="" placeholder="Numéro de téléphone" />
-                            <div className="error text-danger">
-                                {errors.phone && patientValidation.phone}
-                            </div>
-                        </div>
-                    </div>
-
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label">  Le sexe </label>
-                        <div class="col-md-6">
-                            <input type="radio" id="checkbox2_5" name="gender" required="" value="Male" />
-                            <label for="checkbox2_5">  Masculin </label>
-                            <input type="radio" id="checkbox2_10" name="gender" required="" value="Female" />
-                            <label for="checkbox2_10">  Femme </label>
-
-
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label"> Groupe sanguin  </label>
-                        <div class="col-md-6">
-                            <select onChange={handleInputChange} value={patient.blood_group} ref={register({ required: true })}
-                                class="form-control" name="blood_group">
-
-                                <option value="A+"> A + </option>
-                                <option value="A-"> UNE- </option>
-                                <option value="B+"> B + </option>
-                                <option value="B-"> B- </option>
-                                <option value="O+"> O + </option>
-                                <option value="O-"> O- </option>
-                                <option value="AB+"> AB + </option>
-                                <option value="AB-"> UN B- </option>
-                                <option value="Unknown"> Inconnue </option>
-                            </select>
-                            <div className="error text-danger">
-                                {errors.blood_group && patientValidation.blood_group}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-3 control-label"> Adresse </label>
-                        <div class="col-md-6">
+                        <label class="col-md-3 control-label"> Address </label>
+                        <div class="col-md-12">
                             <textarea onChange={handleInputChange} value={patient.address}
                                 ref={register({ required: true })}
                                 name="address" class="form-control"></textarea>
@@ -155,31 +103,18 @@ const AddPatient = () => {
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="col-md-3 control-label"> Image </label>
-                        <div class="col-md-6">
-                            <input type="file" name="picture" />
-                        </div>
-                    </div>
 
 
                     <div className="form-group row">
                         <div className="col-sm-offset-9 col-sm-6">
                             <button name="submit" type="submit" class="btn btn-primary">
-                                <i className="fa fa-check"></i>  Sauvegarder</button>
+                                <i className="fa fa-check"></i>  Save </button>
 
                         </div>
                     </div>
 
 
                 </div>
-
-
-
-
-
-
-
 
             </form>
         </div>

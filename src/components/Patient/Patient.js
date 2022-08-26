@@ -1,78 +1,78 @@
-import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useRef, useState } from 'react';
 import './Patient.css';
-import { LoadJS } from './../init';
+import { LoadJSFiles } from './../init';
 import AddPatient from './../AddPatient/AddPatient';
 import ViewPatient from './../ViewPatient/ViewPatient';
 import EditPatient from './../EditPatient/EditPatient';
-import HTTPService from '../../main/services/HTTPService';
-import PatientTestService from '../../main/mocks/PatientTestService';
+
 import showMessage from '../../libraries/messages/messages';
 import patientMessage from '../../main/messages/patientMessage';
 import useForceUpdate from 'use-force-update';
-const deleteTask = () => {
-  return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
-}
+import patientHTTPService from '../../main/services/patientHTTPService';
+
 const Patient = () => {
   const [patients, setPatients] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
   const forceUpdate = useForceUpdate();
+  const closeButtonEdit = useRef(null);
+  const closeButtonAdd = useRef(null);
+  const [loading, setLoading] = useState(false);
 
 
   useEffect(() => {
-    LoadJS()
-    retrievePatients()
+    LoadJSFiles()
+    getAllPatient()
   }, []);
 
 
-  const getAll = () => {
-    HTTPService.getAll()
+  const getAllPatient = () => {
+    // setLoading(true);
+    patientHTTPService.getAllPatient()
       .then(response => {
         setPatients(response.data);
+        // setLoading(false);
       })
       .catch(e => {
-        console.log(e);
+        showMessage('Confirmation', e, 'info')
       });
   };
 
-  const removeOne = (data) => {
-    HTTPService.remove(data)
-      .then(response => {
-
-      })
-      .catch(e => {
-
-      });
-  }
 
 
 
-  const retrievePatients = () => {
-    var patients = PatientTestService.getAll();
-    setPatients(patients);
-  };
-
-  const resfresh = () => {
-    retrievePatients()
-    forceUpdate()
-  }
-
-  const remove = (e, data) => {
+  const removePatientAction = (e, data) => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
       showMessage('Confirmation', patientMessage.delete, 'success')
-      PatientTestService.remove(data)
-      //removeOne(data)
-      resfresh()
+      patientHTTPService.removePatient(data).then(data => {
+        resfreshComponent()
+      }).catch(e => {
+        showMessage('Confirmation', e, 'warning')
+      });
     }
-
   }
 
-  const update = (e, data) => {
+  const updatePatientAction = (e, data) => {
     e.preventDefault();
     setUpdatedItem(data)
-    resfresh()
+    //resfreshComponent()
+  }
+
+  const closeModalEdit = (data) => {
+    //resfreshComponent()
+    closeButtonEdit.current.click()
+    getAllPatient()
+  }
+
+  const closeModalAdd = (data) => {
+    //resfreshComponent()
+    closeButtonAdd.current.click()
+    getAllPatient()
+  }
+  const resfreshComponent = () => {
+    getAllPatient()
+    //forceUpdate()
   }
 
 
@@ -82,37 +82,40 @@ const Patient = () => {
         <strong className="card-title">Patients</strong>
       </div>
       <div className="card-body">
+        <button type="button" data-toggle="modal" data-target="#addPatient" className="btn btn-success btn-sm">Create</button>
 
         <table id="example1" className="table table-striped table-bordered">
           <thead class=" text-primary">
             <tr>
-              <th>ID Patient </th>
-              <th> Nom Patient</th>
-              <th> Téléphone</th>
-              <th>Sexe </th>
+              <th>Fullname</th>
+              <th> Email</th>
+              <th> Birth date</th>
+              <th>Telephone </th>
               <th>Actions</th></tr>
           </thead>
           <tbody>
 
-            {patients.map(item =>
-              <tr>
-                <td> {item.patient_id}</td>
-                <td>{item.name} </td>
-                <td>{item.phone}</td>
-                <td>{item.sexe}</td>
-                <td>   <button onClick={e => update(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                  <button onClick={e => remove(e, patients.indexOf(item))} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                </td>
+            {loading ? "loading..." :
+              patients.map(item =>
+                <tr>
+                  <td> {item.namepatient}</td>
+                  <td>{item.emailpatient} </td>
+                  <td>{item.birth}</td>
+                  <td>{item.telephone}</td>
+                  <td>
+                    <button type="button" data-toggle="modal" data-target="#viewPatient" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
+                    <button onClick={e => updatePatientAction(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
+                    <button onClick={e => removePatientAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                  </td>
 
-              </tr>
-            )}
+                </tr>
+              )}
 
 
 
 
           </tbody>
         </table>
-        <button type="button" data-toggle="modal" data-target="#addPatient" className="btn btn-success btn-sm">Ajouter</button>
 
 
         <div class="modal fade" id="addPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -120,15 +123,15 @@ const Patient = () => {
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLongTitle">Nouveau</h5>
-                <button onClick={resfresh} type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button onClick={resfreshComponent} type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div class="modal-body">
-                <AddPatient />
+                <AddPatient closeModal={closeModalAdd} />
               </div>
               <div class="modal-footer">
-                <button onClick={resfresh} type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button onClick={resfreshComponent} ref={closeButtonAdd} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 
               </div>
             </div>
@@ -149,7 +152,7 @@ const Patient = () => {
                 <ViewPatient />
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button type="button" ref={closeButtonEdit} class="btn btn-secondary" data-dismiss="modal">Close</button>
 
               </div>
             </div>
@@ -162,15 +165,15 @@ const Patient = () => {
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                <button onClick={resfresh} type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div class="modal-body">
-                <EditPatient patient={updatedItem} />
+                <EditPatient patient={updatedItem} closeModal={closeModalEdit} />
               </div>
               <div class="modal-footer">
-                <button onClick={resfresh} type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button ref={closeButtonEdit} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 
               </div>
             </div>
@@ -182,9 +185,5 @@ const Patient = () => {
     </div>
   )
 };
-
-Patient.propTypes = {};
-
-Patient.defaultProps = {};
 
 export default Patient;
