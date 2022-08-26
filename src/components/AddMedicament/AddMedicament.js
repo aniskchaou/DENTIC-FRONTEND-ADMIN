@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AddMedicament.css';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages'
 import medicamentMessage from '../../main/messages/medicamentMessage'
 import medicamentValidation from '../../main/validations/medicamentValidation'
 import MedicamentTestService from '../../main/mocks/MedicamentTestService';
-import HTTPService from '../../main/services/HTTPService';
+import medicamentHTTPService from '../../main/services/medicamentHTTPService';
+import medicamentManufactureHTTPService from '../../main/services/medicamentManufactureHTTPService';
+import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
 
-const AddMedicament = () => {
+const AddMedicament = (props) => {
 
     const initialState = {
         medicine_name: "",
@@ -21,14 +23,18 @@ const AddMedicament = () => {
 
     const onSubmit = (data) => {
         //saveMedicament(data)
-        MedicamentTestService.create(data)
-        setMedicament(initialState)
-        showMessage('Confirmation', medicamentMessage.add, 'success')
+        //MedicamentTestService.create(data)
+        medicamentHTTPService.createMedicament(data).then(data => {
+            setMedicament(initialState)
+            showMessage('Confirmation', medicamentMessage.add, 'success')
+            props.closeModal()
+        })
+
     }
 
     const saveMedicament = (data) => {
 
-        HTTPService.create(data)
+        medicamentHTTPService.create(data)
             .then(response => {
                 setMedicament(initialState)
             })
@@ -44,6 +50,41 @@ const AddMedicament = () => {
         setMedicament({ ...medicament, [name]: value });
     };
 
+    const [medicamentCategory, setMedicamentCategory] = useState([]);
+    const [medicamentManufacture, setMedicamentManufacture] = useState([]);
+
+    useEffect(() => {
+        //LoadJSFiles()
+        getAllMedicamentManufactures()
+        getAllMedicamentCategories()
+    }, []);
+
+
+    const getAllMedicamentManufactures = () => {
+        //setLoading(true);
+        medicamentManufactureHTTPService.getAllMedicamentManufacture()
+            .then(response => {
+                setMedicamentManufacture(response.data);
+                //setLoading(false);
+
+            })
+            .catch(e => {
+                showMessage('Confirmation', e, 'info')
+            });
+    };
+
+    const getAllMedicamentCategories = () => {
+        //setLoading(true);
+        medicamentCategoryHTTPService.getAllMedicamentCayegory()
+            .then(response => {
+                setMedicamentCategory(response.data);
+                //setLoading(false);
+            })
+            .catch(e => {
+                showMessage('Confirmation', e, 'info')
+            });
+    };
+
 
     return (
         <div className="AddMedicament">
@@ -52,28 +93,33 @@ const AddMedicament = () => {
                 <div class="form-body">
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Nom du médicament:</font></font></label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={medicament.medicine_name}
+                        <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Name:</font></font></label>
+                        <div class="col-md-12">
+                            <input onChange={handleInputChange} value={medicament.name}
                                 ref={register({ required: true })}
                                 type="text" data-toggle="tooltip"
-                                name="medicine_name" class="form-control test"
-                                placeholder="Nom du médicament" />
+                                name="name" class="form-control test"
+                            />
 
                             <div className="error text-danger">
-                                {errors.medicine_name && medicamentValidation.medicine_name}
+                                {errors.name && medicamentValidation.name}
                             </div>
                         </div>
                     </div>
 
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Nom de l'entreprise:</font></font></label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={medicament.company_name} ref={register({ required: true })}
+                        <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Manufacture :</font></font></label>
+                        <div class="col-md-12">
+                            <select onChange={handleInputChange} value={medicament.company_name} ref={register({ required: true })}
                                 type="text" class="form-control" autocomplete="off" id="search-box"
                                 placeholder="Nom de la compagnie" data-toggle="tooltip" title="Nom de la compagnie"
-                                name="company_name" required="" />
+                                name="company_name" required="" >
+                                {medicamentCategory.map(data =>
+                                    <option value={data.id}>{data.name}</option>
+                                )}
+
+                            </select>
 
                             <div className="error text-danger">
                                 {errors.company_name && medicamentValidation.company_name}
@@ -83,11 +129,15 @@ const AddMedicament = () => {
 
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><font  ><font  >Nom de groupe :</font></font></label>
-                        <div class="col-md-6">
-                            <input onChange={handleInputChange} value={medicament.group_name} ref={register({ required: true })}
+                        <label class="col-md-3 control-label"><font  ><font  >Category :</font></font></label>
+                        <div class="col-md-12">
+                            <select onChange={handleInputChange} value={medicament.group_name} ref={register({ required: true })}
                                 type="text" name="group_name" autocomplete="off" id="search-group" class="form-control"
-                                data-toggle="tooltip" title="Nom de groupe " placeholder="Nom de groupe" required="" />
+                                data-toggle="tooltip" title="Nom de groupe " required="" >
+                                {medicamentManufacture.map(data =>
+                                    <option value={data.id}>{data.name}</option>
+                                )}
+                            </select>
 
                             <div className="error text-danger">
                                 {errors.group_name && medicamentValidation.group_name}
@@ -96,8 +146,8 @@ const AddMedicament = () => {
                     </div>
 
                     <div class="form-group">
-                        <label class="col-md-3 control-label"><font  ><font  >Description de la médecine:</font></font></label>
-                        <div class="col-md-6">
+                        <label class="col-md-3 control-label"><font  ><font  >Description:</font></font></label>
+                        <div class="col-md-12">
                             <textarea name="description" class="form-control" rows="6"
                                 onChange={handleInputChange} value={medicament.description} ref={register({ required: true })}
                             ></textarea>
@@ -112,9 +162,9 @@ const AddMedicament = () => {
 
 
                 <div class="form-group row">
-                    <div class="offset-4 col-8">
+                    <div class=" col-8">
                         <button name="submit" type="submit" class="btn btn-primary">
-                            <i className="fa fa-check"></i>  Sauvegarder</button>
+                            <i className="fa fa-check"></i>  Save</button>
 
                     </div>
                 </div>

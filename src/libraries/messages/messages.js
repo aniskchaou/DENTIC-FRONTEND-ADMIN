@@ -5,7 +5,7 @@ export default function showMessage(title, message, type) {
         title: title,
         message: message,
         closeOnClick: true,
-        displayCloseButton: false,
+        displayCloseButton: true,
         positionClass: 'nfc-top-right',
         onclick: false,
         theme: type
