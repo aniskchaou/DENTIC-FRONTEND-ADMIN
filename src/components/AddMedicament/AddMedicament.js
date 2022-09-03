@@ -22,6 +22,7 @@ const AddMedicament = (props) => {
     const [medicament, setMedicament] = useState(initialState);
 
     const onSubmit = (data) => {
+        console.log(data)
         //saveMedicament(data)
         //MedicamentTestService.create(data)
         medicamentHTTPService.createMedicament(data).then(data => {

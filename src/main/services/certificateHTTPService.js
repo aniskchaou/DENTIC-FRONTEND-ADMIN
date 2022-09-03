@@ -16,9 +16,19 @@ const removeCertificate = id => {
     return http.delete(`${BASE_URL}/api/certificate/${id}`);
 };
 
+const removeAllCertificates = id => {
+    return http.delete(`${BASE_URL}/api/certificate`);
+};
+
+const filterCertificate = () => {
+    return http.get(`${BASE_URL}/api/certificate/${patient}/${template}`);
+};
+
 export default {
     getAllCertificate,
     createCertificate,
     editCertificate,
-    removeCertificate
+    removeCertificate,
+    filterCertificate,
+    removeAllCertificates
 };

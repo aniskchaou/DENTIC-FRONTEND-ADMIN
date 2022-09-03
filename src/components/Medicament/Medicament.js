@@ -9,6 +9,13 @@ import medicamentMessage from '../../main/messages/medicamentMessage';
 import useForceUpdate from 'use-force-update';
 import showMessage from '../../libraries/messages/messages';
 import medicamentHTTPService from '../../main/services/medicamentHTTPService';
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { chartBarOption } from '../../main/config/chart.bar';
+import { data2 } from '../Certificates/Certificates';
+import { Bar } from 'react-chartjs-2';
+import SummaryWidget from '../SummaryWidget/SummaryWidget';
+
 
 const deleteTask = () => {
   return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
@@ -52,17 +59,21 @@ const Medicament = () => {
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
       showMessage('Confirmation', medicamentMessage.delete, 'success')
-      medicamentHTTPService.removeMedicament(data).then(data => {
-        resfreshComponent()
-      }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+
+
+      data.forEach(element => {
+        medicamentHTTPService.removeMedicament(element).then(data => {
+          resfreshComponent()
+        }).catch(e => {
+          showMessage('Confirmation', e, 'warning')
+        });
       });
     }
   }
 
   const updateMedicamentAction = (e, data) => {
     e.preventDefault();
-    setUpdatedItem(data)
+    setUpdatedItem(medicaments.filter(item => item.id === data)[0])
     resfreshComponent()
   }
 
@@ -76,42 +87,90 @@ const Medicament = () => {
     closeButtonAdd.current.click()
   }
 
+  const columns = [
+    { field: 'id', headerName: '#', width: 200 },
+    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'producer', headerName: 'Manufacture', width: 200 },
+    { field: 'group', headerName: 'Category', width: 200 },
+  ];
+
+
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
 
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Medecines</strong>
-      </div>
       <div className="card-body">
-        <button type="button" data-toggle="modal" data-target="#addMedicament" className="btn btn-success btn-sm">Create</button>
+        {
+          showChart &&
+          <div className="card">
+            <div className="card-body">
+              <h4>Chart</h4>
+              <br />
+              <Bar options={chartBarOption} data={data2} />
+            </div>
+          </div>
+        }
 
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
-              <th>Name </th>
-              <th> Producer</th>
-              <th> Group</th>
-              <th>Actions</th></tr>
-          </thead>
-          <tbody>
+        {showFilter &&
+          <div className="row">
+            <SummaryWidget />
 
-            {medicaments.map(item =>
-              <tr>
-                <td> {item.name}</td>
-                <td>{item.producer}</td>
-                <td>{item.group}</td>
-                <td>
-                  <button onClick={e => updateMedicamentAction(e, item)} type="button" data-toggle="modal" data-target="#editMedicament" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                  <button onClick={e => removeMedicamentAction(e, medicaments.indexOf(item))} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button></td>
+            <SummaryWidget />
 
-              </tr>
-            )}
+            <SummaryWidget />
 
+            <SummaryWidget />
+          </div>
+        }
 
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Medecines
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updateMedicamentAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removeMedicamentAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllMedicament()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
 
-          </tbody>
-        </table>
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={medicaments}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar }}
+          /></div>}
 
         <div class="modal fade" id="addMedicament" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

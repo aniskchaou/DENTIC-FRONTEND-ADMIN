@@ -9,6 +9,12 @@ import patientMessage from '../../main/messages/patientMessage';
 import patientHTTPService from '../../main/services/patientHTTPService';
 import AddPayment from '../AddPayment/AddPayment';
 import EditPayment from '../EditPayment/EditPayment';
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { chartBarOption } from '../../main/config/chart.bar';
+import { data2 } from '../Certificates/Certificates';
+import { Bar } from 'react-chartjs-2';
+import SummaryWidget from '../SummaryWidget/SummaryWidget';
 const deleteTask = () => {
   return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
@@ -74,45 +80,93 @@ const Payment = () => {
     closeButtonAdd.current.click()
   }
 
+  const columns = [
+    { field: 'id', headerName: '#', width: 200 },
+    { field: 'invoiceNumber', headerName: 'Invoice Number', width: 200 },
+    { field: 'paymentDate', headerName: 'Date', width: 200 },
+    { field: 'paymenMode', headerName: 'Mode', width: 200 },
+    { field: 'amountReceived', headerName: 'Received', width: 200 },
+    { field: 'invoiceBlanceDue', headerName: 'Due', width: 200 },
+  ];
+
+
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
+
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Payments</strong>
-      </div>
+
       <div className="card-body">
-        <button data-toggle="modal" data-target="#addPayment" type="button" className="btn btn-success btn-sm">Create</button>
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
+        {
+          showChart &&
+          <div className="card">
+            <div className="card-body">
+              <h4>Chart</h4>
+              <br />
+              <Bar options={chartBarOption} data={data2} />
+            </div>
+          </div>
+        }
 
-              <th>Invoice Number # </th>
-              <th>Payment Date</th>
-              <th>Payment Mode</th>
-              <th>Amount received</th>
-              <th>Invoice Balance Due</th>
-              <th>Actions</th></tr>
-          </thead>
-          <tbody>
-            {loading ? "loading..." :
-              payments.map(item =>
-                <tr>
-                  <td> {item.invoiceNumber}</td>
-                  <td>{item.paymentDate} </td>
-                  <td>{item.paymenMode} </td>
-                  <td>{item.amountReceived}</td>
-                  <td>{item.invoiceBlanceDue}</td>
-                  <td>
-                    <button type="button" data-toggle="modal" data-target="#viewPatient" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                    <button onClick={e => updatePaymentAction(e, item)} type="button" data-toggle="modal" data-target="#editPayment" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                    <button onClick={e => removePaymentAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                  </td>
+        {showFilter &&
+          <div className="row">
+            <SummaryWidget />
 
-                </tr>
-              )}
+            <SummaryWidget />
 
-          </tbody>
-        </table>
+            <SummaryWidget />
+
+            <SummaryWidget />
+          </div>
+        }
+
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Payments
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updatePaymentAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removePaymentAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllPayments()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
+
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={payments}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar }}
+          /></div>}
 
 
         <div class="modal fade" id="addPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

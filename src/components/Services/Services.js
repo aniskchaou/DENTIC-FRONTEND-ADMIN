@@ -4,6 +4,8 @@ import './Services.css';
 import AddService from '../AddService/AddService';
 import EditService from '../EditService/EditService'
 import { LoadJSFiles } from '../init';
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 const Services = () => {
   const [patients, setPatients] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
@@ -69,43 +71,66 @@ const Services = () => {
     //forceUpdate()
   }
 
+  const columns = [
+    { field: 'id', headerName: '#', width: 200 },
+    { field: 'namepatient', headerName: 'Name', width: 200 },
+    { field: 'emailpatient', headerName: 'Description', width: 200 }]
+
+
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
+
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Services</strong>
-      </div>
+
       <div className="card-body">
-        <button type="button" data-toggle="modal" data-target="#addPatient" className="btn btn-success btn-sm">Create</button>
 
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
-              <th>image</th>
-              <th> Name</th>
-              <th>Actions</th></tr>
-          </thead>
-          <tbody>
-
-            {loading ? "loading..." :
-              patients.map(item =>
-                <tr>
-                  <td> {item.namepatient}</td>
-                  <td>{item.emailpatient} </td>
-                  <td>
-
-                    <button onClick={e => updatePatientAction(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                    <button onClick={e => removePatientAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                  </td>
-
-                </tr>
-              )}
-
-
-
-
-          </tbody>
-        </table>
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Services
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPatient" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updatePatientAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removePatientAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={Services}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar }}
+          /></div>}
 
 
         <div class="modal fade" id="addPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

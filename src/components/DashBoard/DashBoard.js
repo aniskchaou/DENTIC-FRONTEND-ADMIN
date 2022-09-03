@@ -243,6 +243,7 @@ const DashBoard = () => {
 
   return (
     <div classNameName="content">
+
       <div classNameName="row">
         <div classNameName="col-md-12">
           <div classNameName="card">
@@ -261,7 +262,7 @@ const DashBoard = () => {
                         <div className="stat-content">
                           <div className="text-left dib">
                             <div className="stat-text">
-                              $<span className="count">2</span>
+                              <span className="count">2</span>
                             </div>
                             <div className="stat-heading">Patients</div>
                           </div>

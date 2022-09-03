@@ -41,22 +41,22 @@ const Header = (props) => {
 
                                 </button>
                                 <div className="dropdown-menu" aria-labelledby="notification">
-                                    <p className="red">Accès rapide</p>
+                                    <p className="red">Shortcuts</p>
                                     <Link to="/add-patient" className="dropdown-item media" href="#">
                                         <i className="fa fa-check"></i>
-                                        ajouter  patient
+                                        Add  patient
                                     </Link>
                                     <Link to="/add-medicament" className="dropdown-item media" href="#">
                                         <i className="fa fa-check"></i>
-                                        ajouter  médicament
+                                        Add  Medecine
                                     </Link>
                                     <Link to="/add-appointement" className="dropdown-item media" href="#">
                                         <i className="fa fa-check"></i>
-                                        ajouter  rendez-vous
+                                        Add Appointement
                                     </Link>
                                     <Link to="/add-prescription" className="dropdown-item media" href="#">
                                         <i className="fa fa-check"></i>
-                                        ajouter  préscription
+                                        Add Prescription
                                     </Link>
 
 
@@ -91,9 +91,9 @@ const Header = (props) => {
                             <div className="user-menu dropdown-menu">
 
 
-                                <Link to="/configuration" className="nav-link" href="#"><i className="fa fa-cog"></i>Paramétres</Link>
+                                <Link to="/configuration" className="nav-link" href="#"><i className="fa fa-cog"></i>Settings</Link>
 
-                                <Link onClick={logout} className="nav-link" href="#"><i className="fa fa-power-off"></i>Déconnexion</Link>
+                                <Link onClick={logout} className="nav-link" href="#"><i className="fa fa-power-off"></i>Log Out</Link>
                             </div>
                         </div>
                     </div>

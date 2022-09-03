@@ -17,6 +17,7 @@ const EditMedicament = (props) => {
     const [medicamentCategory, setMedicamentCategory] = useState([]);
     const [medicamentManufacture, setMedicamentManufacture] = useState([]);
     useEffect(() => {
+        console.log(props)
         setMedicament(props.medicament)
         getAllMedicamentManufactures()
         getAllMedicamentCategories()

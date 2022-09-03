@@ -102,7 +102,7 @@ const AddCertificate = (props) => {
           <div class="form-group">
             <label class="col-md-3 control-label"><font  ><font  >Content:</font></font></label>
             <div class="col-md-12">
-              <textarea onChange={handleInputChange} value={certificate?.content} ref={register({ required: true })}
+              <textarea onChange={handleInputChange} value={certificate?.content} placeholder="Content" ref={register({ required: true })}
                 name="content" class="form-control" rows="3"></textarea>
               <div className="error text-danger">
                 {errors.content && certificateValidation.content}
@@ -111,8 +111,8 @@ const AddCertificate = (props) => {
           </div>
 
 
-          <div class="form-group row">
-            <div class=" col-8">
+          <div class="form-group">
+            <div class=" col-12">
               <button name="submit" type="submit" class="btn btn-primary">
                 <i className="fa fa-check"></i><font><font> Save</font></font></button>
 

@@ -8,9 +8,14 @@ import patientMessage from '../../main/messages/patientMessage';
 import useForceUpdate from 'use-force-update';
 import AddMedicamentManufacture from '../AddMedicamentManufacture/AddMedicamentManufacture';
 import EditMedicamentManufacture from '../EditMedicamentManufacture/EditMedicamentManufacture';
-
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
 import { useForm } from 'react-hook-form';
+import { chartBarOption } from '../../main/config/chart.bar';
+import { data2 } from '../Certificates/Certificates';
+import { Bar } from 'react-chartjs-2';
+import SummaryWidget from '../SummaryWidget/SummaryWidget';
 const MedicamentManufacture = () => {
 
   const [medicamentManufactures, setMdicamentManufactures] = useState([]);
@@ -74,38 +79,88 @@ const MedicamentManufacture = () => {
     closeButtonAdd.current.click()
   }
 
+  const columns = [
+    { field: 'id', headerName: '#', width: 200 },
+    { field: 'name', headerName: 'Manufacture', width: 200 }
+  ];
+
+
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
+
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Paiement</strong>
-      </div>
+
       <div className="card-body">
-        <button data-toggle="modal" data-target="#addPayment" type="button" className="btn btn-success btn-sm">Create</button>
+        {
+          showChart &&
+          <div className="card">
+            <div className="card-body">
+              <h4>Chart</h4>
+              <br />
+              <Bar options={chartBarOption} data={data2} />
+            </div>
+          </div>
+        }
 
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              medicamentManufactures.map(item =>
-                <tr>
-                  <td> {item.name}</td>
-                  <td>
+        {showFilter &&
+          <div className="row">
+            <SummaryWidget />
 
-                    <button onClick={e => updateMedicamentManufactureAction(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                    <button onClick={e => removeMedicamentManufactureAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                  </td>
+            <SummaryWidget />
 
-                </tr>
-              )}
+            <SummaryWidget />
 
-          </tbody>
-        </table>
+            <SummaryWidget />
+          </div>
+        }
+
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Medecines Manufactures
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updateMedicamentManufactureAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removeMedicamentManufactureAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllIncomes()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={medicamentManufactures}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar }}
+          /></div>}
 
         <div class="modal fade" id="addPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

@@ -7,7 +7,12 @@ import invoiceHTTPService from '../../main/services/invoiceHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import patientMessage from '../../main/messages/patientMessage';
 import AddInvoice from '../AddInvoice/AddInvoice';
-
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import { chartBarOption } from '../../main/config/chart.bar';
+import { data2 } from '../Certificates/Certificates';
+import { Bar } from 'react-chartjs-2';
 const Invoice = () => {
 
   const [invoices, setInvoices] = useState([]);
@@ -71,13 +76,68 @@ const Invoice = () => {
     closeButtonAdd.current.click()
   }
 
+  const columns = [
+    { field: 'id', headerName: '#', width: 200 },
+    { field: 'template', headerName: 'Certificate Template', width: 200 },
+    { field: 'patient', headerName: 'Patient Name', width: 200 },
+    { field: 'date', headerName: 'Issue Date', width: 200 },
+  ];
+
+
+
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Invoices</strong>
-      </div>
+
       <div className="card-body">
+        {
+          showChart &&
+          <div className="card">
+            <div className="card-body">
+              <h4>Chart</h4>
+              <br />
+              <Bar options={chartBarOption} data={data2} />
+            </div>
+          </div>
+        }
+
+        {showFilter &&
+          <div className="row">
+            <SummaryWidget />
+
+            <SummaryWidget />
+
+            <SummaryWidget />
+
+            <SummaryWidget />
+          </div>
+        }
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Invoices
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updateInvoiceAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removeInvoiceAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllInvoices()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
         <table id="example1" className="table table-striped table-bordered">
           <thead class=" text-primary">
 
@@ -113,8 +173,7 @@ const Invoice = () => {
 
           </tbody>
         </table>
-        <button data-toggle="modal" data-target="#addPayment" type="button" className="btn btn-success btn-sm">Ajouter</button>
-        <button data-toggle="modal" data-target="#addPayment" type="button" className="btn btn-success btn-sm">Batch payment</button>
+
         <div class="modal fade" id="addPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">

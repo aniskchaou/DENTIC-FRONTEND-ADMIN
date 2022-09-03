@@ -32,7 +32,7 @@ const EditTestimonial = (props) => {
         <div class="form-group row">
           <label for="text" class="col-4 col-form-label">Nom du groupe</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={groupe.groupe_name} ref={register({ required: true })}
+            <input onChange={handleInputChange} value={groupe?.groupe_name} ref={register({ required: true })}
               id="text" name="groupe_name" type="text" class="form-control" />
 
           </div>

@@ -4,6 +4,8 @@ import './Testimonial.css';
 import { LoadJSFiles } from '../init';
 import AddTestimonial from '../AddTestimonial/AddTestimonial';
 import EditTestimonial from '../EditTestimonial/EditTestimonial';
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
 const Testimonial = () => {
   const [patients, setPatients] = useState([]);
@@ -70,43 +72,61 @@ const Testimonial = () => {
     //forceUpdate()
   }
 
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+  const columns = [
+    { field: 'id', headerName: '#', width: 50 },
+    { field: 'namepatient', headerName: 'Fullname', width: 200 },
+    { field: 'emailpatient', headerName: 'Email', width: 200 },
+    { field: 'birth', headerName: 'Birth date', width: 200 },
+    { field: 'telephone', headerName: 'Telephone', width: 200 },
+  ];
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
+
+
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Testimonials</strong>
-      </div>
+
       <div className="card-body">
-        <button type="button" data-toggle="modal" data-target="#addPatient" className="btn btn-success btn-sm">Create</button>
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Testimonials
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPatient" ><i class="fas fa-plus"></i> Create </Button>
 
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
-              <th>image</th>
-              <th> Name</th>
-              <th>Actions</th></tr>
-          </thead>
-          <tbody>
-
-            {loading ? "loading..." :
-              patients.map(item =>
-                <tr>
-                  <td> {item.namepatient}</td>
-                  <td>{item.emailpatient} </td>
-                  <td>
-
-                    <button onClick={e => updatePatientAction(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                    <button onClick={e => removePatientAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                  </td>
-
-                </tr>
-              )}
-
-
-
-
-          </tbody>
-        </table>
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={patients}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar, showQuickFilter: true }}
+          /></div>}
 
 
         <div class="modal fade" id="addPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

@@ -10,6 +10,13 @@ import patientMessage from '../../main/messages/patientMessage';
 import useForceUpdate from 'use-force-update';
 import patientHTTPService from '../../main/services/patientHTTPService';
 
+import { Button, LinearProgress, Typography } from '@mui/material';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import { chartBarOption } from '../../main/config/chart.bar';
+import { data2 } from '../Certificates/Certificates';
+import { Bar } from 'react-chartjs-2';
+
 const Patient = () => {
   const [patients, setPatients] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
@@ -26,11 +33,11 @@ const Patient = () => {
 
 
   const getAllPatient = () => {
-    // setLoading(true);
+    setLoading(true);
     patientHTTPService.getAllPatient()
       .then(response => {
         setPatients(response.data);
-        // setLoading(false);
+        setLoading(false);
       })
       .catch(e => {
         showMessage('Confirmation', e, 'info')
@@ -75,47 +82,95 @@ const Patient = () => {
     //forceUpdate()
   }
 
+  const [updatedItemId, setUpdatedItemId] = useState(0);
+  const [updatedItemIds, setUpdatedItemIds] = useState([]);
+
+  const columns = [
+    { field: 'id', headerName: '#', width: 50 },
+    { field: 'namepatient', headerName: 'Fullname', width: 200 },
+    { field: 'emailpatient', headerName: 'Email', width: 200 },
+    { field: 'birth', headerName: 'Birth date', width: 200 },
+    { field: 'telephone', headerName: 'Telephone', width: 200 },
+  ];
+
+
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
+
+      setUpdatedItemId(e[0])
+
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
+
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
+
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
+
+
 
   return (
     <div className="card">
-      <div className="card-header">
-        <strong className="card-title">Patients</strong>
-      </div>
       <div className="card-body">
-        <button type="button" data-toggle="modal" data-target="#addPatient" className="btn btn-success btn-sm">Create</button>
+        {
+          showChart &&
+          <div className="card">
+            <div className="card-body">
+              <h4>Chart</h4>
+              <br />
+              <Bar options={chartBarOption} data={data2} />
+            </div>
+          </div>
+        }
 
-        <table id="example1" className="table table-striped table-bordered">
-          <thead class=" text-primary">
-            <tr>
-              <th>Fullname</th>
-              <th> Email</th>
-              <th> Birth date</th>
-              <th>Telephone </th>
-              <th>Actions</th></tr>
-          </thead>
-          <tbody>
+        {showFilter &&
+          <div className="row">
+            <SummaryWidget />
 
-            {loading ? "loading..." :
-              patients.map(item =>
-                <tr>
-                  <td> {item.namepatient}</td>
-                  <td>{item.emailpatient} </td>
-                  <td>{item.birth}</td>
-                  <td>{item.telephone}</td>
-                  <td>
-                    <button type="button" data-toggle="modal" data-target="#viewPatient" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>
-                    <button onClick={e => updatePatientAction(e, item)} type="button" data-toggle="modal" data-target="#editPatient" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></button>
-                    <button onClick={e => removePatientAction(e, item.id)} type="button" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
-                  </td>
+            <SummaryWidget />
 
-                </tr>
-              )}
+            <SummaryWidget />
 
+            <SummaryWidget />
+          </div>
+        }
 
+        <Typography variant="h4" gutterBottom>
+          <i className="menu-icon fa fa-bars"></i>   Patients
+        </Typography>
+        <br />
+        <Button type="button" data-toggle="modal" data-target="#addPatient" ><i class="fas fa-plus"></i> Create </Button>
+        <Button onClick={e => updatePatientAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removePatientAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
+        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+        <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+        <br /><br />
 
+        {loading ?
+          <LinearProgress />
+          : <div style={{ height: 430, width: '100%' }}><DataGrid
+            rows={patients}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[6]}
+            checkboxSelection
+            onSelectionModelChange={handleRowSelection}
+            components={{ Toolbar: GridToolbar, showQuickFilter: true }}
+          /></div>}
 
-          </tbody>
-        </table>
 
 
         <div class="modal fade" id="addPatient" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
