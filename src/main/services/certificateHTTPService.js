@@ -22,11 +22,12 @@ const removeAllCertificates = id => {
 
 
 
+
+
 export default {
     getAllCertificate,
     createCertificate,
     editCertificate,
     removeCertificate,
-
     removeAllCertificates
 };
