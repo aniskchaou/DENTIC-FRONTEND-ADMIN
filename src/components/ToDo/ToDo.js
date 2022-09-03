@@ -87,15 +87,28 @@ const ToDo = () => {
 
   const handleRowSelection = (e) => {
     if (e.length == 1) {
-      console.log(e);
+
       setUpdatedItemId(e[0])
-    } else {
-      setUpdatedItemIds(e)
+
+      console.log(updatedItem);
     }
+    setUpdatedItemIds(e)
+
   }
   const [updatedItemId, setUpdatedItemId] = useState(0);
   const [updatedItemIds, setUpdatedItemIds] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [showChart, setShowChart] = useState(false);
+  const removeAll = (e) => {
+    e.preventDefault();
+    var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
+    if (r) {
 
+      /*   certificateHTTPService.removeAllCertificates().then(data => {
+          getAllPatient()
+        }) */
+    }
+  }
 
 
   return (
