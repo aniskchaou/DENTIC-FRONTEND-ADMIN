@@ -19,9 +19,11 @@ const EditPatient = (props) => {
 
 
     const onSubmit = (data) => {
-        patientHTTPService.editPatient(props.patient.id, data)
-        props.closeModal(data)
-        showMessage('Confirmation', patientMessage.edit, 'success')
+        patientHTTPService.editPatient(props.patient, data).then(dta => {
+            props.closeModal(data)
+            showMessage('Confirmation', patientMessage.edit, 'success')
+        })
+
     }
 
     const handleInputChange = event => {

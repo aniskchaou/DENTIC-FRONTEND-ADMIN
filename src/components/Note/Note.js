@@ -83,14 +83,15 @@ const Note = () => {
 
 
   const handleRowSelection = (e) => {
-    if (e.length == 1) {
-
-      setUpdatedItemId(e[0])
-
-      console.log(updatedItem);
-    }
-    setUpdatedItemIds(e)
-
+    /*  if (e.length == 1) {
+ 
+       setUpdatedItemId(e[0])
+       const selectedItem = patients.find(item => item.id == e[0])
+       setUpdatedItem(selectedItem)
+       console.log(updatedItem);
+     }
+     setUpdatedItemIds(e)
+  */
   }
   const [updatedItemId, setUpdatedItemId] = useState(0);
   const [updatedItemIds, setUpdatedItemIds] = useState([]);

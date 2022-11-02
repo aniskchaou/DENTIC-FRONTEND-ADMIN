@@ -21,7 +21,9 @@ const removeAllCertificates = id => {
 };
 
 
-
+const getCount = () => {
+    return http.get(`${BASE_URL}/api/certificate/count`)
+}
 
 
 export default {
@@ -29,5 +31,6 @@ export default {
     createCertificate,
     editCertificate,
     removeCertificate,
+    getCount,
     removeAllCertificates
 };

@@ -6,6 +6,8 @@ import EditService from '../EditService/EditService'
 import { LoadJSFiles } from '../init';
 import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import serviceHTTPService from '../../main/services/serviceHTTPService';
+import showMessage from '../../libraries/messages/messages';
 const Services = () => {
   const [patients, setPatients] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
@@ -23,14 +25,14 @@ const Services = () => {
 
   const getAllPatient = () => {
     // setLoading(true);
-    /* patientHTTPService.getAllPatient()
+    serviceHTTPService.getAllService()
       .then(response => {
         setPatients(response.data);
         // setLoading(false);
       })
       .catch(e => {
         showMessage('Confirmation', e, 'info')
-      }); */
+      });
   };
 
 
@@ -73,15 +75,16 @@ const Services = () => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
-    { field: 'namepatient', headerName: 'Name', width: 200 },
-    { field: 'emailpatient', headerName: 'Description', width: 200 }]
+    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'status', headerName: 'Description', width: 200 }]
 
 
   const handleRowSelection = (e) => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = patients.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -123,7 +126,7 @@ const Services = () => {
         {loading ?
           <LinearProgress />
           : <div style={{ height: 430, width: '100%' }}><DataGrid
-            rows={Services}
+            rows={patients}
             columns={columns}
             pageSize={5}
             rowsPerPageOptions={[6]}
@@ -143,7 +146,7 @@ const Services = () => {
                 </button>
               </div>
               <div class="modal-body">
-
+                <AddService closeModal={closeModalAdd} />
               </div>
               <div class="modal-footer">
                 <button onClick={resfreshComponent} ref={closeButtonAdd} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

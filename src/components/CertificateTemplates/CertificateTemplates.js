@@ -26,6 +26,7 @@ const CertificateTemplates = () => {
     setLoading(true);
     certificationtemplatetHTTPServiceCopy.getAllCertificationTemplate()
       .then(response => {
+        console.log(response.data)
         setCertificateTemplate(response.data);
         setLoading(false);
       })
@@ -66,6 +67,7 @@ const CertificateTemplates = () => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
+    { field: 'name', headerName: 'Certificate Template', width: 200 },
     { field: 'name', headerName: 'Certificate Template', width: 200 }
 
   ];
@@ -75,7 +77,8 @@ const CertificateTemplates = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = certificateTemplate.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -107,7 +110,7 @@ const CertificateTemplates = () => {
           </Typography>
           <br />
           <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
-          <Button onClick={e => updateActivityAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+          <Button onClick={e => updateActivityAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
           <Button onClick={e => removeActivityAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
           <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
           <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
@@ -118,7 +121,7 @@ const CertificateTemplates = () => {
           {loading ?
             <LinearProgress />
             : <div style={{ height: 430, width: '100%' }}><DataGrid
-              rows={CertificateTemplates}
+              rows={certificateTemplate}
               columns={columns}
               pageSize={5}
               rowsPerPageOptions={[6]}
@@ -148,7 +151,7 @@ const CertificateTemplates = () => {
             </div>
           </div>
 
-          <div class="modal fade" id="viewMedicament" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -158,7 +161,7 @@ const CertificateTemplates = () => {
                   </button>
                 </div>
                 <div class="modal-body">
-                  <EditCertificationTemplate closeModal={closeModalEdit} />
+                  <EditCertificationTemplate closeModal={closeModalEdit} certificateTemplate={updatedItem} />
                 </div>
                 <div class="modal-footer">
                   <button type="button" ref={closeButtonEdit} class="btn btn-secondary" data-dismiss="modal">Close</button>

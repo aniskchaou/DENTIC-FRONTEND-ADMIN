@@ -16,7 +16,12 @@ const removeMedicamentCayegory = id => {
     return http.delete(`${BASE_URL}/api/medicamentcategory/${id}`);
 };
 
+const getMedicamentCayegoryById = id => {
+    return http.get(`${BASE_URL}/api/medicamentcategory/${id}`);
+};
+
 export default {
+    getMedicamentCayegoryById,
     getAllMedicamentCayegory,
     createMedicamentCayegory,
     editMedicamentCayegory,

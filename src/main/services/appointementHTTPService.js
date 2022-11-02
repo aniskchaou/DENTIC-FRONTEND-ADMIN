@@ -15,10 +15,14 @@ const editAppointement = (id, data) => {
 const removeAppointement = id => {
     return http.delete(`${BASE_URL}/api/appointement/${id}`);
 };
+const getCount = () => {
+    return http.get(`${BASE_URL}/api/appointement/count`)
+}
 
 export default {
     getAllAppointement,
     createAppointement,
     editAppointement,
+    getCount,
     removeAppointement
 };

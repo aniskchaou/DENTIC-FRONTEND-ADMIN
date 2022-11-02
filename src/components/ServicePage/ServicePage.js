@@ -23,6 +23,12 @@ const ServicePage = () => {
       });
   };
 
+  const update = (e, data) => {
+    e.preventDefault();
+    setFrontOffice(data)
+    //resfreshComponent()
+  }
+
 
   return (
     <div className="FrontOffice">
@@ -36,13 +42,13 @@ const ServicePage = () => {
               </Typography>
               <div className="table-responsive">
 
-                <Button type="button" data-toggle="modal" data-target="#editFrontOffice" ><i class="fas fa-edit"></i> Edit </Button>
+                <Button onClick={e => update(e, frontOffice)} type="button" data-toggle="modal" data-target="#editFrontOffice" ><i class="fas fa-edit"></i> Edit </Button>
                 <Button type="button" data-toggle="modal" data-target="#preview" ><i class="fas fa-eye"></i> Preview </Button>
 
 
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item"> Title : {frontOffice?.sliderTitle}</li>
-                  <li class="list-group-item">Sub Title : {frontOffice?.leftButtonTitle} </li>
+                  <li class="list-group-item"> Title : {frontOffice?.title}</li>
+                  <li class="list-group-item">Sub Title : {frontOffice?.subtitle} </li>
 
                 </ul>
               </div>

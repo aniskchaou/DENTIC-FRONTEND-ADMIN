@@ -51,9 +51,10 @@ const Patient = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+
       patientHTTPService.removePatient(data).then(data => {
         resfreshComponent()
+        showMessage('Confirmation', patientMessage.delete, 'success')
       }).catch(e => {
         showMessage('Confirmation', e, 'warning')
       });
@@ -86,7 +87,9 @@ const Patient = () => {
   const [updatedItemIds, setUpdatedItemIds] = useState([]);
 
   const columns = [
-    { field: 'id', headerName: '#', width: 50 },
+    {
+      field: 'id', headerName: '#', description: 'The identification used by the person with access to the online service.', width: 50
+    },
     { field: 'namepatient', headerName: 'Fullname', width: 200 },
     { field: 'emailpatient', headerName: 'Email', width: 200 },
     { field: 'birth', headerName: 'Birth date', width: 200 },
@@ -98,7 +101,8 @@ const Patient = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = patients.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -151,8 +155,8 @@ const Patient = () => {
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPatient" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updatePatientAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
-        <Button onClick={e => removePatientAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button onClick={e => updatePatientAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editPatient"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removePatientAction(e, updatedItemId)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
         <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
         <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>

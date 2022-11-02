@@ -10,6 +10,7 @@ const AddCertificateTemplate = (props) => {
   const [certificateTemplate, setCertificateTemplate] = useState();
 
   const onSubmit = (data) => {
+    console.log(data)
     certificationtemplatetHTTPServiceCopy.createCertificationTemplate(data).then(data => {
       setCertificateTemplate(initialState)
       props.closeModal()
@@ -56,7 +57,7 @@ const AddCertificateTemplate = (props) => {
           </div>
 
           <div class="form-group row">
-            <div class="offset-4 col-8">
+            <div >
               <button name="submit" type="submit" class="btn btn-primary">
                 <i className="fa fa-check"></i><font><font> Save</font></font></button>
 

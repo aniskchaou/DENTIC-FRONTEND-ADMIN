@@ -82,6 +82,7 @@ const LabTest = () => {
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
     { field: 'datee', headerName: 'Date', width: 200 },
+    { field: 'content', headerName: 'Content', width: 200 },
     { field: 'patient', headerName: 'Patient Name', width: 200 },
 
   ];
@@ -90,7 +91,8 @@ const LabTest = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = labTests.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -143,8 +145,8 @@ const LabTest = () => {
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updateLabTestAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
-        <Button onClick={e => removeLabTestAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
+        <Button onClick={e => updateLabTestAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => removeLabTestAction(e, updatedItemId)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
         <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
         <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllIncomes()}><i class="fas fa-refresh"></i> Reload</Button>
@@ -182,7 +184,7 @@ const LabTest = () => {
           </div>
         </div>
 
-        <div class="modal fade" id="editPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -192,7 +194,7 @@ const LabTest = () => {
                 </button>
               </div>
               <div class="modal-body">
-                <EditLabTest closeModal={closeButtonEdit} labtest={updatedItem} />
+                <EditLabTest closeModal={closeButtonEdit} testLab={updatedItem} />
               </div>
               <div class="modal-footer">
                 <button type="button" ref={closeButtonEdit} onClick={closeModalEdit} class="btn btn-secondary" data-dismiss="modal">Fermer</button>

@@ -42,8 +42,8 @@ const OpeningHourPage = () => {
 
 
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Title : {frontOffice?.sliderTitle}</li>
-                  <li class="list-group-item">Sub Title : {frontOffice?.leftButtonTitle} </li>
+                  <li class="list-group-item">Title : {frontOffice?.title}</li>
+                  <li class="list-group-item">Sub Title : {frontOffice?.subtitle} </li>
 
 
 

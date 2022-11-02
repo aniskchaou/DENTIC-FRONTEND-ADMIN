@@ -15,10 +15,13 @@ const editMedicament = (id, data) => {
 const removeMedicament = id => {
     return http.delete(`${BASE_URL}/api/medicament/${id}`);
 };
-
+const getCount = () => {
+    return http.get(`${BASE_URL}/api/medicament/count`)
+}
 export default {
     getAllMedicament,
     createMedicament,
     editMedicament,
+    getCount,
     removeMedicament
 };

@@ -42,9 +42,9 @@ const HomePage = () => {
 
 
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Sub Title : {frontOffice?.subTitle}</li>
-                  <li class="list-group-item">Main Title : {frontOffice?.mainTitle} </li>
-                  <li class="list-group-item">Description : {frontOffice?.description} </li>
+                  <li class="list-group-item">Sub Title : {frontOffice?.title1}</li>
+                  <li class="list-group-item">Main Title : {frontOffice?.title2} </li>
+                  <li class="list-group-item">Description : {frontOffice?.title3} </li>
 
 
                 </ul>

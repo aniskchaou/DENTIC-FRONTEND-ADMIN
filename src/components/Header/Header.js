@@ -1,19 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './Header.css';
 import { Link, useHistory } from 'react-router-dom';
 import CurrentUser from '../../main/config/user';
-
+import messageHTTPService from '../../main/services/messageHTTPService'
+import showMessage from '../../libraries/messages/messages';
+import { LinearProgress } from '@mui/material';
+import appointementHTTPService from '../../main/services/appointementHTTPService';
 
 const Header = (props) => {
     let history = useHistory()
+    const [loading, setLoading] = useState(false);
+    const [messsage, setmessage] = useState([]);
 
+    const [appointements, setAppointements] = useState([]);
 
     const logout = () => {
         props.rerender();
         CurrentUser.CONNECTED_USER = false
         history.push("/login")
     }
+
+    useEffect(() => {
+        // LoadJS()
+        //  getAllExpenses()
+    }, []);
+
+
+    const getAllExpenses = () => {
+        setLoading(true);
+        messageHTTPService.getAllMessage()
+            .then(response => {
+                console.log(response.data)
+                setmessage(response.data);
+                setLoading(false);
+            })
+            .catch(e => {
+                showMessage('Confirmation', e, 'info')
+            });
+    };
+
+    const getAllAppointements = () => {
+        setLoading(true);
+        appointementHTTPService.getAllAppointement()
+            .then(response => {
+                setAppointements(response.data);
+                setLoading(false);
+            })
+            .catch(e => {
+                showMessage('Confirmation', e, 'info')
+            });
+    };
+
+
     return (
         <div id="right-panel" className="right-panel" style={{ display: (CurrentUser.CONNECTED_USER ? 'block' : 'none') }}>
             <header id="header" className="header">
@@ -36,48 +75,50 @@ const Header = (props) => {
                             </div>
 
                             <div className="dropdown for-notification">
-                                <button className="btn btn-secondary dropdown-toggle" type="button" id="notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i className="fa fa-plus"></i>
-
+                                <button onClick={getAllAppointements} className="btn btn-secondary dropdown-toggle" type="button" id="notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span className="count bg-info">{appointements?.length}</span>
                                 </button>
                                 <div className="dropdown-menu" aria-labelledby="notification">
-                                    <p className="red">Shortcuts</p>
-                                    <Link to="/add-patient" className="dropdown-item media" href="#">
-                                        <i className="fa fa-check"></i>
-                                        Add  patient
-                                    </Link>
-                                    <Link to="/add-medicament" className="dropdown-item media" href="#">
-                                        <i className="fa fa-check"></i>
-                                        Add  Medecine
-                                    </Link>
-                                    <Link to="/add-appointement" className="dropdown-item media" href="#">
-                                        <i className="fa fa-check"></i>
-                                        Add Appointement
-                                    </Link>
-                                    <Link to="/add-prescription" className="dropdown-item media" href="#">
-                                        <i className="fa fa-check"></i>
-                                        Add Prescription
-                                    </Link>
+                                    <p className="red">You have {appointements.length} Appointements</p>
+                                    {loading ? <span>loading...</span> :
+
+
+                                        appointements.map(itemm =>
+                                            <Link to="/add-patient" className="dropdown-item media" href="#">
+                                                <i className="fa fa-check"></i>
+                                                {itemm.patient}
+                                            </Link>
+                                        )}
 
 
                                 </div>
                             </div>
 
                             <div className="dropdown for-message">
-                                <button className="btn btn-secondary dropdown-toggle" type="button" id="message" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button onClick={getAllExpenses} className="btn btn-secondary dropdown-toggle" type="button" id="message" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     <i className="fa fa-envelope"></i>
-                                    <span className="count bg-primary">4</span>
+                                    <span className="count bg-primary">{messsage?.length}</span>
                                 </button>
                                 <div className="dropdown-menu" aria-labelledby="message">
-                                    <p className="red">You have 4 Mails</p>
-                                    <a className="dropdown-item media" href="#">
-                                        <span className="photo media-left"><img alt="avatar" src="images/avatar/1.jpg" /></span>
-                                        <div className="message media-body">
-                                            <span className="name float-left">Jonathan Smith</span>
-                                            <span className="time float-right">Just now</span>
-                                            <p>Hello, this is an example msg</p>
-                                        </div>
-                                    </a>
+                                    <p className="red">You have {messsage?.length}  Mails</p>
+                                    {loading ? <span>loading...</span> :
+
+
+                                        messsage.map(itemm =>
+                                            <a className="dropdown-item media" href="#">
+                                                <span className="photo media-left"><img alt="avatar" src="../images/avatar/1.jpg" /></span>
+                                                <div className="message media-body">
+                                                    <span className="name float-left">{itemm.name}</span>
+                                                    <span className="time float-right">{itemm.datee}</span>
+                                                    <p>{itemm.subject}</p>
+                                                </div>
+                                            </a>
+                                        )
+
+
+
+                                    }
 
                                 </div>
                             </div>

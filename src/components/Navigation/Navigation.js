@@ -104,9 +104,6 @@ class Navigation extends React.Component {
                   <li>
                     <NavLink to="/blogpage" activeClassName="activeNavLink">Blog</NavLink>
                   </li>
-                  <li>
-                    <NavLink to="/contactpage" activeClassName="activeNavLink">Contact </NavLink>
-                  </li>
                 </ul>
               </li>
 
@@ -138,13 +135,7 @@ class Navigation extends React.Component {
                     <NavLink to="/testimonials" activeClassName="activeNavLink">Testimonials </NavLink>
                   </li>
                   <li>
-                    <NavLink to="/schedule" activeClassName="activeNavLink">Schedule </NavLink>
-                  </li>
-                  <li>
                     <NavLink to="/messages" activeClassName="activeNavLink">Messages </NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/newsletters" activeClassName="activeNavLink">NewsLetters </NavLink>
                   </li>
 
                 </ul>

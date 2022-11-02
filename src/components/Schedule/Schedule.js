@@ -74,7 +74,8 @@ const Schedule = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = patients.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)

@@ -23,7 +23,8 @@ const EditAppointment = (props) => {
 
         //EventTestService.update(props.event, data)
         // showMessage('Confirmation', eventMessage.edit, 'success')
-        appointementHTTPService.editAppointement(props.appointement.id, data).then(data => {
+        console.log(props.appointement)
+        appointementHTTPService.editAppointement(props.appointement, data).then(data => {
             showMessage('Confirmation', 'eventMessage.edit', 'success')
             props.closeModal()
         })

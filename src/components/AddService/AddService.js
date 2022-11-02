@@ -4,12 +4,14 @@ import './AddService.css';
 import appointementValidation from '../../main/validations/appointementValidation';
 import { useForm } from 'react-hook-form';
 import serviceHTTPService from '../../main/services/serviceHTTPService';
+import showMessage from '../../libraries/messages/messages';
+import appointementMessage from '../../main/messages/appointementMessage';
 
-const AddService = () => {
+const AddService = (props) => {
 
   const initialState = {
     name: '',
-    date: '',
+    description: '',
     status: ''
   };
 
@@ -17,8 +19,11 @@ const AddService = () => {
   const [service, setService] = useState(initialState);
 
   const onSubmit = (data) => {
+    console.log(data)
     serviceHTTPService.createService(data).then(data => {
-
+      setService(initialState)
+      showMessage('Confirmation', appointementMessage.add, 'success')
+      props.closeModal()
     })
   }
 
@@ -36,7 +41,7 @@ const AddService = () => {
           <div class="form-group">
             <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Service Name:</font></font></label>
             <div class="col-md-12">
-              <input onChange={handleInputChange} value={service?.name} ref={register({ required: true })}
+              <input onChange={handleInputChange} ref={register({ required: true })}
                 type="text" id="date" name="name" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" />
               <div className="error text-danger">
                 {errors.date && appointementValidation.date}
@@ -47,7 +52,7 @@ const AddService = () => {
           <div class="form-group">
             <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Description:</font></font></label>
             <div class="col-md-12">
-              <textarea onChange={handleInputChange} value={service?.description} ref={register({ required: false })}
+              <textarea onChange={handleInputChange} ref={register({ required: false })}
                 type="text" name="description" id="patient_id" class="form-control" autocomplete="off" required="" >
               </textarea>
             </div>
@@ -56,7 +61,7 @@ const AddService = () => {
           <div class="form-group">
             <label class="col-md-3 control-label"><font  ><font  >Status:</font></font></label>
             <div class="col-md-12">
-              <select onChange={handleInputChange} value={service?.status} ref={register({ required: true })}
+              <select onChange={handleInputChange} ref={register({ required: true })}
                 name="status" class="form-control" rows="3">
                 <option>Active</option>
                 <option>Inactive</option>

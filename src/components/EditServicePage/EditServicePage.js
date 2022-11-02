@@ -12,6 +12,7 @@ const EditServicePage = (props) => {
 
   useEffect(() => {
     setFrontOffice(props.frontOffice)
+    console.log(props.frontOffice)
   }, [props.frontOffice]);
 
 
@@ -19,7 +20,7 @@ const EditServicePage = (props) => {
 
     //GroupeTestService.update(props.frontOffice, data)
     frontOfficeHTTPService.editServicePage(props.frontOffice.id, data).then(data => {
-      props.closeModal()
+      // props.closeModal()
       showMessage('Confirmation', 'groupeMessage.edit', 'success')
     })
 
@@ -38,8 +39,8 @@ const EditServicePage = (props) => {
         <div class="form-group row">
           <label for="text" class="col-4 col-form-label">Title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.title} ref={register({ required: true })}
+              id="text" name="title" type="text" class="form-control" />
 
           </div>
         </div>
@@ -47,8 +48,8 @@ const EditServicePage = (props) => {
         <div class="form-group row">
           <label for="text" class="col-4 col-form-label">Sub title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.subtitle} ref={register({ required: true })}
+              id="text" name="subtitle" type="text" class="form-control" />
 
           </div>
         </div>

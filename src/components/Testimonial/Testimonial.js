@@ -6,6 +6,8 @@ import AddTestimonial from '../AddTestimonial/AddTestimonial';
 import EditTestimonial from '../EditTestimonial/EditTestimonial';
 import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import testimonialsHTTPService from '../../main/services/testimonialsHTTPService';
+import showMessage from '../../libraries/messages/messages';
 
 const Testimonial = () => {
   const [patients, setPatients] = useState([]);
@@ -24,14 +26,14 @@ const Testimonial = () => {
 
   const getAllPatient = () => {
     // setLoading(true);
-    /* patientHTTPService.getAllPatient()
+    testimonialsHTTPService.getAllTestimonials()
       .then(response => {
         setPatients(response.data);
         // setLoading(false);
       })
       .catch(e => {
         showMessage('Confirmation', e, 'info')
-      }); */
+      });
   };
 
 
@@ -76,17 +78,20 @@ const Testimonial = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = patients.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
 
   }
+
+
   const columns = [
     { field: 'id', headerName: '#', width: 50 },
-    { field: 'namepatient', headerName: 'Fullname', width: 200 },
-    { field: 'emailpatient', headerName: 'Email', width: 200 },
-    { field: 'birth', headerName: 'Birth date', width: 200 },
+    { field: 'name', headerName: 'Fullname', width: 200 },
+    { field: 'image', headerName: 'Email', width: 200 },
+    { field: 'quote', headerName: 'Birth date', width: 200 },
     { field: 'telephone', headerName: 'Telephone', width: 200 },
   ];
   const [updatedItemId, setUpdatedItemId] = useState(0);

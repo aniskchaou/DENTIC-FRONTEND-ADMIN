@@ -87,7 +87,8 @@ const MedicamentCategory = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = medicamentsCategories.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -140,7 +141,7 @@ const MedicamentCategory = () => {
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updateMedicamentCategoryAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => updateMedicamentCategoryAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editPatient"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeMedicamentCategoryAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
         <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
         <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>

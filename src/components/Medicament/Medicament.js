@@ -15,6 +15,8 @@ import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
+import { data } from 'jquery';
 
 
 const deleteTask = () => {
@@ -40,6 +42,8 @@ const Medicament = () => {
     setLoading(true);
     medicamentHTTPService.getAllMedicament()
       .then(response => {
+        const tab = []
+
         setMedicaments(response.data);
         setLoading(false);
       })
@@ -47,6 +51,17 @@ const Medicament = () => {
         showMessage('Confirmation', e, 'warning')
       });
   };
+
+  const getMedicamentCategory = (id) => {
+
+    return medicamentCategoryHTTPService.getMedicamentCayegoryById(id)
+
+    /*.then(data => {
+      console.log(data)
+      return data.data
+    })*/
+
+  }
 
 
   const resfreshComponent = () => {
@@ -89,9 +104,7 @@ const Medicament = () => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'producer', headerName: 'Manufacture', width: 200 },
-    { field: 'group', headerName: 'Category', width: 200 },
+    { field: 'name', headerName: 'Name', width: 200 }
   ];
 
 
@@ -99,7 +112,8 @@ const Medicament = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = medicaments.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)

@@ -101,14 +101,6 @@ const Certificates = () => {
   }
 
 
-  const handleRowSelection = (e) => {
-    if (e.length == 1) {
-      console.log(e);
-      setUpdatedItemId(e[0])
-    } else {
-      setUpdatedItemIds(e)
-    }
-  }
 
   const removeAll = (e) => {
     e.preventDefault();
@@ -121,7 +113,17 @@ const Certificates = () => {
     }
   }
 
+  const handleRowSelection = (e) => {
+    if (e.length == 1) {
 
+      setUpdatedItemId(e[0])
+      const selectedItem = certificates.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
+      console.log(updatedItem);
+    }
+    setUpdatedItemIds(e)
+
+  }
 
   return (
     <div className="Certificates">
@@ -159,7 +161,7 @@ const Certificates = () => {
           </Typography>
           <br />
           <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
-          <Button onClick={e => updateActivityAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
+          <Button onClick={e => updateActivityAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
           <Button onClick={e => removeActivityAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
           <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
           <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
@@ -208,7 +210,7 @@ const Certificates = () => {
                   </button>
                 </div>
                 <div class="modal-body">
-                  <EditCertificate closeModal={closeModalEdit} />
+                  <EditCertificate closeModal={closeModalEdit} certificate={updatedItem} />
                 </div>
                 <div class="modal-footer">
                   <button type="button" ref={closeButtonEdit} class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times"></i> Close</button>

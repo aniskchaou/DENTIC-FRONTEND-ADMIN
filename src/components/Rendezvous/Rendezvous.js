@@ -87,8 +87,10 @@ const Rendezvous = () => {
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
     { field: 'patient', headerName: 'Patient', width: 200 },
-    { field: 'date', headerName: 'Date', width: 200 },
-    { field: 'problem', headerName: 'Problem', width: 200 },
+    { field: 'datee', headerName: ' Date', width: 200 },
+    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'telephone', headerName: 'Telephone', width: 200 },
+    { field: 'message', headerName: 'Problem', width: 200 },
   ];
 
 
@@ -96,7 +98,8 @@ const Rendezvous = () => {
     if (e.length == 1) {
 
       setUpdatedItemId(e[0])
-
+      const selectedItem = appointements.find(item => item.id == e[0])
+      setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
     setUpdatedItemIds(e)
@@ -148,7 +151,7 @@ const Rendezvous = () => {
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addRendezvous" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updateAppointementAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        <Button onClick={e => updateAppointementAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editRendezvous"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeAppointementAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
         <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
         <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>

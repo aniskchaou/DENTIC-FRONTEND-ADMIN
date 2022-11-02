@@ -32,6 +32,10 @@ import expenseHTTPService from '../../main/services/expenseHTTPService';
 
 
 import showMessage from '../../libraries/messages/messages'
+import appointementHTTPService from '../../main/services/appointementHTTPService';
+import patientHTTPService from '../../main/services/patientHTTPService';
+import certificateHTTPService from '../../main/services/certificateHTTPService';
+import medicamentHTTPService from '../../main/services/medicamentHTTPService';
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -127,49 +131,69 @@ const DashBoard = () => {
   const [attendance, setAttendance] = useState([])
 
 
-  const [groupCount, setGroupCount] = useState(0);
-  const [memberCount, setMemberCount] = useState(0);
-  const [staffCount, setStaffCount] = useState(0);
-  const [activityCount, setActivityCount] = useState(0);
+  const [certificateCountCount, setcertificateCount] = useState(0);
+  const [appointementCount, setAppointementsCount] = useState(0);
+  const [medicamentCount, setMedicamentCount] = useState(0);
+  const [patientCount, setPatientCount] = useState(0);
   const [dashboardSettings, setDashboardSettings] = useState([]);
-
+  const [appointements, setAppointements] = useState([]);
+  const [appointementsCalendar, setAppointementsCalendar] = useState([]);
 
   useEffect(() => {
+    const aar = []
     // Runs ONCE after initial rendering
     getExpenseChartData()
     getIncomeChartData()
     getMemberLinetData()
     getActivityPieData()
     getAttendencesCalendar()
-    getActivityCount()
-    getMemberCount()
-    getStaffCount()
-    getGroupCount()
+    getPatientCount()
+    getAppointementCount()
+    getMedicamentCount()
+    getCertificateCount()
     getDashboardSettings()
+    appointementHTTPService.getAllAppointement()
+      .then(response => {
+        setAppointements(response.data);
+        console.log(response.data)
+        //setLoading(false);
+        for (const item of response.data) {
+          console.log(item)
+          appointementsCalendar.push({ title: item.patient, date: item.createdAt })
+        }
+
+
+        // console.log(aar)
+        setAppointements(appointementsCalendar)
+        console.log(appointements)
+      })
+      .catch(e => {
+        showMessage('Confirmation', e, 'info')
+      });
   }, []);
 
-  const getActivityCount = () => {
-    /*  activityHTTPService.getCountActivity().then(data => {
-       setActivityCount(data.data.activity)
-     }) */
+  const getPatientCount = () => {
+    patientHTTPService.getCount().then(data => {
+      setPatientCount(data.data.patient)
+    })
   }
 
-  const getMemberCount = () => {
-    /*  memberHTTPService.getCountMember().then(data => {
-       setMemberCount(data.data.member)
-     }) */
+  const getAppointementCount = () => {
+    appointementHTTPService.getCount().then(data => {
+      setAppointementsCount(data.data.appointement)
+    })
   }
 
-  const getStaffCount = () => {
-    /*  staffHTTPService.getCountStaff().then(data => {
-       setStaffCount(data.data.staff)
-     }) */
+  const getMedicamentCount = () => {
+    medicamentHTTPService.getCount().then(data => {
+      setMedicamentCount(data.data.medicament)
+    })
   }
 
-  const getGroupCount = () => {
-    /*  groupeHTTPService.getCountGroup().then(data => {
-       setGroupCount(data.data.group)
-     }) */
+  const getCertificateCount = () => {
+    certificateHTTPService.getCount().then(data => {
+      setcertificateCount(data.data.certificate)
+    })
   }
 
   const getAttendencesCalendar = () => {
@@ -257,12 +281,12 @@ const DashBoard = () => {
                     <div className="card-body">
                       <div className="stat-widget-five">
                         <div className="stat-icon dib flat-color-1">
-                          <i className="pe-7s-cash"></i>
+                          <i class="fas fa-user-injured"></i>
                         </div>
                         <div className="stat-content">
                           <div className="text-left dib">
                             <div className="stat-text">
-                              <span className="count">2</span>
+                              <span className="count">{patientCount}</span>
                             </div>
                             <div className="stat-heading">Patients</div>
                           </div>
@@ -277,14 +301,14 @@ const DashBoard = () => {
                     <div className="card-body">
                       <div className="stat-widget-five">
                         <div className="stat-icon dib flat-color-2">
-                          <i className="pe-7s-cart"></i>
+                          <i class="fas fa-capsules"></i>
                         </div>
                         <div className="stat-content">
                           <div className="text-left dib">
                             <div className="stat-text">
-                              <span className="count">12</span>
+                              <span className="count">{medicamentCount}</span>
                             </div>
-                            <div className="stat-heading">Préscription</div>
+                            <div className="stat-heading">Medicaments</div>
                           </div>
                         </div>
                       </div>
@@ -297,14 +321,14 @@ const DashBoard = () => {
                     <div className="card-body">
                       <div className="stat-widget-five">
                         <div className="stat-icon dib flat-color-3">
-                          <i className="pe-7s-browser"></i>
+                          <i class="fas fa-calendar-check"></i>
                         </div>
                         <div className="stat-content">
                           <div className="text-left dib">
                             <div className="stat-text">
-                              <span className="count">1</span>
+                              <span className="count">{appointementCount}</span>
                             </div>
-                            <div className="stat-heading">Rendez-vous</div>
+                            <div className="stat-heading">Appointements</div>
                           </div>
                         </div>
                       </div>
@@ -317,14 +341,14 @@ const DashBoard = () => {
                     <div className="card-body">
                       <div className="stat-widget-five">
                         <div className="stat-icon dib flat-color-4">
-                          <i className="pe-7s-users"></i>
+                          <i class="fas fa-certificate"></i>
                         </div>
                         <div className="stat-content">
                           <div className="text-left dib">
                             <div className="stat-text">
-                              <span className="count">2</span>
+                              <span className="count">{certificateCountCount}</span>
                             </div>
-                            <div className="stat-heading">Médicaments</div>
+                            <div className="stat-heading">Certificates</div>
                           </div>
                         </div>
                       </div>
@@ -365,7 +389,7 @@ const DashBoard = () => {
                   <div class="col-lg-12">
                     <div class="card">
                       <div class="card-body">
-                        <h4 class="box-title">Events </h4>
+                        <h4 class="box-title">Appointements </h4>
                       </div>
                       <div className="card-calendar"><FullCalendar
                         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
@@ -384,10 +408,7 @@ const DashBoard = () => {
                         selectable={true}
                         selectMirror={true}
                         dayMaxEvents={false}
-                        events={[
-                          { title: 'rende-vous', date: '2021-03-19' },
-                          { title: 'event 2', date: '2019-04-02' }
-                        ]}
+                        events={appointements}
                       /></div>
 
                     </div>
