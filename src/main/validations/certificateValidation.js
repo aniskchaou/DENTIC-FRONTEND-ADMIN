@@ -1,6 +1,6 @@
 
 const certificateValidation = {
-    datee: 'Sequelize.STRING',
+    datee: 'date is required.',
     patient: 'Sequelize.STRING',
     content: 'Sequelize.STRING',
     patient: 'ddd'

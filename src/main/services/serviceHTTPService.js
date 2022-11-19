@@ -4,8 +4,12 @@ import BASE_URL from "../urls/urls";
 const getAllService = () => {
     return http.get(`${BASE_URL}/api/service`)
 }
-const createService = data => {
-    return http.post(`${BASE_URL}/api/service`, data);
+const createService = (filename, data) => {
+    return http.post(`${BASE_URL}/api/service/${filename}`, data);
+};
+
+const uploadFile = (data) => {
+    return http.post(`${BASE_URL}/api/service/image/uploadfile`, data);
 };
 
 const editService = (id, data) => {
@@ -20,5 +24,6 @@ export default {
     getAllService,
     createService,
     editService,
-    removeService
+    removeService,
+    uploadFile
 };

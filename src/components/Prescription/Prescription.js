@@ -17,6 +17,8 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import AddMedicamentItem from '../AddMedicamentItem/AddMedicamentItem';
+import CurrentUser from '../../main/config/user';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const deleteTask = () => {
@@ -58,10 +60,10 @@ const Prescription = () => {
   const closeButtonEdit = useRef(null);
   const closeButtonAdd = useRef(null);
   const [loading, setLoading] = useState(true);
-
+  const [viewPrescription, setViewPrescription] = useState(false);
 
   useEffect(() => {
-    LoadJSFiles()
+    // LoadJSFiles()
     getAllPrescriptions()
   }, []);
 
@@ -71,10 +73,11 @@ const Prescription = () => {
     prescriptionHTTPService.getAllPrescription()
       .then(response => {
         setPrescriptions(response.data);
+        console.log(response.data)
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -88,11 +91,11 @@ const Prescription = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       prescriptionHTTPService.removePrescription(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -116,18 +119,24 @@ const Prescription = () => {
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
     { field: 'patient', headerName: 'Patient', width: 200 },
-    { field: 'datee', headerName: 'Date', width: 200 },
-    { field: 'medicament', headerName: 'Medicament', width: 200 },
+    { field: 'createdAt', headerName: 'Issue Date', width: 200 },
+    { field: 'pression', headerName: 'Pression', width: 200 },
+    { field: 'problem', headerName: 'Medicament', width: 200 },
+    { field: 'temperature', headerName: 'Temperature', width: 200 },
+    { field: 'note', headerName: 'Note', width: 200 },
   ];
 
 
   const handleRowSelection = (e) => {
-    if (e.length == 1) {
 
+    if (e.length == 1) {
+      setViewPrescription(true)
       setUpdatedItemId(e[0])
       const selectedItem = prescriptions.find(item => item.id == e[0])
       setUpdatedItem(selectedItem)
       console.log(updatedItem);
+    } else if (e.length == 0) {
+      setViewPrescription(false)
     }
     setUpdatedItemIds(e)
 
@@ -177,12 +186,16 @@ const Prescription = () => {
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPrescription" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updatePrescriptionAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+        {viewPrescription &&
+          <span>
+            <Button onClick={e => updatePrescriptionAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#viewPrescription"><i class="fas fa-edit"></i> View</Button>
+            <Button onClick={e => updatePrescriptionAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#addMedicamentItem" ><i class="fas fa-trash-alt"></i> Add Medicaments</Button>
+          </span>}
         <Button onClick={e => removePrescriptionAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+
+
         <Button type="button" onClick={() => getAllPrescriptions()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
         {loading ?
           <LinearProgress />
@@ -206,10 +219,10 @@ const Prescription = () => {
                 </button>
               </div>
               <div class="modal-body">
-                <AddPrescription />
+                <AddPrescription closeModal={closeModalAdd} />
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button type="button" onClick={resfreshComponent} class="btn btn-secondary" ref={closeButtonAdd} data-dismiss="modal">Fermer</button>
 
               </div>
             </div>
@@ -217,17 +230,17 @@ const Prescription = () => {
         </div>
 
 
-        <div class="modal fade" id="editPrescription" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal fade" id="addMedicamentItem" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
+                <h5 class="modal-title" id="exampleModalLongTitle">Add Medicament Item</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div class="modal-body">
-                <EditPrescription />
+                <AddMedicamentItem updatedItem={updatedItem} />
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
@@ -247,7 +260,27 @@ const Prescription = () => {
                 </button>
               </div>
               <div class="modal-body">
-                <ViewPrescription />
+                <ViewPrescription updatedItem={updatedItem} />
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="editPrescription" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <EditPrescription />
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>

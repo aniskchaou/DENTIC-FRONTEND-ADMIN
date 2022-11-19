@@ -103,8 +103,10 @@ const Medicament = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
-    { field: 'name', headerName: 'Name', width: 200 }
+    { field: 'id', headerName: '#', width: 20 },
+    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'producer', headerName: 'Manufacture', width: 200 },
+    { field: 'group', headerName: 'Category', width: 200 }
   ];
 
 
@@ -162,16 +164,15 @@ const Medicament = () => {
         }
 
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i>   Medecines
+          <i className="menu-icon fa fa-bars"></i>   Medicments
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updateMedicamentAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeMedicamentAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
+
         <Button type="button" onClick={() => getAllMedicament()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
 
         {loading ?

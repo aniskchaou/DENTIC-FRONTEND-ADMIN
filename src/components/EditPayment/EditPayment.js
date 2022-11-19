@@ -6,6 +6,7 @@ import patientHTTPService from '../../main/services/patientHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import patientMessage from '../../main/messages/patientMessage';
 import paymentHTTPService from '../../main/services/paymentHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditPayment = (props) => {
 
@@ -20,7 +21,7 @@ const EditPayment = (props) => {
   const onSubmit = (data) => {
     paymentHTTPService.editPayment(props.payment.id, data)
     props.closeModal(data)
-    showMessage('Confirmation', patientMessage.edit, 'success')
+    showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
   }
 
   const handleInputChange = event => {

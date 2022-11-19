@@ -16,6 +16,7 @@ import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import CurrentUser from '../../main/config/user';
 
 const Rendezvous = () => {
 
@@ -42,7 +43,7 @@ const Rendezvous = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'info')
       });
   };
 
@@ -56,12 +57,12 @@ const Rendezvous = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       appointementHTTPService.removeAppointement(data).then(data => {
         // resfreshComponent()
         getAllAppointements()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -85,8 +86,8 @@ const Rendezvous = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
-    { field: 'patient', headerName: 'Patient', width: 200 },
+    { field: 'id', headerName: '#', width: 20 },
+    { field: 'patient', headerName: 'Full Name', width: 200 },
     { field: 'datee', headerName: ' Date', width: 200 },
     { field: 'email', headerName: 'Email', width: 200 },
     { field: 'telephone', headerName: 'Telephone', width: 200 },
@@ -150,13 +151,9 @@ const Rendezvous = () => {
           <i className="menu-icon fa fa-bars"></i>   Appointements
         </Typography>
         <br />
-        <Button type="button" data-toggle="modal" data-target="#addRendezvous" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updateAppointementAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editRendezvous"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeAppointementAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllAppointements()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
         {loading ?
           <LinearProgress />

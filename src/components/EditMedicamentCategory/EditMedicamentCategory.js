@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages';
+import CurrentUser from '../../main/config/user';
 const EditMedicamentCategory = (props) => {
   const { register, handleSubmit, errors } = useForm() // initialise the hook
   const [medicamentCategory, setMedicamentCategory] = useState(props.medicamentCategory);
@@ -24,7 +25,7 @@ const EditMedicamentCategory = (props) => {
     //ActivityTestService.update(props.medicamentCategory, data)
     medicamentCategoryHTTPService.editMedicamentCayegory(props.medicamentCategory.id, data).then(data => {
       props.closeModal()
-      showMessage('Confirmation', 'activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }

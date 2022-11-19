@@ -12,6 +12,9 @@ import EditFooterSettings from '../EditFooterSettings/EditFooterSettings';
 import EditNotificationsSettings from '../EditNotificationsSettings/EditNotificationsSettings';
 import EditHeaderSettings from '../EditHeaderSettings/EditHeaderSettings';
 import EditDashboardSettings from '../EditDashboardSettings/EditDashboardSettings';
+
+
+
 const ConfigurationContent = () => {
   const [systemSettings, setSystemSettings] = useState({})
   const [dashboardSettings, setDashboardSettings] = useState({})
@@ -143,14 +146,14 @@ const ConfigurationContent = () => {
     })
   }
 
+  const restoreDefaultLocalisationSettings = () => {
+    settingsHTTPService.restoreLocalisationSettings(localisationSettings.id).then(data => {
+      getLocalisationSettings()
+    })
+  }
 
   return (
     <div class="container">
-
-
-
-
-
       <div class="row gutters-sm">
         <div class="col-md-4 d-none d-md-block">
           <div class="card">
@@ -162,9 +165,7 @@ const ConfigurationContent = () => {
                 <a href="#localisation" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
                   Localisation
                 </a>
-                <a href="#email" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Email
-                </a>
+
                 <a href="#footer" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
                   Footer
                 </a>
@@ -244,7 +245,7 @@ const ConfigurationContent = () => {
                 <label class="d-block mb-0">Currency symbol</label>
                 <div class="small text-muted mb-3">{localisationSettings.currencySymbol}</div>
                 <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editLocalisationSettings">Edit</button>
-                <button class="btn btn-warning" type="button">Restore to default</button>
+                <button onClick={restoreDefaultLocalisationSettings} class="btn btn-warning" type="button">Restore to default</button>
 
 
 
@@ -385,6 +386,8 @@ const ConfigurationContent = () => {
                 <h6>Header Settings</h6><hr />
                 <label class="d-block mb-0">Show search bar </label>
                 <div class="small text-muted mb-3">{convertToYesNoValue(headerSettings.enbaleSearchBar)}</div>
+                <label class="d-block mb-0">Show logo </label>
+                <div class="small text-muted mb-3">{convertToYesNoValue(headerSettings.showLogo)}</div>
 
                 <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editHeaderettings">Edit</button>
                 <button onClick={restoreHeaderSettings} class="btn btn-warning" type="button">Restore to default</button>
@@ -444,11 +447,8 @@ const ConfigurationContent = () => {
                     </div>
                   </div>
                 </div>
-
               </div>
-
             </div>
-
           </div>
         </div>
       </div>
@@ -460,4 +460,4 @@ ConfigurationContent.propTypes = {};
 
 ConfigurationContent.defaultProps = {};
 
-export default ConfigurationContent;
+export default ConfigurationContent

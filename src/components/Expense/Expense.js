@@ -15,6 +15,7 @@ import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
+import CurrentUser from '../../main/config/user';
 const Expense = () => {
 
   const [expenses, setExpenses] = useState([]);
@@ -39,7 +40,7 @@ const Expense = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -53,11 +54,11 @@ const Expense = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       expenseHTTPService.removeExpense(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -79,7 +80,7 @@ const Expense = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
+    { field: 'id', headerName: '#', width: 20 },
     { field: 'name', headerName: 'Name', width: 200 },
     { field: 'amount', headerName: 'Amount', width: 200 },
     { field: 'datee', headerName: 'Date', width: 200 },
@@ -146,10 +147,8 @@ const Expense = () => {
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updateExpenseAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editPayment"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeExpenseAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllExpenses()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
 
 

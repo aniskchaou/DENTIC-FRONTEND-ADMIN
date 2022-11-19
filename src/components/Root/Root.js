@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navigation from '../Navigation/Navigation';
 import Header from '../Header/Header';
 import Content from '../Content/Content';
@@ -8,52 +8,47 @@ import Footer from '../Footer/Footer';
 import Login from '../Login/Login';
 import CurrentUser from '../../main/config/user';
 
-class Root extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { connected: CurrentUser.CONNECTED_USER };
-  }
-  rerender = () => {
-    this.forceUpdate();
+const Root = () => {
+
+  const [connected, setConnected] = useState(false);
+
+
+  const handleClick = num => {
+    setConnected(num)
   };
-  forceUpdate = () => {
-    this.setState((state) => ({
-      connected: CurrentUser.CONNECTED_USER
-    }));
-  };
-  render() {
 
 
-    return (
-      <div>
-        <Router >
-          <Navigation />
-          <Header rerender={this.rerender} />
+  return (
+    <div>
+      <Router>
+        {connected === true ?
+          <div>
+            <Navigation connected={connected} />
+            <Header connected={connected} handleClick={handleClick} />
 
 
-          <div id="right-panel" className="right-panel">
+            <div id="right-panel" className="right-panel">
+              <div className="content">
 
+                <div className="animated fadeIn">
+                  <div className="row">
 
-            <div className="content">
-              <div className="animated fadeIn">
-                <div className="row">
+                    <Content connected={connected} />
 
-                  <Content />
-
-
+                  </div>
                 </div>
               </div>
+
+              <div className="clearfix"></div>
+              <Footer connected={connected} />
+
+
             </div>
+          </div> : <Login handleClick={handleClick} />}
+      </Router>
+    </div>
+  );
 
-            <div className="clearfix"></div>
-            <Footer />
-            <Login rerender={this.rerender} />
-
-          </div>
-        </Router>
-      </div>
-    );
-  }
 }
 
 

@@ -5,6 +5,7 @@ import certificationtemplatetHTTPServiceCopy from '../../main/services/certifica
 import patientHTTPService from '../../main/services/patientHTTPService';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages';
+import CurrentUser from '../../main/config/user';
 
 const EditCertificateTemplate = (props) => {
 
@@ -29,7 +30,7 @@ const EditCertificateTemplate = (props) => {
     //GroupeTestService.update(props.certificateTemplate, data)
     certificationtemplatetHTTPServiceCopy.editCertificationTemplate(props.certificateTemplate.id, data).then(data => {
       props.closeModal()
-      showMessage('Confirmation', 'groupeMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }

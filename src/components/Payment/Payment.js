@@ -15,6 +15,7 @@ import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import CurrentUser from '../../main/config/user';
 const deleteTask = () => {
   return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
@@ -41,7 +42,7 @@ const Payment = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -55,11 +56,11 @@ const Payment = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       paymentHTTPService.removePayment(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -81,12 +82,12 @@ const Payment = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
-    { field: 'invoiceNumber', headerName: 'Invoice Number', width: 200 },
-    { field: 'paymentDate', headerName: 'Date', width: 200 },
-    { field: 'paymenMode', headerName: 'Mode', width: 200 },
-    { field: 'amountReceived', headerName: 'Received', width: 200 },
-    { field: 'invoiceBlanceDue', headerName: 'Due', width: 200 },
+    { field: 'id', headerName: '#', width: 20 },
+    { field: 'patient', headerName: 'Patient', width: 200 },
+    { field: 'paymentDate', headerName: 'Payment Date', width: 200 },
+    { field: 'paymenMode', headerName: 'Payment Mode', width: 200 },
+    { field: 'amountReceived', headerName: 'Amount Received', width: 200 },
+
   ];
 
 
@@ -153,10 +154,7 @@ const Payment = () => {
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updatePaymentAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#editPayment"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removePaymentAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllPayments()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
         <br /><br />
 
         {loading ?

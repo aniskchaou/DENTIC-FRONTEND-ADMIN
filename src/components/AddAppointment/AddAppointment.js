@@ -7,6 +7,7 @@ import AppointementTestService from '../../main/mocks/AppointementTestService';
 import appointementValidation from '../../main/validations/appointementValidation'
 import appointementHTTPService from '../../main/services/appointementHTTPService';
 import patientHTTPService from '../../main/services/patientHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const AddAppointment = (props) => {
 
@@ -26,7 +27,7 @@ const AddAppointment = (props) => {
         //AppointementTestService.create(data)
         appointementHTTPService.createAppointement(data).then(data => {
             setAppointement(initialState)
-            showMessage('Confirmation', appointementMessage.add, 'success')
+            showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
             props.closeModal()
         })
 
@@ -46,7 +47,7 @@ const AddAppointment = (props) => {
 
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 

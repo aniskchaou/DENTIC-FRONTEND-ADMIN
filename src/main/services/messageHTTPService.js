@@ -4,6 +4,10 @@ import BASE_URL from "../urls/urls";
 const getAllMessage = () => {
     return http.get(`${BASE_URL}/api/message`)
 }
+
+const getCount = () => {
+    return http.get(`${BASE_URL}/api/count/message`)
+}
 const createMessage = data => {
     return http.post(`${BASE_URL}/api/message`, data);
 };
@@ -20,5 +24,6 @@ export default {
     getAllMessage,
     createMessage,
     editMessage,
-    removeMessage
+    removeMessage,
+    getCount
 };

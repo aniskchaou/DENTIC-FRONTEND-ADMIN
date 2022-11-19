@@ -9,6 +9,10 @@ const getCount = () => {
     return http.get(`${BASE_URL}/api/patient/count`)
 }
 
+const getPatientByDate = () => {
+    return http.get(`${BASE_URL}/api/analytics/patient`)
+}
+
 const createPatient = data => {
     return http.post(`${BASE_URL}/api/patient`, data);
 };
@@ -21,10 +25,16 @@ const removePatient = id => {
     return http.delete(`${BASE_URL}/api/patient/${id}`);
 };
 
+const searchPatient = (patient) => {
+    return http.get(`${BASE_URL}/api/search/patient/${patient}`)
+}
+
 export default {
     getAllPatient,
     createPatient,
     editPatient,
     getCount,
-    removePatient
+    removePatient,
+    searchPatient,
+    getPatientByDate
 };

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages';
+import CurrentUser from '../../main/config/user';
 const EditMedicamentManufacture = (props) => {
 
   const { register, handleSubmit, errors } = useForm() // initialise the hook
@@ -24,7 +25,7 @@ const EditMedicamentManufacture = (props) => {
     //ActivityTestService.update(props.medicamentManufacture, data)
     medicamentManufactureHTTPService.editMedicamentManufacture(props.medicamentManufacture.id, data).then(data => {
       props.closeModal()
-      showMessage('Confirmation', ' activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }

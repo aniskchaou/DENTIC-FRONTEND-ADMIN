@@ -7,6 +7,7 @@ import patientMessage from '../../main/messages/patientMessage';
 import showMessage from '../../libraries/messages/messages';
 import patientValidation from '../../main/validations/patientValidation';
 import patientHTTPService from '../../main/services/patientHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditPatient = (props) => {
 
@@ -21,7 +22,7 @@ const EditPatient = (props) => {
     const onSubmit = (data) => {
         patientHTTPService.editPatient(props.patient, data).then(dta => {
             props.closeModal(data)
-            showMessage('Confirmation', patientMessage.edit, 'success')
+            showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
         })
 
     }

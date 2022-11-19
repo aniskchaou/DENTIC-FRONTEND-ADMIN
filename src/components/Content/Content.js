@@ -40,8 +40,10 @@ import BlogPage from '../BlogPage/BlogPage'
 import Testimonial from '../Testimonial/Testimonial'
 import Schedule from '../Schedule/Schedule'
 import NewsLetter from '../NewsLetter/NewsLetter'
-const Content = () => (
-  <div className="col-md-12" style={{ display: (CurrentUser.CONNECTED_USER ? 'block' : 'none') }}>
+import SearchPatient from '../SearchPatient/SearchPatient';
+import Profile from '../Profile/Profile';
+const Content = ({ connected }) => (
+  <div className="col-md-12" style={{ display: (connected ? 'block' : 'none') }}>
     <div>
       <Route exact path="/" component={Dashbord} />
       <Route exact path="/dashboard" component={Dashbord} />
@@ -86,7 +88,8 @@ const Content = () => (
       <Route exact path="/schedule" component={Schedule} />
       <Route exact path="/messages" component={Message} />
       <Route exact path="/newsletters" component={NewsLetter} />
-
+      <Route path="/result/:input" component={SearchPatient} />
+      <Route exact path="/profile" component={Profile} />
 
 
 

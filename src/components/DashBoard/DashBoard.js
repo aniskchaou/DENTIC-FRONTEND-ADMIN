@@ -266,13 +266,13 @@ const DashBoard = () => {
   }
 
   return (
-    <div classNameName="content">
+    <div className="content">
 
-      <div classNameName="row">
-        <div classNameName="col-md-12">
-          <div classNameName="card">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="card">
 
-            <div classNameName="card-body">
+            <div className="card-body">
 
               <div className="row">
 
@@ -355,34 +355,6 @@ const DashBoard = () => {
                     </div>
                   </div>
                 </div>
-
-
-
-
-                {
-                  <div className="col-md-6">
-                    <div className="card">
-                      <div className="card-body">
-
-                        <h4 className="mb-3">Incomes</h4>
-                        <Bar options={chartBarOption} data={incomeChart} />
-                      </div>
-                    </div>
-                  </div>
-                }
-                {
-                  <div className="col-md-6">
-                    <div className="card">
-                      <div className="card-body">
-
-                        <h4 className="mb-3">Expenses</h4>
-                        <Bar data={expenseChart} options={chartBarOption} />
-                      </div>
-                    </div>
-                  </div>
-                }
-
-
 
 
                 {

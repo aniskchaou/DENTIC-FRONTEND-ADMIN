@@ -16,6 +16,7 @@ import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
+import CurrentUser from '../../main/config/user';
 
 const Patient = () => {
   const [patients, setPatients] = useState([]);
@@ -40,7 +41,7 @@ const Patient = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -54,9 +55,9 @@ const Patient = () => {
 
       patientHTTPService.removePatient(data).then(data => {
         resfreshComponent()
-        showMessage('Confirmation', patientMessage.delete, 'success')
+        showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -88,12 +89,13 @@ const Patient = () => {
 
   const columns = [
     {
-      field: 'id', headerName: '#', description: 'The identification used by the person with access to the online service.', width: 50
+      field: 'id', headerName: '#', description: 'The identification used by the person with access to the online service.', width: 20
     },
-    { field: 'namepatient', headerName: 'Fullname', width: 200 },
+    { field: 'namepatient', headerName: 'Full Name', width: 200 },
     { field: 'emailpatient', headerName: 'Email', width: 200 },
-    { field: 'birth', headerName: 'Birth date', width: 200 },
+    { field: 'birth', headerName: 'Date of Birth', width: 200 },
     { field: 'telephone', headerName: 'Telephone', width: 200 },
+    { field: 'address', headerName: 'Address', width: 200 },
   ];
 
 
@@ -157,10 +159,8 @@ const Patient = () => {
         <Button type="button" data-toggle="modal" data-target="#addPatient" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updatePatientAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editPatient"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removePatientAction(e, updatedItemId)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
 
         {loading ?

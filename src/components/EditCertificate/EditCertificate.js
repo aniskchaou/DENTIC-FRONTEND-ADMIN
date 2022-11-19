@@ -5,6 +5,7 @@ import certificateHTTPService from '../../main/services/certificateHTTPService';
 import { useForm } from 'react-hook-form';
 import showMessage from '../../libraries/messages/messages';
 import patientHTTPService from '../../main/services/patientHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditCertificate = (props) => {
 
@@ -19,7 +20,7 @@ const EditCertificate = (props) => {
 
       })
       .catch(e => {
-        // showMessage('Confirmation', e, 'info')
+        showMessage('Confirmation', CurrentUser.ERR_MSG, 'success')
       });
   }, [props.certificate]);
 
@@ -29,7 +30,7 @@ const EditCertificate = (props) => {
     //GroupeTestService.update(props.certificate, data)
     certificateHTTPService.editCertificate(props.certificate.id, data).then(data => {
       props.closeModal()
-      showMessage('Confirmation', 'groupeMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }

@@ -5,11 +5,14 @@ import { useForm } from 'react-hook-form';
 import certificateValidation from '../../main/validations/certificateValidation';
 import patientHTTPService from '../../main/services/patientHTTPService';
 import certificateHTTPService from '../../main/services/certificateHTTPService';
+import certificationtemplatetHTTPServiceCopy from '../../main/services/certificationtemplatetHTTPService copy';
+import showMessage from '../../libraries/messages/messages';
 const AddCertificate = (props) => {
   const { register, handleSubmit, errors } = useForm()
   const [certificate, setCertificate] = useState();
   const [patients, setPatients] = useState([]);
-
+  const [certificateTemplates, setCertificateTemplates] = useState([])
+  const [certificateContent, setCertificateContentValue] = useState([])
 
   const handleInputChange = event => {
     const { name, value } = event.target;
@@ -19,7 +22,21 @@ const AddCertificate = (props) => {
   useEffect(() => {
     //LoadJSFiles()
     getAllPatient()
+    getAllTemplates()
   }, []);
+
+  const getAllTemplates = () => {
+    // setLoading(true);
+    certificationtemplatetHTTPServiceCopy.getAllCertificationTemplate()
+      .then(response => {
+        console.log(response.data)
+        setCertificateTemplates(response.data);
+        // setLoading(false);
+      })
+      .catch(e => {
+        showMessage('Confirmation', e, 'info')
+      });
+  };
 
 
   const getAllPatient = () => {
@@ -40,6 +57,11 @@ const AddCertificate = (props) => {
       props.closeModal()
     })
 
+  }
+
+  const setCertificateContent = () => {
+    certificationtemplatetHTTPServiceCopy.
+    setCertificateContentValue(certificate?.template)
   }
 
   const initialState = {
@@ -85,9 +107,13 @@ const AddCertificate = (props) => {
           <div class="form-group">
             <label class="col-md-3 control-label"><font  ><font  >Template:</font></font></label>
             <div class="col-md-12">
-              <select onChange={handleInputChange} value={certificate?.template} ref={register({ required: true })}
+              <select onChange={handleInputChange} onClick={setCertificateContent} value={certificate?.template} ref={register({ required: true })}
                 name="template" class="form-control" rows="3">
-                <option value="1">template</option>
+                {certificateTemplates.map(data =>
+                  <option value={data.id}>{data.name}</option>
+                )
+                }
+
               </select>
               <div className="error text-danger">
                 {errors.template && certificateValidation.template}
@@ -102,7 +128,7 @@ const AddCertificate = (props) => {
           <div class="form-group">
             <label class="col-md-3 control-label"><font  ><font  >Content:</font></font></label>
             <div class="col-md-12">
-              <textarea onChange={handleInputChange} value={certificate?.content} placeholder="Content" ref={register({ required: true })}
+              <textarea onChange={handleInputChange} value={certificateContent} placeholder="Content" ref={register({ required: true })}
                 name="content" class="form-control" rows="3"></textarea>
               <div className="error text-danger">
                 {errors.content && certificateValidation.content}

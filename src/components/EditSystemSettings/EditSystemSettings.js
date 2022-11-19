@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import settingsHTTPService from '../../main/services/settingsHTTPService';
 import showMessage from '../../libraries/messages/messages'
 import React, { useEffect, useState } from 'react';
+import CurrentUser from '../../main/config/user';
 
 const EditSystemSettings = () => {
   const { register, handleSubmit, errors } = useForm()
@@ -29,7 +30,7 @@ const EditSystemSettings = () => {
 
     settingsHTTPService.editSystemSettings(systemSettings.id, data).then(data => {
 
-      showMessage('Confirmation', 'activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
   }
   return (

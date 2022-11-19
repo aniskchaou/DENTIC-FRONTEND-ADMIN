@@ -1,80 +1,78 @@
-import React, { useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import './Login.css';
-import CurrentUser from '../../main/config/user';
-import showMessage from '../../libraries/messages/messages';
+
 import { useHistory } from 'react-router';
 import { useForm } from 'react-hook-form';
-import { LoadJS, LoadJSFiles } from '../init';
+import CurrentUser from '../../main/config/user';
+import userHTTPService from '../../main/services/userHTTPService';
+import showMessage from '../../libraries/messages/messages';
 
-const Login = (props) => {
+
+
+const Login = ({ handleClick }) => {
+
   let history = useHistory()
+  var userInit = { username: "admin", password: "admin" }
   const { register, handleSubmit, errors } = useForm()
+  const [user, setUser] = useState(userInit);
 
   useEffect(() => {
-    LoadJSFiles()
   }, []);
 
-  const onSubmit = (data) => {
-    props.rerender();
-    CurrentUser.CONNECTED_USER = true
-    showMessage('', "Welcome  admin !", 'success')
-    history.push("/dashboard")
+  const registerPage = () => {
+    history.replace("/register")
   }
 
 
+  const onSubmit = (data) => {
+    userHTTPService.login({ username: user.username, password: user.password })
+      .then(response => {
+        setUser(userInit)
+        if (Object.keys(response.data).length !== 0) {
+          handleClick(true)
+          CurrentUser.USER_DETAIL = response.data
+          localStorage.setItem('connected', CurrentUser.CONNECTED_USER);
+          history.push("/dashboard")
+        } else {
+          CurrentUser.CONNECTED_USER = false
+          showMessage('Error', 'You have entered an invalid username or password', 'warning')
+        }
+      })
+      .catch(e => {
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
+        console.log(e)
+      });
+
+
+  }
+
+  const handleInputChange = event => {
+    const { name, value } = event.target;
+    setUser({ ...user, [name]: value });
+  };
+
   return (
-    <div className="bg-dark">
-      <div className="sufee-login d-flex align-content-center flex-wrap">
-        <div className="container">
-          <div className="login-content" style={{ display: (!CurrentUser.CONNECTED_USER ? 'block' : 'none') }}>
+    <div className="login-content" style={{ display: (!CurrentUser.CONNECTED_USER ? 'block' : 'none') }}>
 
-            <div className="login-form">
-
-              <div className="login-logo">
-                <a href="index.html">
-                  <img className="align-content" src="images/logo.png" alt="" />
-                </a>
-              </div>
-              <div class="login-form">
-                <form onSubmit={handleSubmit(onSubmit)} method="post">
-                  <div class="form-group">
-                    <label>Email address</label>
-                    <input type="email" class="form-control" placeholder="Email" value="admin@admin.com" />
-                  </div>
-                  <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-control" placeholder="Password" value="admin" />
-                  </div>
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" /> Remember Me
-                    </label>
-                    <label class="pull-right">
-                      <a href="#">Forgotten Password?</a>
-                    </label>
-
-                  </div>
-                  <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-30">Sign in</button>
-                  <div class="social-login-content">
-                    <div class="social-button">
-                      <button type="button" class="btn social facebook btn-flat btn-addon mb-3"><i class="ti-facebook"></i>Sign in with facebook</button>
-                      <button type="button" class="btn social twitter btn-flat btn-addon mt-2"><i class="ti-twitter"></i>Sign in with twitter</button>
-                    </div>
-                  </div>
-                  <div class="register-link m-t-15 text-center">
-                    <p>Don't have account ? <a href="#"> Sign Up Here</a></p>
-                  </div>
-                </form>
-              </div>
-
-            </div>
-          </div>
+      <div className="login-form">
+        <div className="login-logo">
+          <img className="align-content" src="images/logo.png" alt="" />
         </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} method="post">
+          <div className="form-group">
+            <label>Username</label>
+            <input type="text" className="form-control" placeholder="Email" name="username" onChange={handleInputChange} value={user.username} ref={register({ required: true })} />
+          </div>
+          <div className="form-group">
+            <label>Password</label>
+            <input name="password" type="password" className="form-control" placeholder="Password" onChange={handleInputChange} value={user.password} ref={register({ required: true })} />
+          </div>
+          <button type="submit" className="btn btn-success btn-flat m-b-30 m-t-30"><i class="ti-user"></i> Sign in</button>
+          <button type="button" onClick={registerPage} className="btn social facebook btn-primary btn-addon mb-3"><i class="ti-pin"></i>Register</button>
+        </form>
       </div>
     </div>
-
-
   )
 };
 

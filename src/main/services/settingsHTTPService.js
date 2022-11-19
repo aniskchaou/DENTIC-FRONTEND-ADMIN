@@ -78,11 +78,17 @@ const restoreFooterSettings = (id) => {
     return http.get(`${BASE_URL}/api/restore/footer/${id}`);
 };
 
+const restoreLocalisationSettings = (id) => {
+    return http.get(`${BASE_URL}/api/restore/localisationsettings/${id}`);
+};
+
+
 
 export default {
     restoreDashboardettings,
     restoreHeaderettings,
     restoreFooterSettings,
+    restoreLocalisationSettings,
     restoreSystemSettings,
     editSystemSettings,
     editEmailSettings,

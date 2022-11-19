@@ -14,6 +14,7 @@ import { useForm } from 'react-hook-form';
 import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { Button, CircularProgress, LinearProgress, Typography } from '@mui/material';
 import SummaryWidget from "../../components/SummaryWidget/SummaryWidget";
+import CurrentUser from '../../main/config/user';
 
 
 
@@ -39,8 +40,7 @@ const Certificates = () => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
-    { field: 'template', headerName: 'Certificate Template', width: 200 },
-    { field: 'patient', headerName: 'Patient Name', width: 200 },
+    { field: 'patient', headerName: 'Patient', width: 200 },
     { field: 'date', headerName: 'Issue Date', width: 200 },
   ];
   const closeButtonEdit = useRef(null);
@@ -65,7 +65,7 @@ const Certificates = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -77,7 +77,7 @@ const Certificates = () => {
         certificateHTTPService.removeCertificate(element).then(data => {
           getAllPatient()
         }).catch(e => {
-          showMessage('Confirmation', e, 'warning')
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning')
         });
       });
 
@@ -163,10 +163,8 @@ const Certificates = () => {
           <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
           <Button onClick={e => updateActivityAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
           <Button onClick={e => removeActivityAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-          <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-          <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
           <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>
-          <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
           <br /><br />
           {loading ?
             <LinearProgress />

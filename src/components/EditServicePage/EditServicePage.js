@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import showMessage from '../../libraries/messages/messages'
 
 import { useForm } from 'react-hook-form';
+import CurrentUser from '../../main/config/user';
 const EditServicePage = (props) => {
   const { register, handleSubmit, errors } = useForm() // initialise the hook
   const [frontOffice, setFrontOffice] = useState(props.frontOffice);
@@ -21,7 +22,7 @@ const EditServicePage = (props) => {
     //GroupeTestService.update(props.frontOffice, data)
     frontOfficeHTTPService.editServicePage(props.frontOffice.id, data).then(data => {
       // props.closeModal()
-      showMessage('Confirmation', 'groupeMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }

@@ -9,6 +9,7 @@ import medicamentValidation from '../../main/validations/medicamentValidation';
 import medicamentHTTPService from '../../main/services/medicamentHTTPService';
 import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
 import medicamentManufactureHTTPService from '../../main/services/medicamentManufactureHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditMedicament = (props) => {
 
@@ -27,7 +28,7 @@ const EditMedicament = (props) => {
     const onSubmit = (data) => {
 
         medicamentHTTPService.editMedicament(props.medicament.id, data).then(data => {
-            showMessage('Confirmation', medicamentMessage.edit, 'success')
+            showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
             props.closeModal()
         })
 
@@ -48,7 +49,7 @@ const EditMedicament = (props) => {
 
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 
@@ -60,7 +61,7 @@ const EditMedicament = (props) => {
                 //setLoading(false);
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import settingsHTTPService from '../../main/services/settingsHTTPService';
 import showMessage from '../../libraries/messages/messages'
 import React, { useEffect, useState } from 'react';
+import CurrentUser from '../../main/config/user';
 
 
 const EditLocalisationSettings = () => {
@@ -29,7 +30,7 @@ const EditLocalisationSettings = () => {
     console.log(localisationSettings.id)
     settingsHTTPService.editLocalisationSettings(localisationSettings.id, data).then(data => {
       console.log(data)
-      showMessage('Confirmation', 'activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
   }
   return (
@@ -41,8 +42,8 @@ const EditLocalisationSettings = () => {
             <select onChange={handleInputChange} value={localisationSettings?.language} ref={register({ required: true })}
               id="select2" name="language" class="custom-select">
 
-              <option value="1">Yes</option>
-              <option value="0">No</option>
+              <option value="English">English</option>
+
             </select>
           </div>
         </div>
@@ -65,8 +66,8 @@ const EditLocalisationSettings = () => {
             <select onChange={handleInputChange} value={localisationSettings?.currencySymbol} ref={register({ required: true })}
               id="select2" name="currencySymbol" class="custom-select">
 
-              <option value="1">Yes</option>
-              <option value="0">No</option>
+              <option value="$">USD</option>
+
             </select>
           </div>
         </div>
@@ -77,8 +78,8 @@ const EditLocalisationSettings = () => {
             <select onChange={handleInputChange} value={localisationSettings?.dateFormat} ref={register({ required: true })}
               id="select2" name="dateFormat" class="custom-select">
 
-              <option value="1">Yes</option>
-              <option value="0">No</option>
+              <option value="dd/mm/yyyy">dd/mm/yyyy</option>
+
             </select>
           </div>
         </div>

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import showMessage from '../../libraries/messages/messages'
 
 import { useForm } from 'react-hook-form';
+import CurrentUser from '../../main/config/user';
 /* subTitle: Sequelize.STRING,
   mainTitle: Sequelize.STRING,
     description: Sequelize.STRING */
@@ -22,8 +23,8 @@ const EditHomePage = (props) => {
 
     //GroupeTestService.update(props.frontOffice, data)
     frontOfficeHTTPService.editHomePage(props.frontOffice.id, data).then(data => {
-      props.closeModal()
-      showMessage('Confirmation', 'groupeMessage.edit', 'success')
+      //props.closeModal()
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }
@@ -39,22 +40,32 @@ const EditHomePage = (props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
 
         <div class="form-group row">
-          <label for="text" class="col-4 col-form-label">Title</label>
+          <label for="text" class="col-4 col-form-label">Sub Title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.title1} ref={register({ required: true })}
+              id="text" name="title1" type="text" class="form-control" />
 
           </div>
         </div>
 
         <div class="form-group row">
-          <label for="text" class="col-4 col-form-label">Sub title</label>
+          <label for="text" class="col-4 col-form-label">Main Title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.title2} ref={register({ required: true })}
+              id="text" name="title2" type="text" class="form-control" />
 
           </div>
         </div>
+
+        <div class="form-group row">
+          <label for="text" class="col-4 col-form-label">Description</label>
+          <div class="col-8">
+            <input onChange={handleInputChange} value={frontOffice.title3} ref={register({ required: true })}
+              id="text" name="title3" type="text" class="form-control" />
+
+          </div>
+        </div>
+
 
 
         <div class="form-group row">

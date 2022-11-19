@@ -13,6 +13,7 @@ import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
+import CurrentUser from '../../main/config/user';
 const Invoice = () => {
 
   const [invoices, setInvoices] = useState([]);
@@ -37,7 +38,7 @@ const Invoice = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -51,11 +52,11 @@ const Invoice = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       invoiceHTTPService.removeInvoice(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }

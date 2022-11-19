@@ -14,6 +14,7 @@ import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
+import CurrentUser from '../../main/config/user';
 const LabTest = () => {
 
   const [labTests, setLabTests] = useState([]);
@@ -38,7 +39,7 @@ const LabTest = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -56,7 +57,7 @@ const LabTest = () => {
       testlabHTTPService.removeTestLab(data).then(data => {
         getAllIncomes()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -80,10 +81,10 @@ const LabTest = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
+    { field: 'id', headerName: '#', width: 20 },
     { field: 'datee', headerName: 'Date', width: 200 },
-    { field: 'content', headerName: 'Content', width: 200 },
-    { field: 'patient', headerName: 'Patient Name', width: 200 },
+    { field: 'content', headerName: 'Result', width: 200 },
+    { field: 'patient', headerName: 'Patient', width: 200 },
 
   ];
 
@@ -141,16 +142,13 @@ const LabTest = () => {
           </div>
         }
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i>   Quick test
+          <i className="menu-icon fa fa-bars"></i>   Quick Tests
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updateLabTestAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeLabTestAction(e, updatedItemId)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllIncomes()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
         <br /><br />
         {loading ?
           <LinearProgress />

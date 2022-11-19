@@ -14,6 +14,7 @@ import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
+import CurrentUser from '../../main/config/user';
 const MedicamentCategory = () => {
 
   const [medicamentsCategories, setMedicamentsCategories] = useState([]);
@@ -38,7 +39,7 @@ const MedicamentCategory = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -52,11 +53,11 @@ const MedicamentCategory = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       medicamentCategoryHTTPService.removeMedicamentCayegory(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -137,16 +138,14 @@ const MedicamentCategory = () => {
         }
 
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i>   Medecines Categories
+          <i className="menu-icon fa fa-bars"></i>   Medicaments Categories
         </Typography>
         <br />
         <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
         <Button onClick={e => updateMedicamentCategoryAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editPatient"><i class="fas fa-edit"></i> Edit</Button>
         <Button onClick={e => removeMedicamentCategoryAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllIncomes()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
         {loading ?
           <LinearProgress />

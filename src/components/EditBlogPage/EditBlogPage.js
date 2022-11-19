@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import showMessage from '../../libraries/messages/messages'
 
 import { useForm } from 'react-hook-form';
+import CurrentUser from '../../main/config/user';
 const EditBlogPage = (props) => {
   const { register, handleSubmit, errors } = useForm() // initialise the hook
   const [frontOffice, setFrontOffice] = useState(props.frontOffice);
@@ -19,8 +20,8 @@ const EditBlogPage = (props) => {
 
     //GroupeTestService.update(props.frontOffice, data)
     frontOfficeHTTPService.editBlogPage(props.frontOffice.id, data).then(data => {
-      props.closeModal()
-      showMessage('Confirmation', 'groupeMessage.edit', 'success')
+      //props.closeModal()
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
 
   }
@@ -38,8 +39,8 @@ const EditBlogPage = (props) => {
         <div class="form-group row">
           <label for="text" class="col-4 col-form-label">Title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.title} ref={register({ required: true })}
+              id="text" name="title" type="text" class="form-control" />
 
           </div>
         </div>
@@ -47,8 +48,8 @@ const EditBlogPage = (props) => {
         <div class="form-group row">
           <label for="text" class="col-4 col-form-label">Sub title</label>
           <div class="col-8">
-            <input onChange={handleInputChange} value={frontOffice.name} ref={register({ required: true })}
-              id="text" name="name" type="text" class="form-control" />
+            <input onChange={handleInputChange} value={frontOffice.subtitle} ref={register({ required: true })}
+              id="text" name="subtitle" type="text" class="form-control" />
 
           </div>
         </div>

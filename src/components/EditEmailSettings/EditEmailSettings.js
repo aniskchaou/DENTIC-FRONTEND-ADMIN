@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import React, { useEffect, useState } from 'react';
 import settingsHTTPService from '../../main/services/settingsHTTPService';
 import showMessage from '../../libraries/messages/messages'
+import CurrentUser from '../../main/config/user';
 const EditEmailSettings = () => {
   const { register, handleSubmit, errors } = useForm()
   const [emailSettings, setEmailSettings] = useState();
@@ -28,7 +29,7 @@ const EditEmailSettings = () => {
   const onSubmit = (data) => {
     settingsHTTPService.editEmailSettings(emailSettings.id, data).then(data => {
       console.log(data)
-      showMessage('Confirmation', 'activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
   }
   return (

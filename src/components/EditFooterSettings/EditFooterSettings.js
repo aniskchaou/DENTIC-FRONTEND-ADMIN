@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import settingsHTTPService from '../../main/services/settingsHTTPService';
 import showMessage from '../../libraries/messages/messages'
 import React, { useEffect, useState } from 'react';
+import CurrentUser from '../../main/config/user';
 
 const EditFooterSettings = () => {
   const { register, handleSubmit, errors } = useForm()
@@ -27,7 +28,7 @@ const EditFooterSettings = () => {
   const onSubmit = (data) => {
     settingsHTTPService.editFooterSettings(footerSettings.id, data).then(data => {
       console.log(data)
-      showMessage('Confirmation', 'activityMessage.edit', 'success')
+      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
     })
   }
   return (

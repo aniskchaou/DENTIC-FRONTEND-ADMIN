@@ -6,6 +6,7 @@ import patientMessage from '../../main/messages/patientMessage'
 
 import patientValidation from '../../main/validations/patientValidation'
 import patientHTTPService from '../../main/services/patientHTTPService';
+import CurrentUser from '../../main/config/user';
 const AddPatient = (props) => {
     const initialState = {
         namepatient: '',
@@ -23,12 +24,12 @@ const AddPatient = (props) => {
         patientHTTPService.createPatient(data)
             .then(response => {
                 setPatient(initialState)
-                showMessage('Confirmation', patientMessage.add, 'success')
+                showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
                 props.closeModal(data)
 
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'warning')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
 
     }

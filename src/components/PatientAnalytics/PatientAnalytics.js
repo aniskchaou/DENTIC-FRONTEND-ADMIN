@@ -1,7 +1,5 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import './PatientAnalytics.css';
-import { Bar } from 'react-chartjs-2';
+import React, { useEffect, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,8 +9,13 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-
-
+import { Bar } from 'react-chartjs-2';
+import { chartBarOption, intialChartBarData } from '../../main/config/chart.bar';
+import patientHTTPService from '../../main/services/patientHTTPService';
+import showMessage from '../../libraries/messages/messages';
+/* import memberHTTPService from '../../main/services/memberHTTPService';
+import { chartBarOption, intialChartBarData } from '../../../main/config/chart.bar';
+import showMessage from '../../libraries/messages/messages'; */
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -42,20 +45,38 @@ export const data = {
   datasets: [
     {
       label: 'Dataset 1',
-      data: [1, 2, 3, 4],
+      data: [1, 2, 3, 4, 5, 6, 7],
       backgroundColor: 'rgba(255, 99, 132, 0.5)',
     },
     {
       label: 'Dataset 2',
-      data: [1, 2, 3, 4],
+      data: [1, 2, 3, 4, 5, 6, 7],
       backgroundColor: 'rgba(53, 162, 235, 0.5)',
     },
   ],
 };
 const PatientAnalytics = () => {
+  const [incomeChart, setIncomeChart] = useState(intialChartBarData);
 
+  useEffect(() => {
+    getIncomeChartData()
+
+  }, []);
+
+  const getIncomeChartData = () => {
+
+    patientHTTPService.getPatientByDate()
+      .then(response => {
+        setIncomeChart(response.data);
+      })
+      .catch(e => {
+        showMessage('Error', "HTTP_ERR_MESSAGE", 'warning')
+      })
+  };
   return (
-    <div className="PatientAnalytics">
+
+
+    <div className="MedicamentAnalytics">
       <div className="SaleAnalytics">
         <div className="card">
           <div className="card-header">
@@ -63,14 +84,15 @@ const PatientAnalytics = () => {
           </div>
           <div className="card-body">
 
-            <Bar options={options} data={data} />
+            <Bar options={chartBarOption} data={incomeChart} />
 
 
 
           </div>
         </div>
       </div>
-    </div>)
+    </div>
+  )
 };
 
 PatientAnalytics.propTypes = {};

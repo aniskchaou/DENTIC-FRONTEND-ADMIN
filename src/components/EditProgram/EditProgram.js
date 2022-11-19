@@ -3,6 +3,7 @@ import showMessage from '../../libraries/messages/messages'
 import { useForm } from 'react-hook-form';
 import PropTypes from 'prop-types';
 import './EditProgram.css';
+import CurrentUser from '../../main/config/user';
 
 const EditProgram = () => {
   const { register, handleSubmit, errors } = useForm() // initialise the hook
@@ -16,7 +17,7 @@ const EditProgram = () => {
   const onSubmit = (data) => {
 
     GroupeTestService.update(props.schedule, data)
-    showMessage('Confirmation', 'groupeMessage.edit', 'success')
+    showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
   }
 
   const handleInputChange = event => {

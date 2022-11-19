@@ -8,6 +8,7 @@ import MedicamentTestService from '../../main/mocks/MedicamentTestService';
 import medicamentHTTPService from '../../main/services/medicamentHTTPService';
 import medicamentManufactureHTTPService from '../../main/services/medicamentManufactureHTTPService';
 import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const AddMedicament = (props) => {
 
@@ -27,7 +28,7 @@ const AddMedicament = (props) => {
         //MedicamentTestService.create(data)
         medicamentHTTPService.createMedicament(data).then(data => {
             setMedicament(initialState)
-            showMessage('Confirmation', medicamentMessage.add, 'success')
+            showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
             props.closeModal()
         })
 
@@ -70,7 +71,7 @@ const AddMedicament = (props) => {
 
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 
@@ -82,7 +83,7 @@ const AddMedicament = (props) => {
                 //setLoading(false);
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 

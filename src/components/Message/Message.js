@@ -12,6 +12,7 @@ import { chartBarOption } from '../../main/config/chart.bar';
 import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
+import CurrentUser from '../../main/config/user';
 const Message = () => {
 
   const [messages, setMessages] = useState([]);
@@ -36,7 +37,7 @@ const Message = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -50,11 +51,11 @@ const Message = () => {
     e.preventDefault();
     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
     if (r) {
-      showMessage('Confirmation', patientMessage.delete, 'success')
+      showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success')
       messageHTTPService.removeMessage(data).then(data => {
         resfreshComponent()
       }).catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
     }
   }
@@ -76,9 +77,10 @@ const Message = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
+    { field: 'id', headerName: '#', width: 50 },
     { field: 'name', headerName: 'From', width: 200 },
-    { field: 'subject', headerName: 'Subject', width: 200 }
+    { field: 'subject', headerName: 'Subject', width: 200 },
+    { field: 'message', headerName: 'Message', width: 200 }
   ];
 
 
@@ -138,13 +140,10 @@ const Message = () => {
           <i className="menu-icon fa fa-bars"></i>   Messages
         </Typography>
         <br />
-        <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updateMessageAction(e, updatedItemId)} type="button" data-toggle="modal" data-target="#editMedicament"><i class="fas fa-edit"></i> Edit</Button>
+
         <Button onClick={e => removeMessageAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => setShowFilter(!showFilter)} ><i class="fas fa-bar-chart"></i> Show/Hide Summary</Button>
-        <Button type="button" onClick={() => setShowChart(!showChart)} ><i class="fas fa-pie-chart"></i> Show/Hide Analytics</Button>
         <Button type="button" onClick={() => getAllMessages()}><i class="fas fa-refresh"></i> Reload</Button>
-        <Button type="button" onClick={e => removeAll(e)} ><i class="fas fa-eraser"></i> Remove All</Button>
+
         <br /><br />
         {loading ?
           <LinearProgress />
@@ -157,7 +156,6 @@ const Message = () => {
             onSelectionModelChange={handleRowSelection}
             components={{ Toolbar: GridToolbar }}
           /></div>}
-        <button data-toggle="modal" data-target="#addPayment" type="button" className="btn btn-success btn-sm">Ajouter</button>
 
         <div class="modal fade" id="addPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-lg" role="document">

@@ -8,6 +8,7 @@ import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import testimonialsHTTPService from '../../main/services/testimonialsHTTPService';
 import showMessage from '../../libraries/messages/messages';
+import CurrentUser from '../../main/config/user';
 
 const Testimonial = () => {
   const [patients, setPatients] = useState([]);
@@ -32,7 +33,7 @@ const Testimonial = () => {
         // setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -40,16 +41,7 @@ const Testimonial = () => {
 
 
   const removePatientAction = (e, data) => {
-    /*  e.preventDefault();
-     var r = window.confirm("Etes-vous sûr que vous voulez supprimer ?");
-     if (r) {
-       showMessage('Confirmation', patientMessage.delete, 'success')
-       patientHTTPService.removePatient(data).then(data => {
-         resfreshComponent()
-       }).catch(e => {
-         showMessage('Confirmation', e, 'warning')
-       });
-     } */
+
   }
 
   const updatePatientAction = (e, data) => {

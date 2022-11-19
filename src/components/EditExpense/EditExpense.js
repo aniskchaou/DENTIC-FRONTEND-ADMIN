@@ -6,6 +6,7 @@ import patientHTTPService from '../../main/services/patientHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import patientMessage from '../../main/messages/patientMessage';
 import expenseHTTPService from '../../main/services/expenseHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditExpense = (props) => {
   const { register, handleSubmit, errors } = useForm() // initialise the hook
@@ -19,7 +20,7 @@ const EditExpense = (props) => {
   const onSubmit = (data) => {
     expenseHTTPService.editExpense(props.expense.id, data)
     props.closeModal(data)
-    showMessage('Confirmation', patientMessage.edit, 'success')
+    showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
   }
 
   const handleInputChange = event => {

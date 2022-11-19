@@ -23,9 +23,9 @@ export const intialChartBarData = {
         {
             label: 'Dataset 1',
             data: [1, 3, 4, 5, 11, 3, 2],
-            borderColor: 'rgba(255, 99, 132, 0.5)',
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: '#ffa400',
+            backgroundColor: '#ffa400',
         }
 
     ],
-} 
+}

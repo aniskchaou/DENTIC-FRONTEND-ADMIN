@@ -1,5 +1,5 @@
 
 const prescriptionValidation = {
-    prescription: 'la prescription est obligatoire'
+    prescription: ' prescription is required'
 }
 export default prescriptionValidation;

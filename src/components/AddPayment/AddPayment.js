@@ -7,6 +7,7 @@ import patientMessage from '../../main/messages/patientMessage';
 import showMessage from '../../libraries/messages/messages';
 import paymentValidation from '../../main/validations/paymentValidation';
 import paymentHTTPService from '../../main/services/paymentHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const AddPayment = (props) => {
 
@@ -15,7 +16,8 @@ const AddPayment = (props) => {
     paymentDate: '',
     paymenMode: '',
     amountReceived: '',
-    invoiceBlanceDue: ''
+    invoiceBlanceDue: '',
+    patient: ''
   };
 
   const { register, handleSubmit, errors } = useForm()
@@ -26,10 +28,10 @@ const AddPayment = (props) => {
       .then(response => {
         setPayment(initialState)
         props.closeModal(data)
-        showMessage('Confirmation', patientMessage.add, 'success')
+        showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'warning')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
 
   }
@@ -53,7 +55,7 @@ const AddPayment = (props) => {
         // setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
       });
   };
 
@@ -64,15 +66,16 @@ const AddPayment = (props) => {
         <div class="form-body">
 
           <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Invoice:</font></font></label>
+            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Patient :</font></font></label>
             <div class="col-md-12">
-              <select onChange={handleInputChange} value={payment?.invoiceNumber} ref={register({ required: true })}
-                type="text" id="date" name="invoiceNumber" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" >
-                <option value="1">INV001</option>
+              <select onChange={handleInputChange} value={payment?.patient} ref={register({ required: true })}
+                type="text" id="date" name="patient" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" >
+                {patients.map(response =>
+                  <option value={response?.namepatient}>{response?.namepatient}</option>
+                )}
+
               </select>
-              <div className="error text-danger">
-                {errors.invoiceNumber && paymentValidation.invoiceNumber}
-              </div>
+
             </div>
           </div>
 

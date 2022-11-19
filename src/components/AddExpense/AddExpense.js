@@ -20,16 +20,7 @@ const AddExpense = (props) => {
   const [expense, setexpense] = useState(initialState);
 
   const onSubmit = (data) => {
-    /* patientHTTPService.createPatient(data)
-       .then(response => {
-         setPatient(initialState)
-         props.closeModal(data)
-         showMessage('Confirmation', patientMessage.add, 'success')
-       })
-       .catch(e => {
-         showMessage('Confirmation', e, 'warning')
-       });
-    */
+
     console.log(data)
     expenseHTTPService.createExpense(data).then(data => {
       console.log(data)

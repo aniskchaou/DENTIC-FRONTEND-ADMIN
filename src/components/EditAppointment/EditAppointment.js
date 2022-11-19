@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import appointementHTTPService from '../../main/services/appointementHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import patientHTTPService from '../../main/services/patientHTTPService';
+import CurrentUser from '../../main/config/user';
 
 const EditAppointment = (props) => {
     const { register, handleSubmit, errors } = useForm() // initialise the hook
@@ -22,10 +23,10 @@ const EditAppointment = (props) => {
     const onSubmit = (data) => {
 
         //EventTestService.update(props.event, data)
-        // showMessage('Confirmation', eventMessage.edit, 'success')
+
         console.log(props.appointement)
         appointementHTTPService.editAppointement(props.appointement, data).then(data => {
-            showMessage('Confirmation', 'eventMessage.edit', 'success')
+            showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
             props.closeModal()
         })
     }
@@ -43,7 +44,7 @@ const EditAppointment = (props) => {
 
             })
             .catch(e => {
-                showMessage('Confirmation', e, 'info')
+                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
             });
     };
 

@@ -1,8 +1,8 @@
 .Login {}
 
-.login-content
- {
-     position: absolute;
-    top: 1%;
-    left: 30%;
-}
+ .login-content{
+    max-width: 540px;
+        margin: 8vh auto;
+    display: block;   
+       
+} 
