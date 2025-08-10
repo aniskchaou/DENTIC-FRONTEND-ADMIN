@@ -14,7 +14,7 @@ const EditCertificateTemplate = (props) => {
   const [patients, setPatients] = useState([]);
   useEffect(() => {
     setCertificate(props.certificateTemplate)
-    patientHTTPService.getAllPatient()
+    patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
 

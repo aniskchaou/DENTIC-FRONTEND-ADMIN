@@ -9,7 +9,7 @@ import patientMessage from '../../main/messages/patientMessage';
 import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { chartBarOption } from '../../main/config/chart.bar';
-import { data2 } from '../Certificates/Certificates';
+
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
 
@@ -124,7 +124,7 @@ const ToDo = () => {
             <div className="card-body">
               <h4>Chart</h4>
               <br />
-              <Bar options={chartBarOption} data={data2} />
+
             </div>
           </div>
         }

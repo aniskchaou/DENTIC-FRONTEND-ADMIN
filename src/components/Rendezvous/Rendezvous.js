@@ -13,7 +13,7 @@ import patientMessage from '../../main/messages/patientMessage';
 import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { chartBarOption } from '../../main/config/chart.bar';
-import { data2 } from '../Certificates/Certificates';
+
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import CurrentUser from '../../main/config/user';
@@ -86,12 +86,18 @@ const Rendezvous = () => {
   }
 
   const columns = [
-    { field: 'id', headerName: '#', width: 20 },
+    { field: 'id', headerName: '#', width: 50 },
     { field: 'patient', headerName: 'Full Name', width: 200 },
-    { field: 'datee', headerName: ' Date', width: 200 },
+    { field: 'datee', headerName: 'Date', width: 150 },
     { field: 'email', headerName: 'Email', width: 200 },
-    { field: 'telephone', headerName: 'Telephone', width: 200 },
+    { field: 'telephone', headerName: 'Telephone', width: 150 },
     { field: 'message', headerName: 'Problem', width: 200 },
+    { field: 'doctor', headerName: 'Doctor', width: 180 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    { field: 'time', headerName: 'Time', width: 120 },
+    { field: 'created_at', headerName: 'Created At', width: 180 },
+    { field: 'updated_at', headerName: 'Updated At', width: 180 },
+    // Add any other fields from your appointment model here
   ];
 
 
@@ -130,7 +136,7 @@ const Rendezvous = () => {
             <div className="card-body">
               <h4>Chart</h4>
               <br />
-              <Bar options={chartBarOption} data={data2} />
+
             </div>
           </div>
         }

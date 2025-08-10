@@ -9,11 +9,10 @@ import showMessage from '../../libraries/messages/messages';
 import patientMessage from '../../main/messages/patientMessage';
 import EditIncome from '../EditIncome/EditIncome';
 import AddIncome from '../AddIncome/AddIncome';
-import { Button, LinearProgress, Typography } from '@mui/material';
+import { Button, LinearProgress, Link, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
-import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 const Income = () => {
 
@@ -78,14 +77,38 @@ const Income = () => {
     closeButtonAdd.current.click()
   }
 
+  
   const columns = [
-    { field: 'id', headerName: '#', width: 200 },
-    { field: 'name_income', headerName: 'Name', width: 200 },
-    { field: 'amount', headerName: 'Amount', width: 200 },
-    { field: 'datee', headerName: ' Date', width: 200 },
-    { field: 'note', headerName: 'Note', width: 200 }
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'incomeCategory', headerName: 'Category', width: 180 },
+    { field: 'description', headerName: 'Description', width: 220 },
+    { field: 'amount', headerName: 'Amount ($)', width: 120, type: 'number' },
+    { field: 'paymentMethod', headerName: 'Method', width: 130 },
+    { field: 'paymentStatus', headerName: 'Status', width: 130 },
+    {
+      field: 'transactionDate',
+      headerName: 'Date',
+      width: 140,
+      valueFormatter: ({ value }) => new Date(value).toLocaleDateString()
+    },
+    { field: 'patientId', headerName: 'Patient ID', width: 230 },
+    { field: 'doctorId', headerName: 'Doctor ID', width: 230 },
+    { field: 'invoiceId', headerName: 'Invoice ID', width: 230 },
+    { field: 'clinicId', headerName: 'Clinic ID', width: 230 },
+    {
+      field: 'receiptAttachments',
+      headerName: 'Receipt',
+      width: 150,
+      renderCell: (params) => (
+        params.value?.length > 0 ? (
+          <Link href={params.value[0]} target="_blank" rel="noopener">
+            View Receipt
+          </Link>
+        ) : '—'
+      )
+    },
+    { field: 'notes', headerName: 'Notes', width: 250 }
   ];
-
 
   const handleRowSelection = (e) => {
     if (e.length == 1) {
@@ -122,7 +145,6 @@ const Income = () => {
           <div className="card-body">
             <h4>Chart</h4>
             <br />
-            <Bar options={chartBarOption} data={data2} />
           </div>
         </div>
       }

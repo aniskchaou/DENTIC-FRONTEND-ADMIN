@@ -1,458 +1,306 @@
-
 import PropTypes from 'prop-types';
 import './ConfigurationContent.css';
-import React, { useEffect, useRef, useState } from 'react';
-import settingsHTTPService from '../../main/services/settingsHTTPService'
-import useForceUpdate from 'use-force-update';
-import { useHistory } from 'react-router-dom';
-import EditSystemSettings from '../EditSystemSettings/EditSystemSettings';
-import EditLocalisationSettings from '../EditLocalisationSettings/EditLocalisationSettings';
-import EditEmailSettings from '../EditEmailSettings/EditEmailSettings';
-import EditFooterSettings from '../EditFooterSettings/EditFooterSettings';
-import EditNotificationsSettings from '../EditNotificationsSettings/EditNotificationsSettings';
-import EditHeaderSettings from '../EditHeaderSettings/EditHeaderSettings';
-import EditDashboardSettings from '../EditDashboardSettings/EditDashboardSettings';
+import React, { useEffect, useState } from 'react';
+import { Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Stack, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import axios from 'axios';
+import BASE_URL from '../../main/urls/urls';
 
+// Only keep important settings
+const defaultSettings = {
+  system: {
+    appName: 'Dentic',
+    address: '123 Dentic St',
+    email: 'support@dentic.com',
+    showLogo: false,
+  },
+  localisation: {
+    language: 'en',
+    dateFormat: 'YYYY-MM-DD',
+    currency: 'USD',
+    currencySymbol: '$',
+  },
+  openHours: [
+    { day: 'Monday', hours: '08:00 - 18:00' },
+    { day: 'Tuesday', hours: '08:00 - 18:00' },
+    { day: 'Wednesday', hours: '08:00 - 18:00' },
+    { day: 'Thursday', hours: '08:00 - 18:00' },
+    { day: 'Friday', hours: '08:00 - 18:00' },
+    { day: 'Saturday', hours: '09:00 - 14:00' },
+    { day: 'Sunday', hours: 'Closed' },
+  ]
+};
 
+const SETTINGS_FILE_KEY = 'dentic_settings_json';
+const CLINIC_SETTINGS_API_URL = BASE_URL + '/clinicsettings';
+
+const dateFormatOptions = [
+  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+  { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY' },
+  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+];
+
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'fr', label: 'French' },
+  { value: 'ar', label: 'Arabic' },
+  { value: 'es', label: 'Spanish' },
+];
+
+const currencyOptions = [
+  { value: 'USD', label: 'USD - US Dollar' },
+  { value: 'EUR', label: 'EUR - Euro' },
+  { value: 'GBP', label: 'GBP - British Pound' },
+  { value: 'MAD', label: 'MAD - Moroccan Dirham' },
+];
+
+const currencySymbolOptions = [
+  { value: '$', label: '$' },
+  { value: '€', label: '€' },
+  { value: '£', label: '£' },
+  { value: 'د.م.', label: 'د.م.' },
+];
 
 const ConfigurationContent = () => {
-  const [systemSettings, setSystemSettings] = useState({})
-  const [dashboardSettings, setDashboardSettings] = useState({})
-  const [headerSettings, setHeaderSettings] = useState({})
-  const [footerSettings, setFooterSettings] = useState({})
-  const [localisationSettings, setLocalisationSettings] = useState({})
-  const [emailSettings, setEmailSettings] = useState({})
-  const [emailTemplateSettings, setemailTemplateSettings] = useState({})
-  const [notificationSettings, setNotificationSettings] = useState({})
+  const [settings, setSettings] = useState(defaultSettings);
+  const [tab, setTab] = useState(0);
+  const [editDialog, setEditDialog] = useState({ open: false, section: null });
+  const [loadingOpenHours, setLoadingOpenHours] = useState(false);
 
-  const history = useHistory()
-  const forceUpdate = useForceUpdate();
+  // Load from backend on mount
   useEffect(() => {
-    // Runs ONCE after initial rendering
-
-    getSystemSettings()
-    getEmailSettings()
-    getEmailTemplateSettings()
-    getLocalisationSettings()
-    getFooterSettings()
-    getHeaderSettings()
-    getDashboardSettings()
-    getNotificationSettings()
+    axios.get(CLINIC_SETTINGS_API_URL)
+      .then(res => {
+        if (res.data) setSettings(res.data);
+      })
+      .catch(() => {
+        const saved = localStorage.getItem(SETTINGS_FILE_KEY);
+        if (saved) setSettings(JSON.parse(saved));
+      });
   }, []);
 
-  const getNotificationSettings = () => {
-    settingsHTTPService.getNotificationSettings().then(data => {
-      console.log(data.data[0])
-      setNotificationSettings(data.data[0])
-      forceUpdate()
-    })
-  }
+  // Save to backend when user clicks Save in dialog
+  const handleEditSave = () => {
+    axios.put(CLINIC_SETTINGS_API_URL, settings)
+      .then(() => {
+        closeEdit();
+      })
+      .catch(() => {
+        // fallback to localStorage if backend fails
+        localStorage.setItem(SETTINGS_FILE_KEY, JSON.stringify(settings));
+        closeEdit();
+      });
+  };
 
+  const convertToYesNoValue = (value) => value ? 'Yes' : 'No';
 
-  const getEmailTemplateSettings = () => {
-    settingsHTTPService.getSystemSettings().then(data => {
-      setSystemSettings(data.data[0])
-      forceUpdate()
-    })
-  }
+  // Restore default for a section
+  const restoreSection = (section) => {
+    setSettings(prev => ({ ...prev, [section]: defaultSettings[section] }));
+  };
 
-  const getEmailSettings = () => {
-    settingsHTTPService.getEmailSettings().then(data => {
-      setEmailSettings(data.data[0])
-      forceUpdate()
-    })
-  }
+  // Dialog open/close helpers
+  const openEdit = (section) => setEditDialog({ open: true, section });
+  const closeEdit = () => setEditDialog({ open: false, section: null });
 
-  const getLocalisationSettings = () => {
-    settingsHTTPService.getLocalisationSettings().then(data => {
-      console.log(data.data[0])
-      setLocalisationSettings(data.data[0])
-      forceUpdate()
-    })
-  }
-  const getFooterSettings = () => {
-    settingsHTTPService.getFooterSettings().then(data => {
-      setFooterSettings(data.data[0])
-      console.log(data.data[0])
-      forceUpdate()
-    })
-  }
+  // Simple edit dialog for demonstration
+  const EditDialogContent = () => {
+    const section = editDialog.section;
+    const sectionSettings = settings[section] ?? {};
 
-  const getHeaderSettings = () => {
-    settingsHTTPService.getHeaderSettings().then(data => {
-      console.log(data.data[0])
-      setHeaderSettings(data.data[0])
-      forceUpdate()
-    })
-  }
+    const handleChange = (e) => {
+      const { name, value, type, checked } = e.target;
+      setSettings(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [name]: type === 'checkbox' ? checked : value
+        }
+      }));
+    };
 
-  const getDashboardSettings = () => {
-    settingsHTTPService.getDashboardSettings().then(data => {
-      setDashboardSettings(data.data[0])
-      console.log(data.data[0])
-      forceUpdate()
-    })
-  }
-
-  const getSystemSettings = () => {
-    settingsHTTPService.getSystemSettings().then(data => {
-      setSystemSettings(data.data[0])
-      forceUpdate()
-    })
-  }
-
-
-  const refreshComponent = () => {
-    getSystemSettings()
-    getEmailSettings()
-    getEmailTemplateSettings()
-    getLocalisationSettings()
-    getFooterSettings()
-    getHeaderSettings()
-    getDashboardSettings()
-    getNotificationSettings()
-    forceUpdate()
-  }
-
-  const convertToYesNoValue = (value) => {
-    if (value == "1") {
-      return 'Yes'
-    } else {
-      return 'No'
+    // For openHours, handle array of days
+    if (section === 'openHours') {
+      const handleHoursChange = (idx, value) => {
+        setSettings(prev => ({
+          ...prev,
+          openHours: prev.openHours.map((item, i) =>
+            i === idx ? { ...item, hours: value } : item
+          )
+        }));
+      };
+      return (
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          {settings.openHours.map((item, idx) => (
+            <TextField
+              key={item.day}
+              label={item.day}
+              value={item.hours}
+              onChange={e => handleHoursChange(idx, e.target.value)}
+              fullWidth
+            />
+          ))}
+        </Stack>
+      );
     }
-  }
 
-  const restoreSystemSettings = () => {
-    settingsHTTPService.restoreSystemSettings(systemSettings.id).then(data => {
-      getSystemSettings()
-    })
-  }
-
-  const restoreDashboardSettings = () => {
-    settingsHTTPService.restoreDashboardettings(dashboardSettings.id).then(data => {
-      getDashboardSettings()
-    })
-  }
-
-  const restoreHeaderSettings = () => {
-    settingsHTTPService.restoreHeaderettings(headerSettings.id).then(data => {
-      getHeaderSettings()
-    })
-  }
-
-  const restoreFooterSettings = () => {
-    settingsHTTPService.restoreFooterSettings(footerSettings.id).then(data => {
-      getFooterSettings()
-    })
-  }
-
-  const restoreDefaultLocalisationSettings = () => {
-    settingsHTTPService.restoreLocalisationSettings(localisationSettings.id).then(data => {
-      getLocalisationSettings()
-    })
-  }
+    return (
+      <Stack spacing={2} sx={{ mt: 1 }}>
+        {section === 'system' && (
+          <>
+            <TextField label="App Name" name="appName" value={sectionSettings.appName ?? ''} onChange={handleChange} fullWidth />
+            <TextField label="Address" name="address" value={sectionSettings.address ?? ''} onChange={handleChange} fullWidth />
+            <TextField label="Email" name="email" value={sectionSettings.email ?? ''} onChange={handleChange} fullWidth />
+            <label>
+              <input type="checkbox" name="showLogo" checked={sectionSettings.showLogo ?? false} onChange={handleChange} />
+              Show Logo
+            </label>
+          </>
+        )}
+        {section === 'localisation' && (
+          <>
+            <FormControl fullWidth>
+              <InputLabel>Language</InputLabel>
+              <Select
+                label="Language"
+                name="language"
+                value={sectionSettings.language ?? ''}
+                onChange={handleChange}
+              >
+                {languageOptions.map(opt => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Date Format</InputLabel>
+              <Select
+                label="Date Format"
+                name="dateFormat"
+                value={sectionSettings.dateFormat ?? ''}
+                onChange={handleChange}
+              >
+                {dateFormatOptions.map(opt => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Currency</InputLabel>
+              <Select
+                label="Currency"
+                name="currency"
+                value={sectionSettings.currency ?? ''}
+                onChange={handleChange}
+              >
+                {currencyOptions.map(opt => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Currency Symbol</InputLabel>
+              <Select
+                label="Currency Symbol"
+                name="currencySymbol"
+                value={sectionSettings.currencySymbol ?? ''}
+                onChange={handleChange}
+              >
+                {currencySymbolOptions.map(opt => (
+                  <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        )}
+      </Stack>
+    );
+  };
 
   return (
-    <div class="container">
-      <div class="row gutters-sm">
-        <div class="col-md-4 d-none d-md-block">
-          <div class="card">
-            <div class="card-body">
-              <nav class="nav flex-column nav-pills nav-gap-y-1">
-                <a href="#system" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded active">
-                  System
-                </a>
-                <a href="#localisation" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Localisation
-                </a>
+    <Box sx={{ maxWidth: 900, mx: 'auto', p: 2, bgcolor: '#fff', borderRadius: 2, boxShadow: 2 }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+        <Box sx={{ minWidth: 220 }}>
+          <Tabs
+            orientation="vertical"
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            aria-label="Settings Tabs"
+            variant="scrollable"
+            sx={{ borderRight: 1, borderColor: 'divider' }}
+          >
+            <Tab label="System" />
+            <Tab label="Localisation" />
+            <Tab label="Open Hours" />
+          </Tabs>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          {/* System */}
+          {tab === 0 && (
+            <Box>
+              <Typography variant="h6">System Settings</Typography><hr />
+              <Typography>App Title: {settings?.system?.appName ?? ''}</Typography>
+              <Typography>Show logo: {convertToYesNoValue(settings?.system?.showLogo ?? false)}</Typography>
+              <Typography>Address: {settings?.system?.address ?? ''}</Typography>
+              <Typography>Email: {settings?.system?.email ?? ''}</Typography>
+              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                <Button variant="contained" color="info" onClick={() => openEdit('system')}>Edit</Button>
+                <Button variant="contained" color="warning" onClick={() => restoreSection('system')}>Restore Default</Button>
+              </Stack>
+            </Box>
+          )}
+          {/* Localisation */}
+          {tab === 1 && (
+            <Box>
+              <Typography variant="h6">Localisation Settings</Typography><hr />
+              <Typography>Language: {settings?.localisation?.language ?? ''}</Typography>
+              <Typography>Date format: {settings?.localisation?.dateFormat ?? ''}</Typography>
+              <Typography>Currency: {settings?.localisation?.currency ?? ''}</Typography>
+              <Typography>Currency symbol: {settings?.localisation?.currencySymbol ?? ''}</Typography>
+              <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                <Button variant="contained" color="info" onClick={() => openEdit('localisation')}>Edit</Button>
+                <Button variant="contained" color="warning" onClick={() => restoreSection('localisation')}>Restore Default</Button>
+              </Stack>
+            </Box>
+          )}
+          {/* Open Hours */}
+          {tab === 2 && (
+            <Box>
+              <Typography variant="h6">Open Hours</Typography><hr />
+              {loadingOpenHours ? (
+                <Typography>Loading...</Typography>
+              ) : (
+                <Box>
+                  {settings.openHours && settings.openHours.map((item, idx) => (
+                    <Typography key={item.day}>
+                      <b>{item.day}:</b> {item.hours}
+                    </Typography>
+                  ))}
+                  <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+                    <Button variant="contained" color="info" onClick={() => openEdit('openHours')}>Edit</Button>
+                  </Stack>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Stack>
 
-                <a href="#footer" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Footer
-                </a>
-                <a href="#notifications" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Notifications
-                </a>
-                <a href="#headerbar" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Header
-                </a>
-                <a href="#dashboard" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Dashboard
-                </a>
-                <a href="#about" data-toggle="tab" class="nav-item nav-link has-icon nav-link-faded">
-                  Version
-                </a>
-              </nav>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-8">
-          <div class="card">
-
-            <div class="card-body tab-content">
-              <div class="tab-pane active" id="system">
-                <h6>System Settings</h6><hr />
-                <form>
-                  <div class="form-group">
-                    <label class="d-block mb-0">App Title</label>
-                    <div class="small text-muted mb-3">{systemSettings.appName}</div>
-
-                    <label class="d-block mb-0">Show logo</label>
-                    <div class="small text-muted mb-3">{convertToYesNoValue(systemSettings.showLogo)}</div>
-
-                    <label class="d-block mb-0">Entreprise Name</label>
-                    <div class="small text-muted mb-3">{systemSettings.appName}</div>
-
-                    <label class="d-block mb-0">Address</label>
-                    <div class="small text-muted mb-3">{systemSettings.address}</div>
-
-                    <label class="d-block mb-0">Email</label>
-                    <div class="small text-muted mb-3">{systemSettings.email}</div>
-
-
-                    <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editSystemSettings">Edit</button>
-                    <button onClick={restoreSystemSettings} class="btn btn-warning" type="button">Restore to default</button>
-                  </div>
-                </form>
-                <div class="modal fade" id="editSystemSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditSystemSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="tab-pane" id="localisation">
-                <h6>Localisation Settings</h6><hr />
-
-                <label class="d-block mb-0">Language</label>
-                <div class="small text-muted mb-3">{localisationSettings.language}</div>
-                <label class="d-block mb-0">Date format</label>
-                <div class="small text-muted mb-3">{localisationSettings.dateFormat}</div>
-                <label class="d-block mb-0">Currency</label>
-                <div class="small text-muted mb-3">{localisationSettings.currency}</div>
-                <label class="d-block mb-0">Currency symbol</label>
-                <div class="small text-muted mb-3">{localisationSettings.currencySymbol}</div>
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editLocalisationSettings">Edit</button>
-                <button onClick={restoreDefaultLocalisationSettings} class="btn btn-warning" type="button">Restore to default</button>
-
-
-
-
-                <div class="modal fade" id="editLocalisationSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditLocalisationSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-
-
-              </div>
-
-
-              <div class="tab-pane" id="email">
-                <h6>Email Settings</h6><hr />
-                <label class="d-block mb-0">Email sent from address </label>
-                <div class="small text-muted mb-3">{emailSettings.emailSentAddress}</div>
-                <label class="d-block mb-0">SMTP server</label>
-                <div class="small text-muted mb-3">{emailSettings.smtp}</div>
-
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editEmailSettings">Edit</button>
-                <button class="btn btn-warning" type="button">Restore to default</button>
-
-                <div class="modal fade" id="editEmailSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditEmailSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-
-              <div class="tab-pane" id="footer">
-                <h6>Footer Settings</h6><hr />
-                <label class="d-block mb-0">Show Footer</label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(footerSettings.enableFooter)}</div>
-
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editFooterSettings">Edit</button>
-                <button onClick={restoreFooterSettings} class="btn btn-warning" type="button">Restore to default</button>
-
-
-
-
-                <div class="modal fade" id="editFooterSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditFooterSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tab-pane" id="notifications">
-                <h6>Notifications Settings</h6><hr />
-                <label class="d-block mb-0">Show Notifications</label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(notificationSettings?.showNotification)}</div>
-
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editNotificationsSettings">Edit</button>
-                <button class="btn btn-warning" type="button">Restore to default</button>
-
-
-
-
-                <div class="modal fade" id="editNotificationsSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditNotificationsSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-              <div class="tab-pane" id="about">
-                <h6>About Settings</h6><hr />
-                <label class="d-block mb-0">Version</label>
-                <div class="small text-muted mb-3">1.0</div>
-
-
-              </div>
-
-
-              <div class="tab-pane" id="headerbar">
-                <h6>Header Settings</h6><hr />
-                <label class="d-block mb-0">Show search bar </label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(headerSettings.enbaleSearchBar)}</div>
-                <label class="d-block mb-0">Show logo </label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(headerSettings.showLogo)}</div>
-
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editHeaderettings">Edit</button>
-                <button onClick={restoreHeaderSettings} class="btn btn-warning" type="button">Restore to default</button>
-
-
-                <div class="modal fade" id="editHeaderettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditHeaderSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button onClick={refreshComponent} type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-
-              <div class="tab-pane" id="dashboard">
-                <h6>Dahboard Settings</h6><hr />
-                <label class="d-block mb-0">Show Summary</label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(dashboardSettings.showSummary)}</div>
-                <label class="d-block mb-0">Show Calendar</label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(dashboardSettings.showCalendar)}</div>
-                <label class="d-block mb-0">Show Charts</label>
-                <div class="small text-muted mb-3">{convertToYesNoValue(dashboardSettings.showExpenseIncomeCharts)}</div>
-
-                <button class="btn btn-info" type="button" data-toggle="modal" data-target="#editDahboardSettings">Edit</button>
-                <button onClick={restoreDashboardSettings} class="btn btn-warning" type="button">Restore to default</button>
-
-                <div class="modal fade" id="editDahboardSettings" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <EditDashboardSettings />
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" onClick={refreshComponent} class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* Material-UI Edit Dialog */}
+      <Dialog open={editDialog.open} onClose={closeEdit} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Settings</DialogTitle>
+        <DialogContent>
+          <EditDialogContent />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditSave} color="primary" variant="contained">
+            Save
+          </Button>
+          <Button onClick={closeEdit} color="secondary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   )
 };
 

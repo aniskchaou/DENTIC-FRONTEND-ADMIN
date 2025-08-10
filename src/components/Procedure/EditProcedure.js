@@ -1,0 +1,141 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, MenuItem, Stack } from '@mui/material';
+import axios from 'axios';
+import BASE_URL from '../../main/urls/urls';
+
+const anesthesiaTypes = ['Local', 'General', 'Sedation', 'None'];
+const statusOptions = ['Scheduled', 'Completed', 'Cancelled'];
+
+const EditProcedure = ({ procedure, closeModal, onSuccess }) => {
+  const [form, setForm] = useState({
+    procedureName: '',
+    procedureDate: '',
+    duration: '',
+    anesthesiaType: '',
+    notes: '',
+    status: 'Scheduled'
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (procedure) {
+      setForm({
+        procedureName: procedure.procedureName || '',
+        procedureDate: procedure.procedureDate
+          ? new Date(procedure.procedureDate).toISOString().slice(0, 16)
+          : '',
+        duration: procedure.duration || '',
+        anesthesiaType: procedure.anesthesiaType || '',
+        notes: procedure.notes || '',
+        status: procedure.status || 'Scheduled'
+      });
+    }
+  }, [procedure]);
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setLoading(true);
+    const now = new Date().toISOString();
+    const data = {
+      procedureName: form.procedureName,
+      procedureDate: new Date(form.procedureDate).toISOString(),
+      duration: Number(form.duration),
+      anesthesiaType: form.anesthesiaType,
+      notes: form.notes,
+      status: form.status,
+      updatedAt: now
+    };
+    console.log('Procedure object to update:', data); // Show object before sending
+    try {
+      await axios.put(`${BASE_URL}/procedures/${procedure.id}`, data);
+      if (onSuccess) onSuccess(data);
+      if (closeModal) closeModal();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+      <Stack spacing={2}>
+        <TextField
+          label="Procedure Name"
+          name="procedureName"
+          value={form.procedureName}
+          onChange={handleChange}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Procedure Date & Time"
+          name="procedureDate"
+          type="datetime-local"
+          value={form.procedureDate}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true }}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Duration (minutes)"
+          name="duration"
+          type="number"
+          value={form.duration}
+          onChange={handleChange}
+          required
+          fullWidth
+        />
+        <TextField
+          select
+          label="Anesthesia Type"
+          name="anesthesiaType"
+          value={form.anesthesiaType}
+          onChange={handleChange}
+          required
+          fullWidth
+        >
+          {anesthesiaTypes.map(opt => (
+            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Notes"
+          name="notes"
+          value={form.notes}
+          onChange={handleChange}
+          multiline
+          rows={2}
+          fullWidth
+        />
+        <TextField
+          select
+          label="Status"
+          name="status"
+          value={form.status}
+          onChange={handleChange}
+          required
+          fullWidth
+        >
+          {statusOptions.map(opt => (
+            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+          ))}
+        </TextField>
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? 'Saving...' : 'Save Changes'}
+          </Button>
+          <Button variant="outlined" onClick={closeModal} disabled={loading}>
+            Cancel
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
+};
+
+export default EditProcedure;

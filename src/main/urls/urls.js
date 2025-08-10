@@ -1,3 +1,3 @@
-const BASE_URL = 'https://dentic-client.herokuapp.com'
+const BASE_URL = 'https://dentic-frontend-client.onrender.com'
 
 export default BASE_URL

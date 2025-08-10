@@ -9,13 +9,15 @@ import patientMessage from '../../main/messages/patientMessage';
 import patientHTTPService from '../../main/services/patientHTTPService';
 import AddPayment from '../AddPayment/AddPayment';
 import EditPayment from '../EditPayment/EditPayment';
-import { Button, LinearProgress, Typography } from '@mui/material';
+import { Button, LinearProgress, Typography, Menu, MenuItem, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Chip, Box, Divider, Stack } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { chartBarOption } from '../../main/config/chart.bar';
-import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import CurrentUser from '../../main/config/user';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import BASE_URL from '../../main/urls/urls';
+
 const deleteTask = () => {
   return window.confirm("Êtes-vous sûr de vouloir supprimer cette tache ?")
 }
@@ -23,6 +25,12 @@ const deleteTask = () => {
 const Payment = () => {
   const [payments, setPayments] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
+  const [patients, setPatients] = useState([]);
+  const [clinics, setClinics] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [viewItem, setViewItem] = useState(null);
+  const [viewOpen, setViewOpen] = useState(false);
   const forceUpdate = useForceUpdate();
   const closeButtonEdit = useRef(null);
   const closeButtonAdd = useRef(null);
@@ -32,6 +40,14 @@ const Payment = () => {
   useEffect(() => {
     LoadJSFiles()
     getAllPayments()
+    // Fetch patients
+    fetch(`${BASE_URL}/patients`)
+      .then(res => res.json())
+      .then(data => setPatients(data));
+    // Fetch clinics
+    fetch(`${BASE_URL}/clinics`)
+      .then(res => res.json())
+      .then(data => setClinics(data));
   }, []);
 
   const getAllPayments = () => {
@@ -81,13 +97,114 @@ const Payment = () => {
     closeButtonAdd.current.click()
   }
 
-  const columns = [
-    { field: 'id', headerName: '#', width: 20 },
-    { field: 'patient', headerName: 'Patient', width: 200 },
-    { field: 'paymentDate', headerName: 'Payment Date', width: 200 },
-    { field: 'paymenMode', headerName: 'Payment Mode', width: 200 },
-    { field: 'amountReceived', headerName: 'Amount Received', width: 200 },
+  // Helper functions to get names
+  const getPatientName = (id) => {
+    const pat = patients.find(p => p.id === id);
+    return pat ? pat.fullName : 'Patient not found';
+  };
+  const getClinicName = (id) => {
+    const clinic = clinics.find(c => c.id === id);
+    return clinic ? clinic.name : 'Clinic not found';
+  };
 
+  // Actions menu for each row
+  const renderActionsMenu = (params) => (
+    <div>
+      <IconButton onClick={(event) => { setAnchorEl(event.currentTarget); setSelectedRow(params.row); }}>
+        <MoreVertIcon />
+      </IconButton>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        <MenuItem onClick={() => {
+          setViewItem(params.row);
+          setViewOpen(true);
+          setAnchorEl(null);
+        }}>View</MenuItem>
+        <MenuItem onClick={() => { updatePaymentAction({}, params.row); setAnchorEl(null); }}>Edit</MenuItem>
+        <MenuItem onClick={() => { removePaymentAction({}, [params.row.id]); setAnchorEl(null); }}>Delete</MenuItem>
+      </Menu>
+    </div>
+  );
+
+  // Columns for Payment object (do not show id, createdAt, updatedAt)
+  const columns = [
+    {
+      field: 'patientId',
+      headerName: 'Patient',
+      width: 200,
+      renderCell: (params) => (
+        <Chip label={getPatientName(params.value)} color="primary" size="small" sx={{ fontWeight: 600 }} />
+      )
+    },
+    {
+      field: 'clinicId',
+      headerName: 'Clinic',
+      width: 200,
+      renderCell: (params) => (
+        <Chip label={getClinicName(params.value)} color="info" size="small" sx={{ fontWeight: 600 }} />
+      )
+    },
+    {
+      field: 'amount',
+      headerName: 'Amount',
+      width: 120,
+      renderCell: (params) => (
+        <Chip label={params.value} color="success" size="small" sx={{ fontWeight: 600 }} />
+      )
+    },
+    {
+      field: 'currency',
+      headerName: 'Currency',
+      width: 100,
+      renderCell: (params) => (
+        <Chip label={params.value} color="default" size="small" sx={{ fontWeight: 600 }} />
+      )
+    },
+    {
+      field: 'paymentMethod',
+      headerName: 'Payment Method',
+      width: 150,
+      renderCell: (params) => (
+        <Chip label={params.value} color="info" size="small" sx={{ fontWeight: 600 }} />
+      )
+    },
+    {
+      field: 'paymentStatus',
+      headerName: 'Status',
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={
+            params.value === 'Paid'
+              ? 'success'
+              : params.value === 'Pending'
+                ? 'warning'
+                : 'default'
+          }
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+      )
+    },
+    {
+      field: 'paymentDate',
+      headerName: 'Payment Date',
+      width: 160,
+      renderCell: (params) => (
+        <Chip
+          label={new Date(params.value).toLocaleString()}
+          color="default"
+          size="small"
+          sx={{ fontWeight: 600 }}
+        />
+      )
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      renderCell: renderActionsMenu
+    }
   ];
 
 
@@ -130,7 +247,6 @@ const Payment = () => {
             <div className="card-body">
               <h4>Chart</h4>
               <br />
-              <Bar options={chartBarOption} data={data2} />
             </div>
           </div>
         }
@@ -151,10 +267,49 @@ const Payment = () => {
           <i className="menu-icon fa fa-bars"></i>   Payments
         </Typography>
         <br />
-        <Button type="button" data-toggle="modal" data-target="#addPayment" ><i class="fas fa-plus"></i> Create </Button>
-        <Button onClick={e => updatePaymentAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#editPayment"><i class="fas fa-edit"></i> Edit</Button>
-        <Button onClick={e => removePaymentAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-        <Button type="button" onClick={() => getAllPayments()}><i class="fas fa-refresh"></i> Reload</Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mb: 2, mr: 1, fontWeight: 600 }}
+          type="button"
+          data-toggle="modal"
+          data-target="#addPayment"
+          startIcon={<i className="fas fa-plus"></i>}
+        >
+          Create
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mb: 2, mr: 1, fontWeight: 600 }}
+          onClick={e => updatePaymentAction(e, updatedItem)}
+          type="button"
+          data-toggle="modal"
+          data-target="#editPayment"
+          startIcon={<i className="fas fa-edit"></i>}
+        >
+          Edit
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mb: 2, mr: 1, fontWeight: 600 }}
+          onClick={e => removePaymentAction(e, updatedItemIds)}
+          type="button"
+          startIcon={<i className="fas fa-trash-alt"></i>}
+        >
+          Remove
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mb: 2, fontWeight: 600 }}
+          type="button"
+          onClick={() => getAllPayments()}
+          startIcon={<i className="fas fa-refresh"></i>}
+        >
+          Reload
+        </Button>
         <br /><br />
 
         {loading ?
@@ -163,10 +318,11 @@ const Payment = () => {
             rows={payments}
             columns={columns}
             pageSize={5}
-            rowsPerPageOptions={[6]}
+            rowsPerPageOptions={[5, 10, 15, 20]}
             checkboxSelection
             onSelectionModelChange={handleRowSelection}
             components={{ Toolbar: GridToolbar }}
+            autoHeight
           /></div>}
 
 
@@ -210,25 +366,47 @@ const Payment = () => {
           </div>
         </div>
 
-        <div class="modal fade" id="viewPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Voir</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Add this MUI Dialog for viewing payment details */}
+        <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>View Payment</DialogTitle>
+          <DialogContent>
+            {viewItem ? (
+              <Box sx={{
+                bgcolor: '#fafdff',
+                borderRadius: 2,
+                boxShadow: 1,
+                p: { xs: 2, sm: 3 },
+                minWidth: 320,
+                minHeight: 200,
+                mb: 2
+              }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
+                  <Chip label={getPatientName(viewItem.patientId)} color="primary" icon={<i className="fas fa-user"></i>} sx={{ fontWeight: 600, fontSize: 15 }} />
+                  <Chip label={getClinicName(viewItem.clinicId)} color="info" icon={<i className="fas fa-hospital"></i>} sx={{ fontWeight: 600, fontSize: 15 }} />
+                  <Chip label={`Amount: ${viewItem.amount} ${viewItem.currency}`} color="success" sx={{ fontWeight: 600, fontSize: 15 }} />
+                  <Chip label={viewItem.paymentMethod} color="info" sx={{ fontWeight: 600, fontSize: 15 }} />
+                  <Chip label={viewItem.paymentStatus} color={viewItem.paymentStatus === 'Paid' ? 'success' : viewItem.paymentStatus === 'Pending' ? 'warning' : 'default'} sx={{ fontWeight: 600, fontSize: 15 }} />
+                </Stack>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <b>Appointment ID:</b> {viewItem.appointmentId}<br />
+                  <b>Invoice ID:</b> {viewItem.invoiceId}<br />
+                  <b>Transaction ID:</b> {viewItem.transactionId}<br />
+                  <b>Insurance Claim:</b> {viewItem.insuranceClaimId}<br />
+                  <b>Payment Date:</b> {viewItem.paymentDate ? new Date(viewItem.paymentDate).toLocaleString() : '-'}<br />
+                  <b>Notes:</b> {viewItem.notes}
+                </Typography>
+              </Box>
+            ) : (
+              <Typography>No payment selected.</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setViewOpen(false)} color="primary" variant="outlined">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   )

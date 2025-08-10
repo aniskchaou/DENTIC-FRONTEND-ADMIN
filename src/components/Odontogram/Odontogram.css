@@ -1,0 +1,43 @@
+.odontogram {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.tooth {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background-color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.tooth.healthy {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.tooth.decayed {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.tooth.missing {
+  background-color: #e2e3e5;
+  border-color: #d6d8db;
+}
+
+.tooth:hover {
+  transform: scale(1.1);
+}

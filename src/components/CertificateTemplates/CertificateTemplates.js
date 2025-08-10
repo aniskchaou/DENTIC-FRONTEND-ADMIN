@@ -68,17 +68,16 @@ const CertificateTemplates = () => {
 
   const columns = [
     { field: 'id', headerName: '#', width: 200 },
-    { field: 'name', headerName: 'Certificate Template', width: 200 },
-    { field: 'name', headerName: 'Certificate Template', width: 200 }
-
+    { field: 'name', headerName: 'Certificate Template Name', width: 200 },
+    { field: 'description', headerName: 'Description', width: 200 },
   ];
 
 
   const handleRowSelection = (e) => {
-    if (e.length == 1) {
+    if (e.length === 1) {
 
       setUpdatedItemId(e[0])
-      const selectedItem = certificateTemplate.find(item => item.id == e[0])
+      const selectedItem = certificateTemplate.find(item => item.id === e[0])
       setUpdatedItem(selectedItem)
       console.log(updatedItem);
     }
@@ -100,6 +99,21 @@ const CertificateTemplates = () => {
     }
   }
 
+  const createTemplate = (templateDetails) => {
+    console.log('Creating template:', templateDetails);
+    // Placeholder for creating a reusable certificate template
+  };
+
+  const designCertificateLayout = (layoutDetails) => {
+    console.log('Designing certificate layout:', layoutDetails);
+    // Placeholder for designing certificate layout
+  };
+
+  const applyTemplateToGenerateCertificate = (templateId, data) => {
+    console.log('Applying template to generate certificate:', { templateId, data });
+    // Placeholder for applying template to generate certificates dynamically
+  };
+
   return (
     <div className="CertificateTemplates">
       <div className="card">
@@ -107,14 +121,39 @@ const CertificateTemplates = () => {
         <div className="card-body">
 
           <Typography variant="h4" gutterBottom>
-            <i className="menu-icon fa fa-bars"></i>   Certificates Templates
+            <i className="menu-icon fa fa-bars"></i>   Manage Certificate Templates
           </Typography>
           <br />
-          <Button type="button" data-toggle="modal" data-target="#addMedicament" ><i class="fas fa-plus"></i> Create </Button>
-          <Button onClick={e => updateActivityAction(e, updatedItem)} type="button" data-toggle="modal" data-target="#edit"><i class="fas fa-edit"></i> Edit</Button>
-          <Button onClick={e => removeActivityAction(e, updatedItemIds)} type="button" ><i class="fas fa-trash-alt"></i> Remove</Button>
-          <Button type="button" onClick={() => getAllPatient()}><i class="fas fa-refresh"></i> Reload</Button>
-
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => createTemplate({
+              name: 'Template 1',
+              format: 'PDF',
+            })}
+          >
+            Create Template
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => designCertificateLayout({
+              text: 'Certificate of Achievement',
+              logo: 'logo.png',
+              signatures: ['signature1.png', 'signature2.png'],
+            })}
+            style={{ marginLeft: '10px' }}
+          >
+            Design Layout
+          </Button>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={() => applyTemplateToGenerateCertificate('template1', { name: 'John Doe', date: '2025-07-13' })}
+            style={{ marginLeft: '10px' }}
+          >
+            Generate Certificate
+          </Button>
           <br /><br />
 
           {loading ?

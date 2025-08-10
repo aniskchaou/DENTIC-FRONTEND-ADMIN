@@ -1,150 +1,275 @@
-import React, { useEffect, useState } from 'react';
-import './AddPrescription.css';
-import { useForm } from 'react-hook-form';
-import showMessage from '../../libraries/messages/messages'
-import prescriptionMessage from '../../main/messages/prescriptionMessage'
-import PrescriptionTestService from '../../main/mocks/PrescriptionTestService';
-import prescriptionHTTPService from '../../main/services/prescriptionHTTPService';
-import patientHTTPService from '../../main/services/patientHTTPService';
-import CurrentUser from '../../main/config/user';
+import React, { useState, useEffect } from 'react';
+import { Button, TextField, MenuItem, Stack, Typography, IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import axios from 'axios';
+import BASE_URL from '../../main/urls/urls';
 
-const AddPrescription = (props) => {
+const refillOptions = ['Yes', 'No'];
+const statusOptions = ['Active', 'Expired', 'Completed', 'Pending'];
 
-    const initialState = {
-        patient: "",
-        pression: "",
-        temperature: "",
-        problem: "",
-        note: ""
+const AddPrescription = ({ closeModal, onSuccess }) => {
+  const [form, setForm] = useState({
+    patientId: '',
+    doctorId: '',
+    clinicId: '',
+    medications: [{
+      dosage: '',
+      duration: '',
+      frequency: '',
+      instructions: '',
+      medicationId: '',
+      medicationName: ''
+    }],
+    prescriptionDate: '',
+    validUntil: '',
+    refillAllowed: 'Yes',
+    refillCount: 1,
+    pharmacyId: '',
+    digitalSignature: '',
+    status: 'Active'
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Add state for select box data
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [clinics, setClinics] = useState([]);
+
+  useEffect(() => {
+    axios.get(BASE_URL+'/patients').then(res => setPatients(res.data)).catch(() => setPatients([]));
+    axios.get(BASE_URL+'/doctors').then(res => setDoctors(res.data)).catch(() => setDoctors([]));
+    axios.get(BASE_URL+'/clinics').then(res => setClinics(res.data)).catch(() => setClinics([]));
+  }, []);
+
+  // Add more medications
+  const handleAddMedication = () => {
+    setForm(f => ({
+      ...f,
+      medications: [
+        ...f.medications,
+        { dosage: '', duration: '', frequency: '', instructions: '', medicationId: '', medicationName: '' }
+      ]
+    }));
+  };
+
+  // Change medication fields
+  const handleMedicationChange = (idx, e) => {
+    const { name, value } = e.target;
+    setForm(f => {
+      const meds = [...f.medications];
+      meds[idx][name] = value;
+      return { ...f, medications: meds };
+    });
+  };
+
+  // Change main fields
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setLoading(true);
+    const now = new Date().toISOString();
+    const data = {
+      ...form,
+      createdAt: now,
+      updatedAt: now
     };
-
-    const { register, handleSubmit, errors } = useForm()
-    const [prescription, setPrescription] = useState(initialState);
-    const [patients, setPatients] = useState([]);
-    const getAllPatient = () => {
-        // setLoading(true);
-        patientHTTPService.getAllPatient()
-            .then(response => {
-                setPatients(response.data);
-                // setLoading(false);
-
-            })
-            .catch(e => {
-                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
-            });
-    };
-
-    useEffect(() => {
-        //LoadJSFiles()
-        getAllPatient()
-    }, []);
-    const onSubmit = (data) => {
-        //savePrescription(data)
-        // PrescriptionTestService.create(data)
-        prescriptionHTTPService.createPrescription(data)
-            .then(response => {
-                setPrescription(initialState)
-                props.closeModal(data)
-                showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
-            })
-            .catch(e => {
-                console.log(e);
-            });
-        setPrescription(initialState)
-
+    try {
+      // Replace with your backend endpoint
+      await axios.post(BASE_URL+'/prescriptions', data);
+      if (onSuccess) onSuccess();
+      if (closeModal) closeModal();
+    } finally {
+      setLoading(false);
     }
+  };
 
-    /*  const savePrescription = (data) => {
- 
-         prescriptionHTTPService.create(data)
-             .then(response => {
-                 setPrescription(initialState)
-             })
-             .catch(e => {
-                 console.log(e);
-             });
- 
-     }; */
-
-
-    const handleInputChange = event => {
-        const { name, value } = event.target;
-        setPrescription({ ...prescription, [name]: value });
-    };
-
-
-    return (
-        <div className="AddPrescription">
-            <form onSubmit={handleSubmit(onSubmit)} className="form-horizontal" method="post" name="n_p" enctype="multipart/form-data" accept-charset="utf-8">
-                <div className="col-md-12">
-                    <div className="panel panel-default panel-form">
-                        <div className="panel-body">
-                            <div className="portlet-body form">
-
-                                <div className="portlet-title">
-                                    <div class="form-group row">
-                                        <label for="text" class="col-4 col-form-label">Patient</label>
-                                        <div class="col-8">
-                                            <div class="input-group">
-                                                <select onChange={handleInputChange} value={prescription?.patient} ref={register({ required: true })}
-                                                    type="text" id="date" name="patient" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" >
-                                                    {patients.map(response =>
-                                                        <option value={response?.namepatient}>{response?.namepatient}</option>
-                                                    )}
-
-                                                </select>
-
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="text4" class="col-4 col-form-label">Pression</label>
-                                        <div class="col-8">
-                                            <input value={prescription.pression} onChange={handleInputChange} ref={register({ required: true })} id="text4" name="pression" type="text" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="text5" class="col-4 col-form-label">Temperature</label>
-                                        <div class="col-8">
-                                            <input value={prescription.temperature} onChange={handleInputChange} ref={register({ required: true })} id="text5" name="temperature" type="text" class="form-control" />
-                                        </div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <label for="textarea" class="col-4 col-form-label">Problem</label>
-                                        <div class="col-8">
-                                            <textarea value={prescription.problem} onChange={handleInputChange} ref={register({ required: true })} id="textarea" name="problem" cols="40" rows="5" class="form-control"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="textarea" class="col-4 col-form-label">Note</label>
-                                        <div class="col-8">
-                                            <textarea value={prescription.note} onChange={handleInputChange} ref={register({ required: true })} id="textarea" name="note" cols="40" rows="5" class="form-control"></textarea>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="form-group row">
-                                    <div class="offset-4 col-8">
-                                        <button name="submit" type="submit" class="btn btn-primary">
-                                            <i className="fa fa-check"></i><font><font> Save</font></font></button>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form >
-        </div >
-    )
+  return (
+    <form onSubmit={handleSubmit} autoComplete="off">
+      <TextField
+        select
+        label="Patient"
+        name="patientId"
+        value={form.patientId}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        required
+      >
+        {patients.map(patient => (
+          <MenuItem key={patient.id} value={patient.id}>
+            {patient.fullName || patient.name || patient.id}
+          </MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        select
+        label="Doctor"
+        name="doctorId"
+        value={form.doctorId}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        required
+      >
+        {doctors.map(doctor => (
+          <MenuItem key={doctor.id} value={doctor.id}>
+            {doctor.fullName || doctor.name || doctor.id}
+          </MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        select
+        label="Clinic"
+        name="clinicId"
+        value={form.clinicId}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        required
+      >
+        {clinics.map(clinic => (
+          <MenuItem key={clinic.id} value={clinic.id}>
+            {clinic.name || clinic.clinicName || clinic.id}
+          </MenuItem>
+        ))}
+      </TextField>
+      <Typography variant="subtitle1" sx={{ mt: 2 }}>Medications</Typography>
+      {form.medications.map((med, idx) => (
+        <Stack key={idx} direction="row" spacing={1} sx={{ mb: 1 }}>
+          <TextField
+            label="Medication Name"
+            name="medicationName"
+            value={med.medicationName}
+            onChange={e => handleMedicationChange(idx, e)}
+            required
+          />
+          <TextField
+            label="Medication ID"
+            name="medicationId"
+            value={med.medicationId}
+            onChange={e => handleMedicationChange(idx, e)}
+            required
+          />
+          <TextField
+            label="Dosage"
+            name="dosage"
+            value={med.dosage}
+            onChange={e => handleMedicationChange(idx, e)}
+            required
+          />
+          <TextField
+            label="Duration (days)"
+            name="duration"
+            type="number"
+            value={med.duration}
+            onChange={e => handleMedicationChange(idx, e)}
+            required
+          />
+          <TextField
+            label="Frequency"
+            name="frequency"
+            value={med.frequency}
+            onChange={e => handleMedicationChange(idx, e)}
+            required
+          />
+          <TextField
+            label="Instructions"
+            name="instructions"
+            value={med.instructions}
+            onChange={e => handleMedicationChange(idx, e)}
+          />
+        </Stack>
+      ))}
+      <IconButton color="primary" onClick={handleAddMedication} sx={{ mb: 2 }}>
+        <AddIcon />
+      </IconButton>
+      <TextField
+        label="Prescription Date"
+        name="prescriptionDate"
+        type="datetime-local"
+        value={form.prescriptionDate}
+        onChange={handleChange}
+        InputLabelProps={{ shrink: true }}
+        fullWidth
+        margin="normal"
+        required
+      />
+      <TextField
+        label="Valid Until"
+        name="validUntil"
+        type="datetime-local"
+        value={form.validUntil}
+        onChange={handleChange}
+        InputLabelProps={{ shrink: true }}
+        fullWidth
+        margin="normal"
+        required
+      />
+      <TextField
+        select
+        label="Refill Allowed"
+        name="refillAllowed"
+        value={form.refillAllowed}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      >
+        {refillOptions.map(opt => (
+          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+        ))}
+      </TextField>
+      <TextField
+        label="Refill Count"
+        name="refillCount"
+        type="number"
+        value={form.refillCount}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Pharmacy ID"
+        name="pharmacyId"
+        value={form.pharmacyId}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        label="Digital Signature"
+        name="digitalSignature"
+        value={form.digitalSignature}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      />
+      <TextField
+        select
+        label="Status"
+        name="status"
+        value={form.status}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+      >
+        {statusOptions.map(opt => (
+          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+        ))}
+      </TextField>
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+        <Button type="submit" variant="contained" color="success" disabled={loading}>
+          {loading ? 'Saving...' : 'Create Prescription'}
+        </Button>
+        <Button variant="outlined" onClick={closeModal} disabled={loading}>
+          Cancel
+        </Button>
+      </Stack>
+    </form>
+  );
 };
-
-AddPrescription.propTypes = {};
-
-AddPrescription.defaultProps = {};
 
 export default AddPrescription;

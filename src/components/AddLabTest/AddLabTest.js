@@ -54,7 +54,7 @@ const AddLabTest = (props) => {
 
   const getAllPatient = () => {
 
-    patientHTTPService.getAllPatient()
+    patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
 

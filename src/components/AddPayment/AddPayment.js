@@ -1,151 +1,203 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import './AddPayment.css';
-import { useForm } from 'react-hook-form';
+import { Box, Button, TextField, MenuItem, Stack } from '@mui/material';
 import patientHTTPService from '../../main/services/patientHTTPService';
-import patientMessage from '../../main/messages/patientMessage';
-import showMessage from '../../libraries/messages/messages';
-import paymentValidation from '../../main/validations/paymentValidation';
 import paymentHTTPService from '../../main/services/paymentHTTPService';
+import showMessage from '../../libraries/messages/messages';
 import CurrentUser from '../../main/config/user';
 
-const AddPayment = (props) => {
+const paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer', 'Insurance', 'Other'];
+const paymentStatuses = ['Completed', 'Pending', 'Failed', 'Refunded'];
+const currencies = ['USD', 'EUR', 'GBP', 'DZD', 'Other'];
 
+const AddPayment = (props) => {
   const initialState = {
-    invoiceNumber: '',
+    patientId: '',
+    appointmentId: '',
+    invoiceId: '',
+    clinicId: '',
+    amount: '',
+    currency: 'USD',
+    paymentMethod: '',
+    transactionId: '',
+    insuranceClaimId: '',
+    paymentStatus: 'Completed',
     paymentDate: '',
-    paymenMode: '',
-    amountReceived: '',
-    invoiceBlanceDue: '',
-    patient: ''
+    notes: ''
   };
 
-  const { register, handleSubmit, errors } = useForm()
   const [payment, setPayment] = useState(initialState);
   const [patients, setPatients] = useState([]);
-  const onSubmit = (data) => {
-    paymentHTTPService.createPayment(data)
-      .then(response => {
-        setPayment(initialState)
-        props.closeModal(data)
-        showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success')
-      })
-      .catch(e => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
-      });
+  const [loading, setLoading] = useState(false);
 
-  }
+  useEffect(() => {
+    getAllPatients();
+  }, []);
+
+  const getAllPatients = () => {
+    patientHTTPService.getAllPatients()
+      .then(response => setPatients(response.data))
+      .catch(() => showMessage('Error', CurrentUser.ERR_MSG, 'warning'));
+  };
 
   const handleInputChange = event => {
     const { name, value } = event.target;
     setPayment({ ...payment, [name]: value });
   };
 
-  useEffect(() => {
-    //LoadJSFiles()
-    getAllPatient()
-  }, []);
-
-
-  const getAllPatient = () => {
-    // setLoading(true);
-    patientHTTPService.getAllPatient()
-      .then(response => {
-        setPatients(response.data);
-        // setLoading(false);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const now = new Date().toISOString();
+    const data = {
+      ...payment,
+      id: payment.id || Math.random().toString(36).substr(2, 9),
+      amount: Number(payment.amount),
+      createdAt: now,
+      updatedAt: now
+    };
+    paymentHTTPService.createPayment(data)
+      .then(() => {
+        setPayment(initialState);
+        if (props.closeModal) props.closeModal(data);
+        showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success');
       })
-      .catch(e => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
-      });
+      .catch(() => {
+        showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
-    <div className="AddPayment">
-
-      <form onSubmit={handleSubmit(onSubmit)} class="form-horizontal" target="_blank" name="p_info" method="post" accept-charset="utf-8">
-        <div class="form-body">
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Patient :</font></font></label>
-            <div class="col-md-12">
-              <select onChange={handleInputChange} value={payment?.patient} ref={register({ required: true })}
-                type="text" id="date" name="patient" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" >
-                {patients.map(response =>
-                  <option value={response?.namepatient}>{response?.namepatient}</option>
-                )}
-
-              </select>
-
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Payment Date:</font></font></label>
-            <div class="col-md-12">
-              <input onChange={handleInputChange} value={payment?.paymentDate} ref={register({ required: true })}
-                type="date" name="paymentDate" id="patient_id" onkeyup="if (!window.__cfRLUnblockHandlers) return false; loadName(this.value);" class="form-control" autocomplete="off" required="" />
-              <div className="error text-danger">
-                {errors.paymentDate && paymentValidation.paymentDate}
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Payment Mode</font></font></label>
-            <div class="col-md-12">
-              <select onChange={handleInputChange} value={payment?.paymenMode} ref={register({ required: true })}
-                type="text" name="paymenMode" id="patient_id" onkeyup="if (!window.__cfRLUnblockHandlers) return false; loadName(this.value);" class="form-control" autocomplete="off" required="" >
-                <option>Cash</option>
-                <option>Credit Card</option>
-              </select>
-
-              <div className="error text-danger">
-                {errors.paymenMode && paymentValidation.paymenMode}
-              </div>
-            </div>
-          </div>
-
-
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><font  ><font  >Amount received:</font></font></label>
-            <div class="col-md-12">
-              <input onChange={handleInputChange} value={payment?.amountReceived} ref={register({ required: true })}
-                name="amountReceived" class="form-control" rows="3" type="text" />
-              <div className="error text-danger">
-                {errors.amountReceived && paymentValidation.amountReceived}
-              </div>
-            </div>
-          </div>
-
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><font  ><font  >Invoice Balance Due :</font></font></label>
-            <div class="col-md-12">
-              <input onChange={handleInputChange} value={payment?.invoiceBlanceDue} ref={register({ required: true })}
-                name="invoiceBlanceDue" class="form-control" rows="3" type="date" />
-              <div className="error text-danger">
-                {errors.invoiceBlanceDue && paymentValidation.InvoiceBlanceDue}
-              </div>
-            </div>
-          </div>
-
-
-          <div class="form-group row">
-            <div class="col-8">
-              <button name="submit" type="submit" class="btn btn-primary">
-                <i className="fa fa-check"></i><font><font> Save</font></font></button>
-
-            </div>
-          </div>
-
-        </div>
-      </form >
-    </div >)
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, maxWidth: 500 }}>
+      <Stack spacing={2}>
+        <TextField
+          select
+          label="Patient"
+          name="patientId"
+          value={payment.patientId}
+          onChange={handleInputChange}
+          required
+          fullWidth
+        >
+          {patients.map((p) => (
+            <MenuItem key={p.id} value={p.id}>
+              {p.fullName || p.namepatient || p.id}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Appointment ID"
+          name="appointmentId"
+          value={payment.appointmentId}
+          onChange={handleInputChange}
+          fullWidth
+        />
+        <TextField
+          label="Invoice ID"
+          name="invoiceId"
+          value={payment.invoiceId}
+          onChange={handleInputChange}
+          fullWidth
+        />
+        <TextField
+          label="Clinic ID"
+          name="clinicId"
+          value={payment.clinicId}
+          onChange={handleInputChange}
+          fullWidth
+        />
+        <TextField
+          label="Amount"
+          name="amount"
+          type="number"
+          value={payment.amount}
+          onChange={handleInputChange}
+          required
+          fullWidth
+        />
+        <TextField
+          select
+          label="Currency"
+          name="currency"
+          value={payment.currency}
+          onChange={handleInputChange}
+          required
+          fullWidth
+        >
+          {currencies.map(cur => (
+            <MenuItem key={cur} value={cur}>{cur}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="Payment Method"
+          name="paymentMethod"
+          value={payment.paymentMethod}
+          onChange={handleInputChange}
+          required
+          fullWidth
+        >
+          {paymentMethods.map(method => (
+            <MenuItem key={method} value={method}>{method}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Transaction ID"
+          name="transactionId"
+          value={payment.transactionId}
+          onChange={handleInputChange}
+          fullWidth
+        />
+        <TextField
+          label="Insurance Claim ID"
+          name="insuranceClaimId"
+          value={payment.insuranceClaimId}
+          onChange={handleInputChange}
+          fullWidth
+        />
+        <TextField
+          select
+          label="Payment Status"
+          name="paymentStatus"
+          value={payment.paymentStatus}
+          onChange={handleInputChange}
+          required
+          fullWidth
+        >
+          {paymentStatuses.map(status => (
+            <MenuItem key={status} value={status}>{status}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Payment Date"
+          name="paymentDate"
+          type="datetime-local"
+          value={payment.paymentDate}
+          onChange={handleInputChange}
+          InputLabelProps={{ shrink: true }}
+          required
+          fullWidth
+        />
+        <TextField
+          label="Notes"
+          name="notes"
+          value={payment.notes}
+          onChange={handleInputChange}
+          multiline
+          rows={2}
+          fullWidth
+        />
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? 'Saving...' : 'Save'}
+          </Button>
+          <Button variant="outlined" onClick={() => props.closeModal && props.closeModal()} disabled={loading}>
+            Cancel
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
 };
-
-AddPayment.propTypes = {};
-
-AddPayment.defaultProps = {};
 
 export default AddPayment;

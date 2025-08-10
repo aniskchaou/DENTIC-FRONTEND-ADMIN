@@ -9,5 +9,5 @@ export default class CurrentUser {
     static UPDATE_MSG = "item has been updated."
     static REMOVE_MSG = "item has been removed."
     static ERR_MSG = 'An Error Occurred Please Try Again Later'
-
+    static DEMO_MODE = false
 }

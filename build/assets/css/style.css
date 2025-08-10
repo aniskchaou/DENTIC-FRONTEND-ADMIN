@@ -11,9 +11,27 @@
 * Tags: html, themplate, Ela Admin
 --------------------------------------------------------- */
 /* 
+/* width */
 
+::-webkit-scrollbar {
+  width: 10px;
+}
 
-Googel Fonts  */
+/* Track */
+::-webkit-scrollbar-track {
+  background: #d7d6d6;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background-color: #7e7e7e;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(245, 245, 245);
+}
+
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400,600,700");
 /* Googel Fonts End  
 

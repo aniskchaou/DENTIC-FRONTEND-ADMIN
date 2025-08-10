@@ -30,11 +30,11 @@ const getHeaderSettings = () => {
 }
 
 const getLocalisationSettings = () => {
-    return http.get(`${BASE_URL}/api/localisationsettings`)
+    return http.get(`${BASE_URL}/localisationsettings`)
 }
 
 const editDashboardSettings = (id, data) => {
-    return http.put(`${BASE_URL}/api/edit/dashboardsettings/${id}`, data);
+    return http.put(`${BASE_URL}/edit/dashboardsettings/${id}`, data);
 };
 
 const editSystemSettings = (id, data) => {

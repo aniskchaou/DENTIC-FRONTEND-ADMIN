@@ -5,6 +5,8 @@ import appointementValidation from '../../main/validations/appointementValidatio
 import { useForm } from 'react-hook-form';
 import certificateTemplateValidation from '../../main/validations/certificationtemplateValidation';
 import certificationtemplatetHTTPServiceCopy from '../../main/services/certificationtemplatetHTTPService copy';
+
+
 const AddCertificateTemplate = (props) => {
   const { register, handleSubmit, errors } = useForm()
   const [certificateTemplate, setCertificateTemplate] = useState();

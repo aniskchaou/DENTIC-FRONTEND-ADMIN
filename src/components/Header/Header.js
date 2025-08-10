@@ -1,23 +1,84 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './Header.css';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import CurrentUser from '../../main/config/user';
 import messageHTTPService from '../../main/services/messageHTTPService'
 import showMessage from '../../libraries/messages/messages';
-import { LinearProgress } from '@mui/material';
+import { LinearProgress, Switch, MenuItem, Menu, IconButton, Avatar, Tooltip, Badge, Chip, Select } from '@mui/material';
 import appointementHTTPService from '../../main/services/appointementHTTPService';
+import { FaPlus, FaBell, FaQuestionCircle, FaBars, FaCircle, FaUserCircle, FaCog, FaPowerOff, FaUser, FaGlobe, FaTooth } from 'react-icons/fa';
+import axios from 'axios'; // Add this if not already imported
+import BASE_URL from '../../main/urls/urls';
+
+const languages = [
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'ar', label: 'العربية' }
+];
+
+// Get username from localStorage user object and capitalize first character
+let username = '';
+try {
+  const userObj = JSON.parse(localStorage.getItem('user'));
+  if (userObj && userObj.username) {
+    username = userObj.username.charAt(0).toUpperCase() + userObj.username.slice(1);
+  }
+} catch {
+  username = '';
+}
+
+// Example usage in header (e.g., greeting or profile menu)
+const user = {
+  name: username || "User",
+  role: "Administrator",
+  avatar: "images/admin.png"
+};
 
 const Header = ({ connected, handleClick }) => {
-    let history = useHistory()
+    let history = useHistory();
+    let location = useLocation();
     const [loading, setLoading] = useState(false);
     const [messsage, setmessage] = useState([]);
-
     const [appointements, setAppointements] = useState([]);
-    const initialState = {
-        input: '',
-    };
+    const initialState = { input: '' };
     const [activity, setActivity] = useState(initialState);
+
+    // Theme switcher
+    const [darkMode, setDarkMode] = useState(false);
+    const handleThemeChange = () => setDarkMode((prev) => !prev);
+
+    // Language selector
+    const [lang, setLang] = useState('en');
+    const handleLangChange = (e) => setLang(e.target.value);
+
+    // Hamburger menu for mobile
+    const [navOpen, setNavOpen] = useState(true);
+    const toggleNav = () => setNavOpen(open => !open);
+
+    // User dropdown
+    const [userAnchorEl, setUserAnchorEl] = useState(null);
+    const handleUserMenu = (event) => setUserAnchorEl(event.currentTarget);
+    const handleUserClose = () => setUserAnchorEl(null);
+
+    // Quick Add
+    const [quickAddAnchorEl, setQuickAddAnchorEl] = useState(null);
+    const handleQuickAdd = (event) => setQuickAddAnchorEl(event.currentTarget);
+    const handleQuickAddClose = () => setQuickAddAnchorEl(null);
+
+    // System status
+    const [systemStatus, setSystemStatus] = useState('online'); // online, warning, offline
+
+    // Customizable shortcuts (example)
+    const shortcuts = [];
+
+    // Breadcrumbs
+    const breadcrumbs = location.pathname.split('/').filter(Boolean);
+
+    // Add state for appointments menu anchor
+    const [appointmentsAnchorEl, setAppointmentsAnchorEl] = useState(null);
+    const [clinicSettings, setClinicSettings] = useState({ system: { appName: 'App' } });
+
     const logout = () => {
         handleClick(false)
         localStorage.clear()
@@ -25,10 +86,13 @@ const Header = ({ connected, handleClick }) => {
     }
 
     useEffect(() => {
+        // Fetch clinic settings for appName
+        axios.get(`${BASE_URL}/clinicsettings`)
+            .then(res => setClinicSettings(res.data))
+            .catch(() => setClinicSettings({ system: { appName: 'App' } }));
         // LoadJS()
         //  getAllExpenses()
     }, []);
-
 
     const print = () => {
         history.replace("/result/" + activity.input)
@@ -45,12 +109,10 @@ const Header = ({ connected, handleClick }) => {
         }
     }
 
-
     const getAllExpenses = () => {
         setLoading(true);
         messageHTTPService.getAllMessage()
             .then(response => {
-                console.log(response.data)
                 setmessage(response.data);
                 setLoading(false);
             })
@@ -71,92 +133,397 @@ const Header = ({ connected, handleClick }) => {
             });
     };
 
+    const handleAppointmentsClick = (event) => {
+        setAppointmentsAnchorEl(event.currentTarget);
+        getAllAppointements(); // Fetch appointments when opening
+    };
+    const handleAppointmentsClose = () => setAppointmentsAnchorEl(null);
 
     return (
-        <div id="right-panel" className="right-panel" style={{ display: (connected ? 'block' : 'none') }}>
+        <div id="right-panel" className={`right-panel${darkMode ? ' dark-mode' : ''}`} style={{ display: (connected ? 'block' : 'none') }}>
             <header id="header" className="header">
-                <div className="top-left">
-                    <div className="navbar-header">
-                        <a className="navbar-brand" ><img src="images/logo.png" alt="Logo" /></a>
-                        <a className="navbar-brand hidden" ><img src="images/logo2.png" alt="Logo" /></a>
-
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        flexWrap: 'nowrap',
+                        padding: '0 16px',
+                        minHeight: 64,
+                        boxSizing: 'border-box'
+                    }}
+                >
+                    {/* Left: App Name instead of Logo */}
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <span className="navbar-brand" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            fontWeight: 700,
+                            fontSize: 28,
+                            color: '#1976d2',
+                            letterSpacing: 1,
+                            fontFamily: 'inherit'
+                        }}>
+                            <FaTooth style={{ fontSize: 32, marginRight: 10, color: '#1976d2' }} />
+                            {clinicSettings?.system?.appName || 'App'}
+                        </span>
+                        {/* Remove logo images */}
+                        {/* <a className="navbar-brand"><img src="images/logo.png" alt="Logo" /></a>
+                        <a className="navbar-brand hidden"><img src="images/logo2.png" alt="Logo" /></a> */}
+                        <IconButton onClick={toggleNav} sx={{ ml: 1, display: { md: 'none' } }}>
+                            <FaBars />
+                        </IconButton>
                     </div>
-                </div>
-                <div className="top-right">
-                    <div className="header-menu">
-                        <div className="header-left">
-                            <button className="search-trigger"><i className="fa fa-search"></i></button>
-                            <div className="form-inline">
-                                <form className="search-form">
-                                    <input onChange={handleInputChange} name="input" value={activity.input} onKeyDown={(e) => search(e)} className="form-control mr-sm-2" type="text" placeholder="Search ..." aria-label="Search" />
-                                    <button onClick={print} className="search-close" type="submit"><i className="fa fa-close"></i></button>
-                                </form>
-                            </div>
-
-                            <div className="dropdown for-notification">
-                                <button onClick={getAllAppointements} className="btn btn-secondary dropdown-toggle" type="button" id="notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fas fa-calendar-check"></i>
-                                    <span className="count bg-info">{appointements?.length}</span>
-                                </button>
-                                <div className="dropdown-menu" aria-labelledby="notification">
-                                    <p className="red">You have {appointements.length} Appointements</p>
-                                    {loading ? <span>loading...</span> :
-
-
-                                        appointements.map(itemm =>
-                                            <Link to="/rendezvous" className="dropdown-item media">
-                                                <i className="fa fa-check"></i>
-                                                {itemm.patient}
-                                            </Link>
-                                        )}
-
-
-                                </div>
-                            </div>
-
-                            <div className="dropdown for-message">
-                                <button onClick={getAllExpenses} className="btn btn-secondary dropdown-toggle" type="button" id="message" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i className="fa fa-envelope"></i>
-                                    <span className="count bg-primary">{messsage?.length}</span>
-                                </button>
-                                <div className="dropdown-menu" aria-labelledby="message">
-                                    <p className="red">You have {messsage?.length}  Mails</p>
-                                    {loading ? <span>loading...</span> :
-
-
-                                        messsage.map(itemm =>
-                                            <Link to="/messages" className="dropdown-item media" >
-                                                <span className="photo media-left"><img alt="avatar" src="../images/avatar/1.jpg" /></span>
-                                                <div className="message media-body">
-                                                    <span className="name float-left">{itemm.name}</span>
-                                                    <span className="time float-right">{itemm.datee}</span>
-                                                    <p>{itemm.subject}</p>
+                    {/* Breadcrumb Navigation */}
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flex: 1,
+                        marginLeft: 16,
+                        marginRight: 16,
+                        minWidth: 0,
+                        overflow: 'hidden'
+                    }}>
+                        <FaGlobe style={{ marginRight: 8, color: '#1976d2', flexShrink: 0 }} />
+                        <nav aria-label="breadcrumb" style={{ width: '100%', overflow: 'hidden' }}>
+                            <ol className="breadcrumb" style={{
+                                margin: 0,
+                                background: 'none',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                width: '100%',
+                                whiteSpace: 'nowrap',
+                                overflowX: 'auto'
+                            }}>
+                                <li className="breadcrumb-item"><Link to="/">Home</Link></li>
+                                {breadcrumbs.map((crumb, idx) => (
+                                    <li key={idx} className="breadcrumb-item">
+                                        <Link to={`/${breadcrumbs.slice(0, idx + 1).join('/')}`}>{crumb.charAt(0).toUpperCase() + crumb.slice(1)}</Link>
+                                    </li>
+                                ))}
+                            </ol>
+                        </nav>
+                    </div>
+                    {/* Right: All header actions */}
+                    <div className="header-menu" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        flexShrink: 0
+                    }}>
+                        {/* Remove the dark mode Switch */}
+                        {/* <Tooltip title="Toggle light/dark mode">
+                            <Switch checked={darkMode} onChange={handleThemeChange} color="default" />
+                        </Tooltip> */}
+                        <Select
+                            value={lang}
+                            onChange={handleLangChange}
+                            size="small"
+                            sx={{ minWidth: 90, fontSize: 14, background: '#fff' }}
+                        >
+                            {/* Only English enabled, others disabled */}
+                            <MenuItem key="en" value="en">English</MenuItem>
+                            <MenuItem key="fr" value="fr" disabled>Français</MenuItem>
+                            <MenuItem key="ar" value="ar" disabled>العربية</MenuItem>
+                        </Select>
+                        <div className="form-inline" style={{ marginRight: 0 }}>
+                            <form className="search-form" onSubmit={e => { e.preventDefault(); print(); }}>
+                                <input
+                                    onChange={handleInputChange}
+                                    name="input"
+                                    value={activity.input}
+                                    onKeyDown={search}
+                                    className="form-control mr-sm-2"
+                                    type="text"
+                                    placeholder="Global Search..."
+                                    aria-label="Search"
+                                    style={{ minWidth: 140, maxWidth: 180 }}
+                                />
+                                <button className="search-close" type="submit"><i className="fa fa-search"></i></button>
+                            </form>
+                        </div>
+                        <Tooltip title="Quick Add">
+                            <IconButton color="primary" onClick={handleQuickAdd}>
+                                <FaPlus />
+                            </IconButton>
+                        </Tooltip>
+                        <Menu
+                            anchorEl={quickAddAnchorEl}
+                            open={Boolean(quickAddAnchorEl)}
+                            onClose={handleQuickAddClose}
+                        >
+                            <MenuItem onClick={() => { handleQuickAddClose(); history.push('/appointments/add'); }}>
+                                Add Appointment
+                            </MenuItem>
+                            <MenuItem onClick={() => { handleQuickAddClose(); history.push('/patients/add'); }}>
+                                Add Patient
+                            </MenuItem>
+                            <MenuItem onClick={() => { handleQuickAddClose(); history.push('/inventory/add'); }}>
+                                Add Inventory Item
+                            </MenuItem>
+                        </Menu>
+                        <Tooltip title="Appointments">
+                            <IconButton color="secondary" onClick={handleAppointmentsClick}>
+                                <Badge badgeContent={appointements?.length} color="error">
+                                    <FaBell />
+                                </Badge>
+                            </IconButton>
+                        </Tooltip>
+                        <Menu
+                            anchorEl={appointmentsAnchorEl}
+                            open={Boolean(appointmentsAnchorEl)}
+                            onClose={handleAppointmentsClose}
+                            PaperProps={{
+                                style: { minWidth: 340, maxHeight: 350, overflowY: 'auto', paddingBottom: 0 }
+                            }}
+                        >
+                            <MenuItem disabled>
+                                <strong>You have {appointements.length} Appointments</strong>
+                            </MenuItem>
+                            {loading ? (
+                                <MenuItem>Loading...</MenuItem>
+                            ) : appointements.length === 0 ? (
+                                <MenuItem>No appointments found.</MenuItem>
+                            ) : (
+                                appointements.map(itemm => (
+                                    <MenuItem
+                                        key={itemm.id || itemm.patient}
+                                        style={{
+                                            whiteSpace: 'normal',
+                                            alignItems: 'flex-start',
+                                            padding: '12px 8px',
+                                            borderBottom: '1px solid #f0f0f0',
+                                            background: '#f9f9f9',
+                                            borderRadius: 8,
+                                            margin: '6px 0'
+                                        }}
+                                    >
+                                        <div style={{ width: '100%' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                                                <span style={{
+                                                    fontWeight: 600,
+                                                    fontSize: 15,
+                                                    color: '#1976d2',
+                                                    marginRight: 8
+                                                }}>
+                                                    {itemm.patient}
+                                                </span>
+                                                {itemm.status && (
+                                                    <span
+                                                        style={{
+                                                            background:
+                                                                itemm.status === 'Confirmed' ? '#e8f5e9'
+                                                                : itemm.status === 'Pending' ? '#fff8e1'
+                                                                : itemm.status === 'Cancelled' ? '#ffebee'
+                                                                : '#e3f2fd',
+                                                            color:
+                                                                itemm.status === 'Confirmed' ? '#388e3c'
+                                                                : itemm.status === 'Pending' ? '#ffa000'
+                                                                : itemm.status === 'Cancelled' ? '#e53935'
+                                                                : '#1976d2',
+                                                            borderRadius: 8,
+                                                            padding: '2px 10px',
+                                                            fontSize: 13,
+                                                            fontWeight: 600,
+                                                            marginLeft: 4
+                                                        }}
+                                                    >
+                                                        {itemm.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {itemm.date && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Date:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#e3f2fd',
+                                                        color: '#1976d2',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13,
+                                                        fontWeight: 500
+                                                    }}>
+                                                        {new Date(itemm.date).toLocaleString()}
+                                                    </span>
                                                 </div>
-                                            </Link>
-                                        )
-
-
-
-                                    }
-
+                                            )}
+                                            {itemm.startTime && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Start:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#fffde7',
+                                                        color: '#fbc02d',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.startTime}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.endTime && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>End:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#e1f5fe',
+                                                        color: '#0288d1',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.endTime}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.doctor && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Doctor:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#ede7f6',
+                                                        color: '#5e35b1',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.doctor}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.type && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Type:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#f3e5f5',
+                                                        color: '#8e24aa',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.type}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.location && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Location:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#e0f2f1',
+                                                        color: '#00897b',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.location}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.phone && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Phone:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#fce4ec',
+                                                        color: '#ad1457',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.phone}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.reason && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Reason:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#fff3e0',
+                                                        color: '#ef6c00',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.reason}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.notes && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Notes:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#f3e5f5',
+                                                        color: '#8e24aa',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {itemm.notes}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.createdAt && (
+                                                <div style={{ marginBottom: 2 }}>
+                                                    <strong>Created:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#ede7f6',
+                                                        color: '#5e35b1',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {new Date(itemm.createdAt).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {itemm.updatedAt && (
+                                                <div>
+                                                    <strong>Updated:</strong>{' '}
+                                                    <span style={{
+                                                        background: '#fbe9e7',
+                                                        color: '#d84315',
+                                                        borderRadius: 6,
+                                                        padding: '2px 8px',
+                                                        fontSize: 13
+                                                    }}>
+                                                        {new Date(itemm.updatedAt).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </MenuItem>
+                                ))
+                            )}
+                        </Menu>
+                        <Tooltip title="Help & Support">
+                            <IconButton color="info" component={Link} to="/help">
+                                <FaQuestionCircle />
+                            </IconButton>
+                        </Tooltip>
+                        <IconButton onClick={handleUserMenu} sx={{ ml: 1 }}>
+                            <Avatar src={user.avatar} alt={user.name} />
+                        </IconButton>
+                        <Menu
+                            anchorEl={userAnchorEl}
+                            open={Boolean(userAnchorEl)}
+                            onClose={handleUserClose}
+                        >
+                            <MenuItem disabled>
+                                <Avatar src={user.avatar} sx={{ mr: 1 }} />
+                                <div>
+                                    <div style={{ fontWeight: 600 }}>{user.name}</div>
+                                    <div style={{ fontSize: 13, color: '#888' }}>{user.role}</div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="user-area dropdown float-right">
-                            <a href="#" className="dropdown-toggle active" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img className="user-avatar rounded-circle" src="images/admin.png" alt="User Avatar" />
-                            </a>
-
-                            <div className="user-menu dropdown-menu">
-
-
-                                <Link to="/configuration" className="nav-link" href="#"><i className="fa fa-cog"></i>Settings</Link>
-                                <Link to="/profile" className="nav-link" href="#"><i className="fa fa-user"></i>My Profile</Link>
-
-                                <Link onClick={logout} className="nav-link" href="#"><i className="fa fa-power-off"></i>Log Out</Link>
-                            </div>
-                        </div>
+                            </MenuItem>
+                            <MenuItem onClick={() => { handleUserClose(); history.push('/profile'); }}>
+                                <FaUserCircle style={{ marginRight: 8 }} /> My Profile
+                            </MenuItem>
+                            <MenuItem onClick={() => { handleUserClose(); history.push('/configuration'); }}>
+                                <FaCog style={{ marginRight: 8 }} /> Settings
+                            </MenuItem>
+                            <MenuItem onClick={() => { handleUserClose(); logout(); }}>
+                                <FaPowerOff style={{ marginRight: 8 }} /> Log Out
+                            </MenuItem>
+                        </Menu>
                     </div>
                 </div>
             </header>

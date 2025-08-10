@@ -11,7 +11,6 @@ import { Button, LinearProgress, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import SummaryWidget from '../SummaryWidget/SummaryWidget';
 import { chartBarOption } from '../../main/config/chart.bar';
-import { data2 } from '../Certificates/Certificates';
 import { Bar } from 'react-chartjs-2';
 import CurrentUser from '../../main/config/user';
 const Invoice = () => {
@@ -101,6 +100,21 @@ const Invoice = () => {
     }
   }
 
+  const addProcedureToBill = (procedure) => {
+    console.log('Adding procedure:', procedure);
+    // Placeholder for adding a procedure to the bill
+  };
+
+  const applyDiscountOrInsurance = (discount, insurance) => {
+    console.log('Applying discount or insurance:', { discount, insurance });
+    // Placeholder for applying discounts or insurance
+  };
+
+  const updatePaymentStatus = (status) => {
+    console.log('Updating payment status to:', status);
+    // Placeholder for updating payment status
+  };
+
   return (
     <div className="card">
 
@@ -111,7 +125,7 @@ const Invoice = () => {
             <div className="card-body">
               <h4>Chart</h4>
               <br />
-              <Bar options={chartBarOption} data={data2} />
+
             </div>
           </div>
         }

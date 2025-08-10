@@ -21,7 +21,7 @@ const AddCertificate = (props) => {
 
   useEffect(() => {
     //LoadJSFiles()
-    getAllPatient()
+    getAllPatients()
     getAllTemplates()
   }, []);
 
@@ -39,9 +39,9 @@ const AddCertificate = (props) => {
   };
 
 
-  const getAllPatient = () => {
+  const getAllPatients = () => {
 
-    patientHTTPService.getAllPatient()
+    patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
 

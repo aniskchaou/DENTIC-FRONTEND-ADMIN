@@ -42,13 +42,12 @@ const AddInvoice = () => {
 
   useEffect(() => {
     //LoadJSFiles()
-    getAllPatient()
+    getAllPatients()
   }, []);
 
+  const getAllPatients = () => {
 
-  const getAllPatient = () => {
-
-    patientHTTPService.getAllPatient()
+    patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
 

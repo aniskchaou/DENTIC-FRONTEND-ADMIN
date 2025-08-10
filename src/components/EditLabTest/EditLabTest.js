@@ -17,7 +17,7 @@ const EditLabTest = (props) => {
     setTestLab(props.testLab)
     console.log(props.testLab)
     //getAllPatient()
-    patientHTTPService.getAllPatient()
+    patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
         //  setLoading(false);

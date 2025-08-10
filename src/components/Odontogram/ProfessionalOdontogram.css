@@ -1,0 +1,57 @@
+.odontogram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.jaw {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tooth {
+  text-align: center;
+}
+
+.tooth-svg {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.tooth-number {
+  position: relative;
+  top: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+}
+
+.tooth-svg path {
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 1;
+}
+
+.tooth-svg.healthy path {
+  fill: #d4edda;
+}
+
+.tooth-svg.decayed path {
+  fill: #f8d7da;
+}
+
+.tooth-svg.missing path {
+  fill: #e2e3e5;
+}
+
+.tooth-svg:hover {
+  transform: scale(1.1);
+}
