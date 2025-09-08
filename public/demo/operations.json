@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "operationType": "Surgical",
+    "procedureName": "Tooth Extraction",
+    "operationDate": "2025-07-10T09:30:00.000Z",
+    "duration": 45,
+    "anesthesiaType": "Local",
+    "complications": "None reported",
+    "postOperationInstructions": "Avoid solid foods for 24 hours. Take antibiotics as prescribed.",
+    "followUpRequired": "Yes",
+    "followUpDate": "2025-07-17T09:30:00.000Z",
+    "status": "Completed",
+    "createdAt": "2025-08-04T15:37:55.890Z",
+    "updatedAt": "2025-08-04T15:37:55.890Z"
+  },
+  {
+    "id": 2,
+    "operationType": "Surgical",
+    "procedureName": "kjhk",
+    "operationDate": "2025-08-05T17:35:00.000Z",
+    "duration": 3,
+    "anesthesiaType": "Local",
+    "complications": "tttt",
+    "postOperationInstructions": "erter",
+    "followUpRequired": "No",
+    "followUpDate": null,
+    "status": "Scheduled",
+    "createdAt": "2025-08-04T15:38:23.097Z",
+    "updatedAt": "2025-08-04T15:38:23.243Z"
+  },
+  {
+    "id": 3,
+    "operationType": "Surgical",
+    "procedureName": "Tooth Extraction",
+    "operationDate": "2025-07-10T09:30:00.000Z",
+    "duration": 45,
+    "anesthesiaType": "Local",
+    "complications": "None reported",
+    "postOperationInstructions": "Avoid solid foods for 24 hours. Take antibiotics as prescribed.",
+    "followUpRequired": "Yes",
+    "followUpDate": "2025-07-17T09:30:00.000Z",
+    "status": "Completed",
+    "createdAt": "2025-08-04T15:49:47.590Z",
+    "updatedAt": "2025-08-04T15:49:47.590Z"
+  }]

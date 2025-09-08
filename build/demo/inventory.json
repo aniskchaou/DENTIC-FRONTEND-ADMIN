@@ -1,0 +1,44 @@
+[
+  {
+    "id": 6,
+    "name": "fzefe",
+    "category": "Dental Tools",
+    "quantity": 11,
+    "unit": "pcs",
+    "supplierId": null,
+    "clinicId": 8,
+    "reorderLevel": 11,
+    "expiryDate": "2025-08-04T00:00:00.000Z",
+    "status": "In Stock",
+    "createdAt": "2025-08-04T11:32:52.398Z",
+    "updatedAt": "2025-08-04T11:32:52.399Z"
+  },
+  {
+    "id": 7,
+    "name": "dfsdf",
+    "category": "Dental Tools",
+    "quantity": 3,
+    "unit": "tube",
+    "supplierId": null,
+    "clinicId": 9,
+    "reorderLevel": 0,
+    "expiryDate": "2025-08-15T00:00:00.000Z",
+    "status": "In Stock",
+    "createdAt": "2025-08-04T11:54:06.628Z",
+    "updatedAt": "2025-08-04T11:54:06.630Z"
+  },
+  {
+    "id": 8,
+    "name": "Dental Mirror",
+    "category": "Dental Tools",
+    "quantity": 50,
+    "unit": "piece",
+    "supplierId": null,
+    "clinicId": 1,
+    "reorderLevel": 10,
+    "expiryDate": null,
+    "status": "In Stock",
+    "createdAt": "2025-08-04T12:31:34.558Z",
+    "updatedAt": "2025-08-04T12:31:34.558Z"
+  }
+]

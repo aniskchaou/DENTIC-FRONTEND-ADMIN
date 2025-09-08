@@ -57,7 +57,6 @@ const EditMembership = ({ membership, closeModal, onSuccess }) => {
     e.preventDefault();
     const data = {
       ...form,
-      id: membership.id,
       validityPeriod: {
         startDate: form.validityPeriod.startDate,
         endDate: form.validityPeriod.endDate

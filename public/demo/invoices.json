@@ -1,0 +1,66 @@
+[
+  {
+    "id": 1,
+    "invoiceNumber": "INV-2025001",
+    "patientId": 1,
+    "clinicId": 1,
+    "items": [
+      {
+        "itemId": 1,
+        "itemType": "Consultation",
+        "quantity": 1,
+        "unitPrice": 50,
+        "totalPrice": 50,
+        "itemDescription": "Initial dental consultation"
+      }
+    ],
+    "subTotal": 50,
+    "discount": {
+      "amount": 5,
+      "percentage": 10,
+      "discountReason": "Welcome discount"
+    },
+    "taxAmount": 2.5,
+    "grandTotal": 47.5,
+    "paymentStatus": "Pending",
+    "paymentMethod": "Cash",
+    "transactionId": null,
+    "invoiceDate": "2025-08-08T12:54:51.392Z",
+    "dueDate": "2025-08-15T12:54:51.392Z",
+    "notes": "First invoice for patient.",
+    "createdAt": "2025-08-08T12:54:51.392Z",
+    "updatedAt": "2025-08-08T12:54:51.393Z"
+  },
+  {
+    "id": 2,
+    "invoiceNumber": "INV-202508081754657698659",
+    "patientId": 1,
+    "clinicId": 2,
+    "items": [
+      {
+        "itemId": 1,
+        "itemType": "X-Ray",
+        "quantity": 1,
+        "unitPrice": 100,
+        "totalPrice": 100,
+        "itemDescription": "X-Ray"
+      }
+    ],
+    "subTotal": 100,
+    "discount": {
+      "amount": 10,
+      "percentage": 11,
+      "discountReason": ""
+    },
+    "taxAmount": 11,
+    "grandTotal": 101,
+    "paymentStatus": "Pending",
+    "paymentMethod": "Card",
+    "transactionId": null,
+    "invoiceDate": "2025-08-08T12:54:58.659Z",
+    "dueDate": "2025-08-07T00:00:00.000Z",
+    "notes": "rgeget",
+    "createdAt": "2025-08-08T12:54:58.659Z",
+    "updatedAt": "2025-08-08T12:54:58.698Z"
+  }
+]

@@ -18,6 +18,11 @@ import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement } from 'chart.js';
 import CurrentUser from '../../main/config/user';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import BASE_URL from '../../main/urls/urls';
+import axios from '../../libraries/axios/axios';
+import SummarizeIcon from '@mui/icons-material/Summarize';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import { useTranslation } from 'react-i18next';
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
@@ -35,6 +40,19 @@ const Patient = () => {
   const [updatedItemId, setUpdatedItemId] = useState(0);
   const [viewOpen, setViewOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false); // New state for AddPatient dialog
+
+  // Health Profile Summary AI states
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryResult, setSummaryResult] = useState(null);
+
+  // Risk Stratification AI states
+  const [riskOpen, setRiskOpen] = useState(false);
+  const [riskLoading, setRiskLoading] = useState(false);
+  const [riskResult, setRiskResult] = useState(null);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     LoadJSFiles();
@@ -43,25 +61,42 @@ const Patient = () => {
 
   const getAllPatient = () => {
     setLoading(true);
-    patientHTTPService.getAllPatients()
-      .then(response => {
-        setPatients(response.data);
-        setLoading(false);
-      })
-      .catch(e => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning');
-      });
+
+    if (CurrentUser.DEMO_MODE) {
+      // Directly fetch the demo JSON file
+      fetch('/demo/patients.json')
+        .then(res => res.json())
+        .then(data => {
+          setPatients(data);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    } else {
+      axios.get(`${BASE_URL}/patients`)
+        .then(res => {
+          setPatients(res.data);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    }
   };
 
   const removePatientAction = (e, data) => {
     e?.preventDefault();
-    if (window.confirm("Etes-vous sûr que vous voulez supprimer ?")) {
-      patientHTTPService.removePatient(data)
+    const patientId = typeof data === 'object' ? data.id : data;
+    if (window.confirm(t('patient.confirm_delete'))) {
+      patientHTTPService.removePatient(patientId)
         .then(() => {
           resfreshComponent();
-          showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success');
+          showMessage(t('patient.confirmation'), CurrentUser.REMOVE_MSG, 'success');
         })
-        .catch(() => showMessage('Error', CurrentUser.ERR_MSG, 'warning'));
+        .catch(() => showMessage(t('patient.error'), CurrentUser.ERR_MSG, 'warning'));
     }
   };
 
@@ -182,9 +217,29 @@ const Patient = () => {
         <MoreVertIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => handleMenuAction('view')}>View</MenuItem>
-        <MenuItem onClick={() => handleMenuAction('edit')}>Edit</MenuItem>
-        <MenuItem onClick={() => handleMenuAction('delete')}>Delete</MenuItem>
+        <MenuItem onClick={() => handleMenuAction('view')}>{t('patient.view')}</MenuItem>
+        <MenuItem onClick={() => handleMenuAction('edit')}>{t('patient.edit')}</MenuItem>
+        <MenuItem onClick={() => handleMenuAction('delete')}>{t('patient.delete')}</MenuItem>
+        <MenuItem
+          onClick={() => {
+            setUpdatedItem(params.row);
+            setSummaryOpen(true);
+            handleMenuClose();
+          }}
+        >
+          <SummarizeIcon fontSize="small" sx={{ mr: 1 }} />
+          {t('patient.health_profile_summary_ai')}
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setUpdatedItem(params.row);
+            setRiskOpen(true);
+            handleMenuClose();
+          }}
+        >
+          <WarningAmberIcon fontSize="small" sx={{ mr: 1 }} />
+          {t('patient.risk_stratification_ai')}
+        </MenuItem>
       </Menu>
     </div>
   );
@@ -192,11 +247,11 @@ const Patient = () => {
   // Columns for Patient object (do not show id, userId, createdAt, updatedAt)
   const columns = [
     // { field: 'userId', headerName: 'User ID', width: 220 }, // deleted
-    { field: 'fullName', headerName: 'Full Name', width: 220 },
-    { field: 'medicalRecordNumber', headerName: 'Medical Record #', width: 180 },
+    { field: 'fullName', headerName: t('patient.full_name'), width: 220 },
+    { field: 'medicalRecordNumber', headerName: t('patient.medical_record_number'), width: 180 },
     {
       field: 'bloodType',
-      headerName: 'Blood Type',
+      headerName: t('patient.blood_type'),
       width: 120,
       renderCell: (params) => (
         <Chip
@@ -215,7 +270,7 @@ const Patient = () => {
     },
     {
       field: 'allergies',
-      headerName: 'Allergies',
+      headerName: t('patient.allergies'),
       width: 180,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -223,13 +278,13 @@ const Patient = () => {
             ? params.value.map((a, i) => (
                 <Chip key={i} label={a} color="error" size="small" variant="outlined" sx={{ mb: 0.5 }} />
               ))
-            : <Chip label="None" color="default" size="small" />}
+            : <Chip label={t('patient.none')} color="default" size="small" />}
         </Box>
       )
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('patient.actions'),
       width: 150,
       renderCell: renderActionsMenu
     },
@@ -286,6 +341,73 @@ const Patient = () => {
     ]
   };
 
+  // Health Profile Summary AI function
+  const handleHealthProfileSummary = async () => {
+    setSummaryLoading(true);
+    setSummaryResult(null);
+    try {
+      const patient = selectedRow || updatedItem;
+
+      // Fetch appointments for this patient
+      const appointmentsRes = await axios.get(`${BASE_URL}/appointments?patientId=${patient.id}`);
+      const appointments = appointmentsRes.data || [];
+
+      const payload = {
+        patientId: patient?.id || patient?.userId || '',
+        history: {
+          age: patient?.age || '',
+          smoker: patient?.smoker || false,
+          medicalConditions: [
+            ...(patient?.medicalHistory?.map(h => h.condition) || [])
+          ]
+        },
+        imaging: {
+          lastXray: patient?.lastXray || '',
+          findings: patient?.imagingFindings || []
+        },
+        treatments: appointments.map(a => ({
+          date: a.appointmentDate,
+          type: a.appointmentType,
+          reason: a.reasonForVisit,
+          status: a.status
+        }))
+      };
+
+      const res = await axios.post(`${BASE_URL}/ai/health-profile-summary`, payload);
+      setSummaryResult({
+        summary: res.data.summary || ''
+      });
+    } catch {
+      setSummaryResult({ error: 'Error generating health summary.' });
+    }
+    setSummaryLoading(false);
+  };
+
+  // Risk Stratification AI function
+  const handleRiskStratification = async () => {
+    setRiskLoading(true);
+    setRiskResult(null);
+    try {
+      const patient = selectedRow || updatedItem;
+      const payload = {
+        patientData: {
+          age: patient?.age || '',
+          smoker: patient?.smoker || false,
+          diabetic: patient?.medicalHistory?.some(h => h.condition?.toLowerCase().includes('diabetes')) || false,
+          oralHygiene: patient?.oralHygiene || ''
+        }
+      };
+      const res = await axios.post(`${BASE_URL}/ai/risk-stratification`, payload);
+      setRiskResult({
+        riskLevel: res.data.riskLevel || '',
+        riskFactors: res.data.riskFactors || []
+      });
+    } catch {
+      setRiskResult({ error: 'Error generating risk stratification.' });
+    }
+    setRiskLoading(false);
+  };
+
   return (
     <div className="card">
       {/* Widgets row */}
@@ -294,30 +416,30 @@ const Patient = () => {
         gutterBottom
         sx={{ mb: 3, mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}
       >
-        <i className="menu-icon fa fa-bars"></i> Patients
+        <i className="menu-icon fa fa-bars"></i> {t('patient.title')}
       </Typography>
 
       {/* Chips for Medical Record Number and Blood Type */}
       
       <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2 }}>
         <Box sx={{ flex: 1, bgcolor: '#e3f2fd', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="primary">Total Patients</Typography>
+          <Typography variant="subtitle2" color="primary">{t('patient.total')}</Typography>
           <Typography variant="h6">{totalPatients}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#e8f5e9', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="success.main">Type A</Typography>
+          <Typography variant="subtitle2" color="success.main">{t('patient.type_a')}</Typography>
           <Typography variant="h6">{typeCounts['A+'] + typeCounts['A-']}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#fffde7', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="warning.main">Type B</Typography>
+          <Typography variant="subtitle2" color="warning.main">{t('patient.type_b')}</Typography>
           <Typography variant="h6">{typeCounts['B+'] + typeCounts['B-']}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#f3e5f5', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="primary">Type O</Typography>
+          <Typography variant="subtitle2" color="primary">{t('patient.type_o')}</Typography>
           <Typography variant="h6">{typeCounts['O+'] + typeCounts['O-']}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#ffebee', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="error.main">Type AB</Typography>
+          <Typography variant="subtitle2" color="error.main">{t('patient.type_ab')}</Typography>
           <Typography variant="h6">{typeCounts['AB+'] + typeCounts['AB-']}</Typography>
         </Box>
       </Box>
@@ -325,48 +447,28 @@ const Patient = () => {
       {/* Charts row */}
       <Box sx={{ display: 'flex', gap: 4, mb: 4, mt: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Patients by Blood Type</Typography>
+          <Typography variant="subtitle1" align="center">{t('patient.by_blood_type')}</Typography>
           <Doughnut data={doughnutData} />
         </Box>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Blood Type Count</Typography>
+          <Typography variant="subtitle1" align="center">{t('patient.blood_type_count')}</Typography>
           <Bar data={barData} />
         </Box>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Blood Type Trend</Typography>
+          <Typography variant="subtitle1" align="center">{t('patient.blood_type_trend')}</Typography>
           <Line data={lineData} />
         </Box>
       </Box>
 
       <div className="card-body">
-        {showChart && (
-          <div className="card">
-            <div className="card-body">
-              <h4>Chart</h4>
-            </div>
-          </div>
-        )}
-
-        {showFilter && (
-          <div className="row">
-            <SummaryWidget />
-            <SummaryWidget />
-            <SummaryWidget />
-            <SummaryWidget />
-          </div>
-        )}
-
-        
-
         <Button
           variant="outlined"
           color="primary"
-          data-toggle="modal"
-          data-target="#addPatient"
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
           startIcon={<i className="fas fa-plus"></i>}
+          onClick={() => setAddOpen(true)} // Open AddPatient dialog
         >
-          Create
+          {t('patient.create')}
         </Button>
         <Button
           variant="outlined"
@@ -377,7 +479,7 @@ const Patient = () => {
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
           startIcon={<i className="fas fa-edit"></i>}
         >
-          Edit
+          {t('patient.edit')}
         </Button>
         <Button
           variant="outlined"
@@ -386,7 +488,7 @@ const Patient = () => {
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
           startIcon={<i className="fas fa-trash-alt"></i>}
         >
-          Remove
+          {t('patient.remove')}
         </Button>
         <Button
           variant="outlined"
@@ -395,7 +497,7 @@ const Patient = () => {
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
           startIcon={<i className="fas fa-refresh"></i>}
         >
-          Reload
+          {t('patient.reload')}
         </Button>
         <Button
           variant="outlined"
@@ -404,12 +506,33 @@ const Patient = () => {
           sx={{ mb: 2, fontWeight: 600 }}
           startIcon={<i className="fas fa-search"></i>}
         >
-          Search
+          {t('patient.search')}
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="info"
+          startIcon={<SummarizeIcon />}
+          sx={{ mb: 2, ml: 2 }}
+          onClick={() => setSummaryOpen(true)}
+          disabled={!selectedRow && !updatedItem}
+        >
+          {t('patient.health_profile_summary_ai')}
+        </Button>
+        <Button
+          variant="outlined"
+          color="warning"
+          startIcon={<WarningAmberIcon />}
+          sx={{ mb: 2, ml: 2 }}
+          onClick={() => setRiskOpen(true)}
+          disabled={!selectedRow && !updatedItem}
+        >
+          {t('patient.risk_stratification_ai')}
         </Button>
 
         <input
           type="text"
-          placeholder="Search patients..."
+          placeholder={t('patient.search_placeholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ marginBottom: '10px', padding: '5px', width: '100%' }}
@@ -431,35 +554,18 @@ const Patient = () => {
         )}
 
         {/* Modals */}
-        <div className="modal fade" id="addPatient">
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">New Patient</h5>
-                <button onClick={resfreshComponent} className="close" data-dismiss="modal">×</button>
-              </div>
-              <div className="modal-body">
-                <AddPatient closeModal={closeModalAdd} />
-              </div>
-              <div className="modal-footer">
-                <button ref={closeButtonAdd} className="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="modal fade" id="editPatient">
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Patient</h5>
+                <h5 className="modal-title">{t('patient.edit_patient')}</h5>
                 <button className="close" data-dismiss="modal">×</button>
               </div>
               <div className="modal-body">
                 <EditPatient patient={updatedItem} closeModal={closeModalEdit} />
               </div>
               <div className="modal-footer">
-                <button ref={closeButtonEdit} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button ref={closeButtonEdit} className="btn btn-secondary" data-dismiss="modal">{t('patient.close')}</button>
               </div>
             </div>
           </div>
@@ -467,25 +573,120 @@ const Patient = () => {
 
         {/* View Patient Modal (for detailed view) */}
         <Dialog open={viewOpen} onClose={() => setViewOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>Patient Details</DialogTitle>
+          <DialogTitle>{t('patient.patient_details')}</DialogTitle>
           <DialogContent>
             <ViewPatient patient={updatedItem} />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setViewOpen(false)} color="primary" variant="outlined">
-              Close
+              {t('patient.close')}
             </Button>
           </DialogActions>
         </Dialog>
 
         <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>Edit Patient</DialogTitle>
+          <DialogTitle>{t('patient.edit_patient')}</DialogTitle>
           <DialogContent>
             <EditPatient patient={updatedItem} closeModal={() => setEditOpen(false)} />
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setEditOpen(false)} color="primary" variant="outlined">
-              Close
+              {t('patient.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Add Patient Dialog (replaces Bootstrap modal) */}
+        <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>{t('patient.new_patient')}</DialogTitle>
+          <DialogContent>
+            <AddPatient closeModal={() => setAddOpen(false)} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAddOpen(false)} color="secondary">
+              {t('patient.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Health Profile Summary Dialog */}
+        <Dialog open={summaryOpen} onClose={() => setSummaryOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>{t('patient.health_profile_summary_ai')}</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ mb: 2 }}>
+              {t('patient.health_profile_summary_description')}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleHealthProfileSummary}
+              disabled={summaryLoading || (!selectedRow && !updatedItem)}
+              sx={{ mb: 2 }}
+            >
+              {t('patient.generate_summary')}
+            </Button>
+            {summaryLoading && <LinearProgress sx={{ mb: 2 }} />}
+            {summaryResult && (
+              <Box sx={{ mt: 2 }}>
+                {summaryResult.error ? (
+                  <Typography color="error">{summaryResult.error}</Typography>
+                ) : (
+                  <>
+                    <Typography variant="subtitle2">{t('patient.summary')}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+                      {summaryResult.summary}
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSummaryOpen(false)} color="primary" variant="outlined">
+              {t('patient.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Risk Stratification Dialog */}
+        <Dialog open={riskOpen} onClose={() => setRiskOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>{t('patient.risk_stratification_ai')}</DialogTitle>
+          <DialogContent>
+            <Typography sx={{ mb: 2 }}>
+              {t('patient.risk_stratification_description')}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleRiskStratification}
+              disabled={riskLoading || (!selectedRow && !updatedItem)}
+              sx={{ mb: 2 }}
+            >
+              {t('patient.generate_risk_stratification')}
+            </Button>
+            {riskLoading && <LinearProgress sx={{ mb: 2 }} />}
+            {riskResult && (
+              <Box sx={{ mt: 2 }}>
+                {riskResult.error ? (
+                  <Typography color="error">{riskResult.error}</Typography>
+                ) : (
+                  <>
+                    <Typography variant="subtitle2">{t('patient.risk_level')}:</Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                      {riskResult.riskLevel}
+                    </Typography>
+                    <Typography variant="subtitle2">{t('patient.risk_factors')}:</Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                      {(riskResult.riskFactors || []).map((factor, idx) => (
+                        <Chip key={idx} label={factor} color="error" variant="outlined" />
+                      ))}
+                    </Box>
+                  </>
+                )}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRiskOpen(false)} color="primary" variant="outlined">
+              {t('patient.close')}
             </Button>
           </DialogActions>
         </Dialog>

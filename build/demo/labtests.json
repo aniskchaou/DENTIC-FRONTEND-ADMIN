@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 2,
+    "clinicId": 3,
+    "testName": "Dental X-Ray",
+    "testCategory": "Radiology",
+    "testDescription": "Panoramic dental X-ray to check for cavities and bone loss.",
+    "sampleType": "Other",
+    "sampleCollectionDate": "2025-07-01T09:00:00.000Z",
+    "sampleCollectedBy": 1,
+    "testStatus": "Completed",
+    "result": {
+      "resultId": "55555555-eeee-ffff-aaaa-555555555555",
+      "resultDate": "2025-07-01T12:00:00Z",
+      "attachments": [
+        "https://example.com/reports/xray1.pdf"
+      ],
+      "resultDescription": "No cavities detected. Mild bone loss observed."
+    },
+    "laboratoryId": 1,
+    "testCost": 120,
+    "insuranceCovered": "Yes",
+    "paymentStatus": "Paid",
+    "createdAt": "2025-08-09T19:22:00.096Z",
+    "updatedAt": "2025-08-09T19:22:00.096Z"
+  },
+  {
+    "id": 2,
+    "patientId": 1,
+    "doctorId": 2,
+    "clinicId": 3,
+    "testName": "Blood Test",
+    "testCategory": "Hematology",
+    "testDescription": "CBC to check for infection.",
+    "sampleType": "Blood",
+    "sampleCollectionDate": "2025-07-02T10:30:00.000Z",
+    "sampleCollectedBy": 4,
+    "testStatus": "Completed",
+    "result": {
+      "resultId": "bbbbbbbb-eeee-ffff-aaaa-bbbbbbbbbbbb",
+      "resultDate": "2025-07-02T13:00:00Z",
+      "attachments": [],
+      "resultDescription": "WBC count elevated, indicating infection."
+    },
+    "laboratoryId": 1,
+    "testCost": 80,
+    "insuranceCovered": "No",
+    "paymentStatus": "Paid",
+    "createdAt": "2025-08-09T19:22:00.096Z",
+    "updatedAt": "2025-08-09T19:22:00.096Z"
+  },
+  {
+    "id": 3,
+    "patientId": 1,
+    "doctorId": 2,
+    "clinicId": 3,
+    "testName": "Saliva Test",
+    "testCategory": "Microbiology",
+    "testDescription": "Test for bacterial load in saliva.",
+    "sampleType": "Saliva",
+    "sampleCollectionDate": "2025-07-03T11:15:00.000Z",
+    "sampleCollectedBy": 1,
+    "testStatus": "Pending",
+    "result": null,
+    "laboratoryId": 1,
+    "testCost": 60,
+    "insuranceCovered": "Yes",
+    "paymentStatus": "Pending",
+    "createdAt": "2025-08-09T19:22:00.096Z",
+    "updatedAt": "2025-08-09T19:22:00.096Z"
+  }
+]

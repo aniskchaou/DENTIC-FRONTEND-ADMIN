@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Button, Typography, Grid, Container, Card, CardContent, Divider, Avatar,
-  AppBar, Toolbar, IconButton, MenuItem, Menu, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, InputLabel, FormControl, Stack, Snackbar, Alert
+  AppBar, Toolbar, IconButton, MenuItem, Menu, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, InputLabel, FormControl, Stack, Snackbar, Alert, LinearProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { useHistory } from 'react-router-dom';
+import ChatIcon from '@mui/icons-material/Chat';
+import TranslateIcon from '@mui/icons-material/Translate';
+import { useHistory, Link } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
 import './HomePage.css';
+import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
+
 // Dentist theme images (royalty-free/unsplash)
 const heroImg = "images/1.jpg";
 const aboutImg = "images/2.jpg";
@@ -32,22 +37,35 @@ const openingHours = [
   { day: "Sunday", hours: "Closed" },
 ];
 
-// Replace menuLinks with updated menu (remove "Blog", replace "Pricing" with "Memberships")
-const menuLinks = [
-  { label: "Home", href: "#hero" },
-  { label: "About", href: "#about" },
-  { label: "Services", href: "#services" },
-  { label: "Doctors", href: "#doctors" },
-  { label: "Staff", href: "#staff" },
-  { label: "Memberships", href: "#memberships" }, // was "Pricing"
-  // { label: "Blog", href: "#blog" }, // removed
-  { label: "Contact", href: "#contact" },
-  { label: "Login", href: "/login" },
+const languages = [
+  { code: 'en', label: 'English', icon: '🇬🇧' },
+  { code: 'fr', label: 'Français', icon: '🇫🇷' },
+  { code: 'ar', label: 'العربية', icon: '🇸🇦' },
+  { code: 'es', label: 'Español', icon: '🇪🇸' },
+  { code: 'vi', label: 'Tiếng Việt', icon: '🇻🇳' },
+  { code: 'th', label: 'ไทย', icon: '🇹🇭' },
+  { code: 'pt', label: 'Português', icon: '🇵🇹' },
+  { code: 'hi', label: 'हिन्दी', icon: '🇮🇳' },
+  { code: 'bn', label: 'বাংলা', icon: '🇧🇩' },
+  { code: 'tr', label: 'Türkçe', icon: '🇹🇷' },
+  { code: 'fil', label: 'Filipino', icon: '🇵🇭' },
+  { code: 'id', label: 'Bahasa Indonesia', icon: '🇮🇩' }
 ];
 
 const HomePage = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const history = useHistory();
+  const { t, i18n } = useTranslation();
+  const [lang, setLang] = useState(i18n.language);
+  const [langMenuAnchor, setLangMenuAnchor] = useState(null);
+
+  const handleLangClick = (event) => setLangMenuAnchor(event.currentTarget);
+  const handleLangClose = () => setLangMenuAnchor(null);
+  const handleLangSelect = (code) => {
+    setLang(code);
+    i18n.changeLanguage(code);
+    handleLangClose();
+  };
 
   // Add state for services from backend
   const [services, setServices] = useState([
@@ -133,6 +151,13 @@ const HomePage = () => {
   const [clinicsList, setClinicsList] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  // Add Chatbot states
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatQuestion, setChatQuestion] = useState('');
+  const [chatContext, setChatContext] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatAnswer, setChatAnswer] = useState('');
+
   useEffect(() => {
     // Fetch services
     const fetchServices = async () => {
@@ -170,10 +195,19 @@ const HomePage = () => {
     // Fetch clinic settings for contact info and open hours
     const fetchClinicSettings = async () => {
       try {
-        const res = await axios.get(BASE_URL + '/clinicsettings');
-        if (res.data && res.data.system) {
-          setClinicSettings(res.data);
-          setOpenHoursDraft(res.data.openHours || []);
+        if (CurrentUser.DEMO_MODE) {
+          const res = await fetch('/demo/clinicssettings.json');
+          const data = await res.json();
+          if (data && data.system) {
+            setClinicSettings(data);
+            setOpenHoursDraft(data.openHours || []);
+          }
+        } else {
+          const res = await axios.get(BASE_URL + '/clinicsettings');
+          if (res.data && res.data.system) {
+            setClinicSettings(res.data);
+            setOpenHoursDraft(res.data.openHours || []);
+          }
         }
       } catch (e) {
         // fallback: keep empty/default
@@ -316,6 +350,23 @@ const HomePage = () => {
     }
   };
 
+  // Chatbot handler
+  const handleSendChat = async () => {
+    setChatLoading(true);
+    setChatAnswer('');
+    try {
+      const payload = {
+        question: chatQuestion,
+        context: chatContext
+      };
+      const res = await axios.post(`${BASE_URL}/ai/clinic-qa`, payload);
+      setChatAnswer(res.data.answer || 'No answer found.');
+    } catch {
+      setChatAnswer('Error getting answer.');
+    }
+    setChatLoading(false);
+  };
+
   // Add scroll handlers before return:
   const handleContactScroll = () => {
     const contactSection = document.getElementById('contact');
@@ -323,6 +374,18 @@ const HomePage = () => {
       contactSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Move menuLinks inside HomePage component, after you define t from useTranslation:
+  const menuLinks = [
+    { label: t("home.menu_home"), href: "#hero" },
+    { label: t("home.menu_about"), href: "#about" },
+    { label: t("home.menu_services"), href: "#services" },
+    { label: t("home.menu_doctors"), href: "#doctors" },
+    { label: t("home.menu_staff"), href: "#staff" },
+    { label: t("home.menu_memberships"), href: "#memberships" },
+    { label: t("home.menu_contact"), href: "#contact" },
+    { label: t("home.menu_login"), href: "/login" },
+  ];
 
   return (
     <Box className="home-page-root" sx={{ bgcolor: '#fafdff', minHeight: '100vh', fontFamily: 'Roboto, Arial, sans-serif' }}>
@@ -335,53 +398,80 @@ const HomePage = () => {
           </Typography>
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
             {menuLinks.map((link) =>
-              link.label === "Login" ? (
-                <Button
-                  key={link.label}
-                  variant="contained"
-                  color="secondary"
-                  sx={{ fontWeight: 600, fontSize: 16, textTransform: 'none', px: 3 }}
-                  onClick={() => {
-                    window.location.href = link.href;
-                  }}
-                >
-                  {link.label}
-                </Button>
-              ) : link.label === "Contact" ? (
-                <Button
-                  key={link.label}
-                  color="inherit"
-                  sx={{ fontWeight: 500, fontSize: 16, textTransform: 'none' }}
-                  onClick={handleContactScroll}
-                >
-                  {link.label}
-                </Button>
-              ) : link.label === "Memberships" ? (
-                <Button
-                  key={link.label}
-                  color="inherit"
-                  sx={{ fontWeight: 500, fontSize: 16, textTransform: 'none' }}
-                  onClick={() => handleMenuClick("#memberships")}
-                >
-                  {link.label}
-                </Button>
+              link.href.startsWith('/') ? (
+                <Link to={link.href} style={{ textDecoration: 'none' }} key={link.label}>
+                  <Button
+                    variant={link.label === t("home.menu_login") ? "contained" : "text"}
+                    color={link.label === t("home.menu_login") ? "secondary" : "inherit"}
+                    sx={{ fontWeight: 600, fontSize: 16, textTransform: 'none', px: 3 }}
+                  >
+                    {link.label}
+                  </Button>
+                </Link>
               ) : (
                 <Button
                   key={link.label}
                   color="inherit"
                   sx={{ fontWeight: 500, fontSize: 16, textTransform: 'none' }}
-                  onClick={() => {
-                    if (link.href.startsWith("#")) {
-                      handleMenuClick(link.href);
-                    } else {
-                      window.location.href = link.href;
-                    }
-                  }}
+                  onClick={() => handleMenuClick(link.href)}
                 >
                   {link.label}
                 </Button>
               )
             )}
+            {/* Fancy Language ComboBox at end of menu */}
+            <IconButton
+              color="inherit"
+              onClick={handleLangClick}
+              sx={{
+                ml: 2,
+                bgcolor: '#e3f2fd',
+                borderRadius: 2,
+                transition: 'background 0.2s',
+                '&:hover': { bgcolor: '#bbdefb' }
+              }}
+            >
+              <TranslateIcon sx={{ color: '#1976d2', fontSize: 28, mr: 1 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <span style={{ fontSize: 20 }}>{languages.find(l => l.code === lang)?.icon}</span>
+                <span style={{ fontWeight: 600, color: '#1976d2', fontSize: 16 }}>{languages.find(l => l.code === lang)?.label}</span>
+              </Box>
+            </IconButton>
+            <Menu
+              anchorEl={langMenuAnchor}
+              open={Boolean(langMenuAnchor)}
+              onClose={handleLangClose}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  minWidth: 160,
+                  borderRadius: 2,
+                  boxShadow: 4,
+                  bgcolor: '#e3f2fd'
+                }
+              }}
+            >
+              {languages.map(l => (
+                <MenuItem
+                  key={l.code}
+                  selected={l.code === lang}
+                  onClick={() => handleLangSelect(l.code)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    fontWeight: l.code === lang ? 700 : 500,
+                    fontSize: 16,
+                    bgcolor: l.code === lang ? '#bbdefb' : 'inherit',
+                    color: '#1976d2',
+                    '&:hover': { bgcolor: '#bbdefb' }
+                  }}
+                >
+                  <span style={{ fontSize: 22 }}>{l.icon}</span>
+                  <span>{l.label}</span>
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
           <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
             <IconButton color="inherit" onClick={handleMenu}>
@@ -399,7 +489,7 @@ const HomePage = () => {
                     key={link.label}
                     onClick={() => {
                       handleClose();
-                      window.location.href = link.href;
+                      history.push(link.href);
                     }}
                     sx={{
                       fontWeight: 600,
@@ -479,10 +569,10 @@ const HomePage = () => {
       >
         <Container maxWidth="md">
           <Typography variant="h2" fontWeight={700} gutterBottom sx={{ letterSpacing: 1 }}>
-            Dentic Dental Clinic
+            {t("home.hero_title")}
           </Typography>
           <Typography variant="h5" sx={{ mb: 4, fontWeight: 400 }}>
-            Modern, gentle, and affordable dental care for your whole family.
+            {t("home.hero_subtitle")}
           </Typography>
           <Box display="flex" justifyContent="center" gap={2} sx={{ mb: 2 }}>
             <Button
@@ -492,7 +582,7 @@ const HomePage = () => {
               sx={{ px: 4, fontWeight: 600 }}
               onClick={handleBookVisit}
             >
-              Book Appointment
+              {t("home.book_appointment")}
             </Button>
             <Button
               variant="outlined"
@@ -501,7 +591,7 @@ const HomePage = () => {
               sx={{ px: 4, fontWeight: 600 }}
               onClick={handleContactScroll}
             >
-              Contact Us
+              {t("home.contact_us")}
             </Button>
           </Box>
         </Container>
@@ -513,17 +603,17 @@ const HomePage = () => {
           <Grid item xs={12} md={6}>
             <img
               src={aboutImg}
-              alt="Dentist at work"
+              alt={t("home.about_img_alt")}
               style={{ width: '100%', borderRadius: 16, boxShadow: '0 8px 32px rgba(25, 118, 210, 0.08)' }}
             />
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-              About Us
+              {t("home.about_title")}
             </Typography>
             <Divider sx={{ mb: 2, width: 60, borderColor: '#1976d2' }} />
             {loadingAbout ? (
-              <Typography>Loading...</Typography>
+              <Typography>{t("home.loading")}</Typography>
             ) : (
               <>
                 <Typography variant="body1" sx={{ mb: 2 }}>
@@ -545,11 +635,11 @@ const HomePage = () => {
         <Grid container spacing={6} alignItems="center">
           <Grid item xs={12} md={6} order={{ xs: 2, md: 1 }}>
             <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-              Our Services
+              {t("home.services_title")}
             </Typography>
             <Divider sx={{ mb: 2, width: 60, borderColor: '#1976d2' }} />
             {loadingServices ? (
-              <Typography>Loading services...</Typography>
+              <Typography>{t("home.loading_services")}</Typography>
             ) : (
               <ul style={{ paddingLeft: 18, marginBottom: 0, fontSize: 18 }}>
                 {services.map((service, idx) => (
@@ -561,7 +651,7 @@ const HomePage = () => {
           <Grid item xs={12} md={6} order={{ xs: 1, md: 2 }}>
             <img
               src={servicesImg}
-              alt="Dental Services"
+              alt={t("home.services_img_alt")}
               style={{ width: '100%', borderRadius: 16, boxShadow: '0 8px 32px rgba(25, 118, 210, 0.08)' }}
             />
           </Grid>
@@ -571,26 +661,26 @@ const HomePage = () => {
       {/* Opening Hours Section */}
       <Container id="opening" maxWidth="sm" sx={{ mt: 10 }}>
         <Typography variant="h4" align="center" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-          Opening Hours
+          {t("home.opening_hours")}
         </Typography>
         <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2' }} />
         <Box sx={{ textAlign: 'center' }}>
           {(clinicSettings.openHours || []).map((item, idx) => (
             <Box key={item.day} sx={{ mb: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
               <Typography variant="subtitle1" fontWeight={600} sx={{ minWidth: 140, textAlign: 'right' }}>
-                {item.day}
+                {t(`home.day_${item.day.toLowerCase().replace(/[^a-z]/g, '')}`)}
               </Typography>
               <Chip
                 label={item.hours}
-                color={item.hours === 'Closed' ? 'error' : 'primary'}
+                color={item.hours === t("home.closed") ? 'error' : 'primary'}
                 variant="outlined"
                 sx={{
                   fontWeight: 600,
                   fontSize: 16,
                   px: 2,
-                  bgcolor: item.hours === 'Closed' ? '#ffebee' : '#e3f2fd',
-                  color: item.hours === 'Closed' ? 'error.main' : 'primary.main',
-                  borderColor: item.hours === 'Closed' ? '#ffcdd2' : '#90caf9',
+                  bgcolor: item.hours === t("home.closed") ? '#ffebee' : '#e3f2fd',
+                  color: item.hours === t("home.closed") ? 'error.main' : 'primary.main',
+                  borderColor: item.hours === t("home.closed") ? '#ffcdd2' : '#90caf9',
                 }}
               />
             </Box>
@@ -598,14 +688,14 @@ const HomePage = () => {
         </Box>
       </Container>
 
-      {/* Memberships Section (replaces Pricing) */}
+      {/* Memberships Section */}
       <Container id="memberships" maxWidth="lg" sx={{ mt: 10 }}>
         <Typography variant="h4" align="center" fontWeight={700} gutterBottom sx={{ color: '#1976d2', letterSpacing: 1 }}>
-          Memberships
+          {t("home.memberships_title")}
         </Typography>
         <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2' }} />
         {loadingMemberships ? (
-          <Typography align="center">Loading memberships...</Typography>
+          <Typography align="center">{t("home.loading_memberships")}</Typography>
         ) : (
           <Grid container spacing={4} justifyContent="center">
             {memberships.map((item, idx) => (
@@ -635,7 +725,7 @@ const HomePage = () => {
                 >
                   <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: 24, right: 24, zIndex: 2 }}>
                     <Chip
-                      label={item.paymentStatus === "Active" ? "Active" : "Inactive"}
+                      label={item.paymentStatus === "Active" ? t("home.active") : t("home.inactive")}
                       color={item.paymentStatus === "Active" ? "success" : "error"}
                       sx={{
                         fontWeight: 700,
@@ -659,27 +749,27 @@ const HomePage = () => {
                       mt: 6,
                     }}
                   >
-                    {item.membershipPlan?.[0] || 'M'}
+                    {item.membershipPlan?.[0] || t("home.m")}
                   </Avatar>
                   <Typography variant="h5" fontWeight={700} sx={{ color: '#1976d2', mb: 1.5, letterSpacing: 1, mt: 1 }}>
                     {item.membershipPlan}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                    <b>Valid:</b> {item.validityPeriod?.startDate ? new Date(item.validityPeriod.startDate).toLocaleDateString() : '-'}
-                    {" "}to{" "}
+                    <b>{t("home.valid")}:</b> {item.validityPeriod?.startDate ? new Date(item.validityPeriod.startDate).toLocaleDateString() : '-'}
+                    {" "}{t("home.to")}{" "}
                     {item.validityPeriod?.endDate ? new Date(item.validityPeriod.endDate).toLocaleDateString() : '-'}
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>
-                    <b>Renewal:</b> {item.renewalDate ? new Date(item.renewalDate).toLocaleDateString() : '-'}
+                    <b>{t("home.renewal")}:</b> {item.renewalDate ? new Date(item.renewalDate).toLocaleDateString() : '-'}
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>
-                    <b>Last Payment:</b> {item.lastPaymentAmount ? (
+                    <b>{t("home.last_payment")}:</b> {item.lastPaymentAmount ? (
                       <span style={{ color: "#388e3c", fontWeight: 600 }}>${item.lastPaymentAmount}</span>
                     ) : '-'}
                   </Typography>
                   <Divider sx={{ my: 2.5, borderColor: '#90caf9', width: '100%' }} />
                   <Typography variant="body1" fontWeight={600} sx={{ mb: 1.5, color: '#1976d2' }}>
-                    Benefits
+                    {t("home.benefits")}
                   </Typography>
                   <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, textAlign: 'left', width: '100%', maxWidth: 400, mx: 'auto' }}>
                     {(item.benefits || []).map((b, i) => (
@@ -715,42 +805,20 @@ const HomePage = () => {
               </Grid>
             ))}
             {memberships.length === 0 && (
-              <Typography align="center" sx={{ width: '100%', mt: 2 }}>No memberships found.</Typography>
+              <Typography align="center" sx={{ width: '100%', mt: 2 }}>{t("home.no_memberships")}</Typography>
             )}
           </Grid>
         )}
       </Container>
 
-      {/* Blog Section */}
-      {/* 
-      <Container id="blog" maxWidth="md" sx={{ mt: 10 }}>
-        <Typography variant="h4" align="center" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-          Blog
-        </Typography>
-        <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2' }} />
-        <Grid container spacing={4}>
-          {blogPosts.map((post, idx) => (
-            <Grid item xs={12} md={6} key={idx}>
-              <Card elevation={2} sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600}>{post.title}</Typography>
-                <Typography variant="caption" color="text.secondary">{new Date(post.date).toLocaleDateString()}</Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>{post.excerpt}</Typography>
-                <Button size="small" sx={{ mt: 2 }}>Read More</Button>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-      */}
-
       {/* Doctors Section */}
       <Container id="doctors" maxWidth="lg" sx={{ mt: 10 }}>
         <Typography variant="h4" align="center" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-          Our Doctors
+          {t("home.doctors_title")}
         </Typography>
         <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2' }} />
         {loadingDoctors ? (
-          <Typography align="center">Loading doctors...</Typography>
+          <Typography align="center">{t("home.loading_doctors")}</Typography>
         ) : (
           <Grid container spacing={4} justifyContent="center">
             {doctors.map((doc, idx) => (
@@ -765,7 +833,7 @@ const HomePage = () => {
                     alt={doc.fullName}
                     sx={{ width: 80, height: 80, mx: 'auto', mb: 2, fontSize: 32, bgcolor: '#1976d2' }}
                   >
-                    {!doc.img && (doc.fullName?.[0] || 'D')}
+                    {!doc.img && (doc.fullName?.[0] || t("home.d"))}
                   </Avatar>
                   <Typography variant="h6" fontWeight={600}>{doc.fullName}</Typography>
                   <Typography variant="body2" color="text.secondary">{doc.specialization || doc.specialty}</Typography>
@@ -773,7 +841,7 @@ const HomePage = () => {
               </Grid>
             ))}
             {doctors.length === 0 && (
-              <Typography align="center" sx={{ width: '100%', mt: 2 }}>No doctors found.</Typography>
+              <Typography align="center" sx={{ width: '100%', mt: 2 }}>{t("home.no_doctors")}</Typography>
             )}
           </Grid>
         )}
@@ -782,11 +850,11 @@ const HomePage = () => {
       {/* Staff Section */}
       <Container id="staff" maxWidth="md" sx={{ mt: 10 }}>
         <Typography variant="h4" align="center" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-          Our Staff
+          {t("home.staff_title")}
         </Typography>
         <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2' }} />
         {loadingStaffs ? (
-          <Typography align="center">Loading staff...</Typography>
+          <Typography align="center">{t("home.loading_staff")}</Typography>
         ) : (
           <Grid container spacing={4} justifyContent="center">
             {staffs.map((staff, idx) => (
@@ -801,7 +869,7 @@ const HomePage = () => {
                     alt={staff.fullName}
                     sx={{ width: 70, height: 70, mx: 'auto', mb: 2, fontSize: 28, bgcolor: '#1976d2' }}
                   >
-                    {!staff.img && (staff.fullName?.[0] || 'S')}
+                    {!staff.img && (staff.fullName?.[0] || t("home.s"))}
                   </Avatar>
                   <Typography variant="subtitle1" fontWeight={600}>{staff.fullName}</Typography>
                   <Typography variant="body2" color="text.secondary">{staff.role}</Typography>
@@ -809,7 +877,7 @@ const HomePage = () => {
               </Grid>
             ))}
             {staffs.length === 0 && (
-              <Typography align="center" sx={{ width: '100%', mt: 2 }}>No staff found.</Typography>
+              <Typography align="center" sx={{ width: '100%', mt: 2 }}>{t("home.no_staff")}</Typography>
             )}
           </Grid>
         )}
@@ -843,11 +911,11 @@ const HomePage = () => {
             }}
           >
             <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: '#1976d2' }}>
-              Contact Us
+              {t("home.contact_title")}
             </Typography>
             <Divider sx={{ mb: 3, width: 60, mx: 'auto', borderColor: '#1976d2', opacity: 0.6 }} />
             <Typography variant="body1" sx={{ mb: 3 }}>
-              Have questions or want to book an appointment? Reach out to us!
+              {t("home.contact_subtitle")}
             </Typography>
             <Grid container spacing={2} justifyContent="center" sx={{ mb: 2 }}>
               <Grid item xs={12} sm={4}>
@@ -855,7 +923,7 @@ const HomePage = () => {
                   <Avatar sx={{ bgcolor: '#1976d2', mb: 1 }}>
                     <i className="fas fa-envelope" style={{ color: '#fff' }} />
                   </Avatar>
-                  <Typography variant="subtitle2" color="text.secondary">Email</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">{t("home.email")}</Typography>
                   <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
                     {clinicSettings.system.email || 'info@denticclinic.com'}
                   </Typography>
@@ -866,7 +934,7 @@ const HomePage = () => {
                   <Avatar sx={{ bgcolor: '#1976d2', mb: 1 }}>
                     <i className="fas fa-phone" style={{ color: '#fff' }} />
                   </Avatar>
-                  <Typography variant="subtitle2" color="text.secondary">Phone</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">{t("home.phone")}</Typography>
                   <Typography variant="body2">
                     {clinicSettings.system.phone || '+1 234 567 890'}
                   </Typography>
@@ -877,7 +945,7 @@ const HomePage = () => {
                   <Avatar sx={{ bgcolor: '#1976d2', mb: 1 }}>
                     <i className="fas fa-map-marker-alt" style={{ color: '#fff' }} />
                   </Avatar>
-                  <Typography variant="subtitle2" color="text.secondary">Address</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">{t("home.address")}</Typography>
                   <Typography variant="body2">
                     {clinicSettings.system.address || '123 Smile Street, Happy City, Country'}
                   </Typography>
@@ -891,7 +959,7 @@ const HomePage = () => {
               sx={{ mt: 2, px: 5, fontWeight: 600, borderRadius: 2 }}
               onClick={() => window.location.href = '/send-message'}
             >
-              Send Message
+              {t("home.send_message")}
             </Button>
           </Card>
         </Container>
@@ -901,7 +969,7 @@ const HomePage = () => {
       <Box sx={{ bgcolor: '#1976d2', color: '#fff', py: 6, mt: 10 }}>
         <Container maxWidth="sm">
           <Typography variant="h5" align="center" fontWeight={700} gutterBottom>
-            Ready for a brighter, healthier smile?
+            {t("home.cta_title")}
           </Typography>
           <Box display="flex" justifyContent="center">
             <Button
@@ -911,7 +979,7 @@ const HomePage = () => {
               sx={{ px: 5, fontWeight: 600 }}
               onClick={handleBookVisit}
             >
-              Book Your Visit
+              {t("home.cta_button")}
             </Button>
           </Box>
         </Container>
@@ -921,7 +989,7 @@ const HomePage = () => {
       <Box sx={{ bgcolor: '#222', color: '#fff', py: 3, mt: 8 }}>
         <Container maxWidth="md">
           <Typography align="center" variant="body2">
-            &copy; {new Date().getFullYear()} Dentic Clinic. All rights reserved.
+            &copy; {new Date().getFullYear()} Dentic Clinic. {t("home.rights")}
           </Typography>
         </Container>
       </Box>
@@ -986,6 +1054,7 @@ const HomePage = () => {
             <FormControl fullWidth>
               <InputLabel>Doctor</InputLabel>
               <Select
+                id="appointment-doctor-select" // Add this line
                 label="Doctor"
                 value={appointmentForm.doctorId}
                 onChange={e => setAppointmentForm(f => ({ ...f, doctorId: e.target.value }))}
@@ -1064,6 +1133,109 @@ const HomePage = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Chatbot Box (not modal) */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 32,
+          right: 32,
+          zIndex: 9999,
+          width: 340,
+          bgcolor: '#fff',
+          borderRadius: 4,
+          boxShadow: 6,
+          p: 2,
+          border: '2px solid #90caf9',
+          display: chatOpen ? 'block' : 'none'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <ChatIcon sx={{ color: '#1976d2', mr: 1 }} />
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#1976d2', flexGrow: 1 }}>
+            Clinic Chatbot
+          </Typography>
+          <IconButton size="small" onClick={() => setChatOpen(false)}>
+            <span style={{ fontSize: 22, color: '#1976d2' }}>&times;</span>
+          </IconButton>
+        </Box>
+        <Typography sx={{ mb: 2, fontSize: 15 }}>
+          Ask a question about our clinic, services, or appointments.
+        </Typography>
+        <TextField
+          label="Your Question"
+          value={chatQuestion}
+          onChange={e => setChatQuestion(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          placeholder="How do I book an appointment?"
+          size="small"
+        />
+        <TextField
+          label="Context (optional)"
+          value={chatContext}
+          onChange={e => setChatContext(e.target.value)}
+          fullWidth
+          sx={{ mb: 2 }}
+          placeholder="e.g. I want to book for next week"
+          size="small"
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleSendChat}
+            disabled={chatLoading || !chatQuestion}
+            size="small"
+          >
+            Send
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setChatOpen(false)}
+            size="small"
+          >
+            Close
+          </Button>
+        </Box>
+        {chatLoading && <LinearProgress sx={{ mt: 2 }} />}
+        {chatAnswer && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Answer:</Typography>
+            <Typography variant="body1">{chatAnswer}</Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Floating Chat Button */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 32,
+          right: chatOpen ? 390 : 32,
+          zIndex: 9998
+        }}
+      >
+        {!chatOpen && (
+          <Button
+            variant="contained"
+            color="info"
+            startIcon={<ChatIcon />}
+            sx={{
+              borderRadius: '50px',
+              px: 3,
+              py: 1.5,
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: 3
+            }}
+            onClick={() => setChatOpen(true)}
+          >
+            Chat
+          </Button>
+        )}
+      </Box>
+
       {/* Snackbar for feedback */}
       <Snackbar
         open={snackbar.open}
@@ -1075,6 +1247,7 @@ const HomePage = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
     </Box>
   );
 

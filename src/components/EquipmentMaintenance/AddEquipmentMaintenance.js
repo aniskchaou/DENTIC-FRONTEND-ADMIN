@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Stack } from '@mui/material';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
+import { useTranslation } from 'react-i18next';
 
 const statuses = ['In Service', 'Out of Service', 'Maintenance Due', 'In Maintenance', 'Retired'];
 
-const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = [], onSuccess }) => {
+const AddEquipmentMaintenance = ({ open, onClose, onSuccess }) => {
+  const { t } = useTranslation();
+  const [clinics, setClinics] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
   const [form, setForm] = useState({
     clinicId: '',
     equipmentName: '',
@@ -20,6 +24,31 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Fetch clinics from backend
+    const fetchClinics = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/clinics`);
+        setClinics(res.data);
+      } catch (err) {
+        setClinics([]);
+      }
+    };
+    fetchClinics();
+
+    // Fetch staff with role 'technical'
+    const fetchTechnicians = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/users`);
+        const technicalStaff = res.data.filter(staff => staff.role?.toUpperCase() === 'TECHNICAL');
+        setTechnicians(technicalStaff);
+      } catch (err) {
+        setTechnicians([]);
+      }
+    };
+    fetchTechnicians();
+  }, []);
+
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
@@ -31,12 +60,11 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
     const now = new Date().toISOString();
     const data = {
       ...form,
-      id: Math.random().toString(36).substr(2, 9),
       createdAt: now,
       updatedAt: now
     };
     try {
-      await axios.post(`${BASE_URL}/equipments`, data);
+      await axios.post(`${BASE_URL}/equipment`, data);
       if (onSuccess) onSuccess();
       if (onClose) onClose();
     } finally {
@@ -46,12 +74,12 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Equipment Maintenance</DialogTitle>
+      <DialogTitle>{t('equipment_maintenance.title')}</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit} autoComplete="off">
           <TextField
             select
-            label="Clinic"
+            label={t('equipment_maintenance.clinic')}
             name="clinicId"
             value={form.clinicId}
             onChange={handleChange}
@@ -64,7 +92,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             ))}
           </TextField>
           <TextField
-            label="Equipment Name"
+            label={t('equipment_maintenance.equipment_name')}
             name="equipmentName"
             value={form.equipmentName}
             onChange={handleChange}
@@ -73,7 +101,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             required
           />
           <TextField
-            label="Model Number"
+            label={t('equipment_maintenance.model_number')}
             name="modelNumber"
             value={form.modelNumber}
             onChange={handleChange}
@@ -81,7 +109,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           />
           <TextField
-            label="Manufacturer"
+            label={t('equipment_maintenance.manufacturer')}
             name="manufacturer"
             value={form.manufacturer}
             onChange={handleChange}
@@ -89,7 +117,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           />
           <TextField
-            label="Purchase Date"
+            label={t('equipment_maintenance.purchase_date')}
             name="purchaseDate"
             type="date"
             value={form.purchaseDate}
@@ -99,7 +127,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           />
           <TextField
-            label="Last Service Date"
+            label={t('equipment_maintenance.last_service_date')}
             name="lastServiceDate"
             type="date"
             value={form.lastServiceDate}
@@ -109,7 +137,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           />
           <TextField
-            label="Next Service Due"
+            label={t('equipment_maintenance.next_service_due')}
             name="nextServiceDue"
             type="date"
             value={form.nextServiceDue}
@@ -120,7 +148,7 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
           />
           <TextField
             select
-            label="Status"
+            label={t('equipment_maintenance.status')}
             name="status"
             value={form.status}
             onChange={handleChange}
@@ -128,12 +156,12 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           >
             {statuses.map(s => (
-              <MenuItem key={s} value={s}>{s}</MenuItem>
+              <MenuItem key={s} value={s}>{t(`equipment_maintenance.status_${s.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
             ))}
           </TextField>
           <TextField
             select
-            label="Assigned Technician"
+            label={t('equipment_maintenance.assigned_technician')}
             name="assignedTechnician"
             value={form.assignedTechnician}
             onChange={handleChange}
@@ -141,11 +169,11 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
             margin="normal"
           >
             {technicians.map(t => (
-              <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
+              <MenuItem key={t.id} value={t.id}>{t.fullName}</MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Maintenance Notes"
+            label={t('equipment_maintenance.maintenance_notes')}
             name="maintenanceNotes"
             value={form.maintenanceNotes}
             onChange={handleChange}
@@ -156,10 +184,10 @@ const AddEquipmentMaintenance = ({ open, onClose, technicians = [], clinics = []
           />
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button type="submit" variant="contained" color="primary" disabled={loading}>
-              {loading ? 'Saving...' : 'Create'}
+              {loading ? t('equipment_maintenance.saving') : t('equipment_maintenance.create')}
             </Button>
             <Button variant="outlined" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('equipment_maintenance.cancel')}
             </Button>
           </Stack>
         </form>

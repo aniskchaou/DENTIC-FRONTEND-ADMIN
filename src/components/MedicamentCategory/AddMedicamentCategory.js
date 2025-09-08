@@ -3,8 +3,10 @@ import { Box, Button, TextField, Stack } from '@mui/material';
 import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 const AddMedicamentCategory = ({ closeModal, onCreate }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     description: ''
@@ -21,7 +23,6 @@ const AddMedicamentCategory = ({ closeModal, onCreate }) => {
     setLoading(true);
     const now = new Date().toISOString();
     const data = {
-      id: Math.random().toString(36).substr(2, 9),
       name: form.name,
       description: form.description,
       createdAt: now,
@@ -29,11 +30,11 @@ const AddMedicamentCategory = ({ closeModal, onCreate }) => {
     };
     try {
       await medicamentCategoryHTTPService.createMedicamentCayegory(data);
-      showMessage('Success', 'Category created successfully', 'success');
+      //showMessage(t('medicament_category.success'), t('medicament_category.created_successfully'), 'success');
       if (onCreate) onCreate(data);
       if (closeModal) closeModal();
     } catch (e) {
-      showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+      showMessage(t('medicament_category.error'), CurrentUser.ERR_MSG, 'warning');
     } finally {
       setLoading(false);
     }
@@ -43,7 +44,7 @@ const AddMedicamentCategory = ({ closeModal, onCreate }) => {
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, minWidth: 350 }}>
       <Stack spacing={2}>
         <TextField
-          label="Name"
+          label={t('medicament_category.name')}
           name="name"
           value={form.name}
           onChange={handleChange}
@@ -51,7 +52,7 @@ const AddMedicamentCategory = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Description"
+          label={t('medicament_category.description')}
           name="description"
           value={form.description}
           onChange={handleChange}
@@ -62,10 +63,10 @@ const AddMedicamentCategory = ({ closeModal, onCreate }) => {
         />
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Category'}
+            {loading ? t('medicament_category.saving') : t('medicament_category.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('medicament_category.cancel')}
           </Button>
         </Stack>
       </Stack>

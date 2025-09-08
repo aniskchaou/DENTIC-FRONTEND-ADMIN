@@ -1,76 +1,88 @@
-
-import PropTypes from 'prop-types';
-import './EditMedicamentCategory.css';
-import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
 import React, { useEffect, useState } from 'react';
-
-
-import { useForm } from 'react-hook-form';
+import { Box, Button, TextField, Stack } from '@mui/material';
+import medicamentCategoryHTTPService from '../../main/services/medicamentCategoryHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import CurrentUser from '../../main/config/user';
-const EditMedicamentCategory = (props) => {
-  const { register, handleSubmit, errors } = useForm() // initialise the hook
-  const [medicamentCategory, setMedicamentCategory] = useState(props.medicamentCategory);
-  const [typeSubs, setTypeSubs] = useState([]);
-  const [members, setMembers] = useState([]);
+import { useTranslation } from 'react-i18next';
+import BASE_URL from '../../main/urls/urls';
+
+const EditMedicamentCategory = ({ closeModal, medicamentCategory = {}, onSuccess }) => {
+  const { t } = useTranslation();
+  const [form, setForm] = useState({
+    name: '',
+    description: ''
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setMedicamentCategory(props.medicamentCategory)
+    if (medicamentCategory) {
+      setForm({
+        name: medicamentCategory.name || '',
+        description: medicamentCategory.description || ''
+      });
+    }
+  }, [medicamentCategory]);
 
-  }, [props.medicamentCategory]);
-
-
-  const onSubmit = (data) => {
-
-    //ActivityTestService.update(props.medicamentCategory, data)
-    medicamentCategoryHTTPService.editMedicamentCayegory(props.medicamentCategory.id, data).then(data => {
-      props.closeModal()
-      showMessage('Confirmation', CurrentUser.UPDATE_MSG, 'success')
-    })
-
-  }
-
-  const handleInputChange = event => {
-    const { name, value } = event.target;
-    setMedicamentCategory({ ...medicamentCategory, [name]: value });
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
   };
 
-
-
-
-
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setLoading(true);
+    const data = {
+      name: form.name,
+      description: form.description
+    };
+    try {
+      await fetch(`${BASE_URL}/medicament-categories/${medicamentCategory.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': '*/*'
+        },
+        body: JSON.stringify(data)
+      });
+      if (onSuccess) onSuccess(data);
+      if (closeModal) closeModal();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="EditActivity">
-      <form onSubmit={handleSubmit(onSubmit)} class="form-horizontal" target="_blank" name="p_info" method="post" accept-charset="utf-8">
-        <div class="form-body">
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  >Medecine Category:</font></font></label>
-            <div class="col-md-12">
-              <input onChange={handleInputChange} value={medicamentCategory?.name} ref={register({ required: true })}
-                type="text" id="date" name="name" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" />
-
-            </div>
-          </div>
-
-
-          <div class="form-group row">
-            <div class=" col-8">
-              <button name="submit" type="submit" class="btn btn-primary">
-                <i className="fa fa-check"></i><font><font> Save</font></font></button>
-
-            </div>
-          </div>
-
-        </div>
-      </form>
-    </div>
-  )
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, minWidth: 350 }}>
+      <Stack spacing={2}>
+        <TextField
+          label={t('medicament_category.name')}
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          required
+          fullWidth
+        />
+        <TextField
+          label={t('medicament_category.description')}
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          multiline
+          rows={3}
+          required
+          fullWidth
+        />
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? t('medicament_category.saving') : t('medicament_category.save')}
+          </Button>
+          <Button variant="outlined" onClick={closeModal} disabled={loading}>
+            {t('medicament_category.cancel')}
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
 };
-
-EditMedicamentCategory.propTypes = {};
-
-EditMedicamentCategory.defaultProps = {};
 
 export default EditMedicamentCategory;

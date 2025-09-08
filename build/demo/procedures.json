@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "procedureName": "Root Canal",
+    "procedureDate": "2025-07-12T10:00:00.000Z",
+    "duration": 90,
+    "anesthesiaType": "Local",
+    "notes": "Procedure went smoothly with no complications.",
+    "status": "Completed",
+    "createdAt": "2025-08-04T13:22:38.747Z",
+    "updatedAt": "2025-08-04T13:22:38.747Z"
+  },
+  {
+    "id": 2,
+    "procedureName": "Root Canal",
+    "procedureDate": "2025-07-12T10:00:00.000Z",
+    "duration": 90,
+    "anesthesiaType": "Local",
+    "notes": "Procedure went smoothly with no complications.",
+    "status": "Completed",
+    "createdAt": "2025-08-04T13:23:26.489Z",
+    "updatedAt": "2025-08-04T13:23:26.489Z"
+  },
+  {
+    "id": 5,
+    "procedureName": "Root Canal",
+    "procedureDate": "2025-07-12T10:00:00.000Z",
+    "duration": 90,
+    "anesthesiaType": "Local",
+    "notes": "Procedure went smoothly with no complications.",
+    "status": "Completed",
+    "createdAt": "2025-08-04T15:27:38.620Z",
+    "updatedAt": "2025-08-04T15:27:38.620Z"
+  }]

@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 1,
+    "description": "Treatment plan for root canal therapy",
+    "estimatedDuration": 10,
+    "status": "Planned",
+    "createdAt": "2025-08-04T15:53:02.779Z",
+    "updatedAt": "2025-08-04T15:53:02.779Z"
+  },
+  {
+    "id": 2,
+    "patientId": 2,
+    "doctorId": 2,
+    "description": "Teeth whitening treatment plan",
+    "estimatedDuration": 5,
+    "status": "In Progress",
+    "createdAt": "2025-08-04T15:53:02.779Z",
+    "updatedAt": "2025-08-04T15:53:02.779Z"
+  },
+  {
+    "id": 3,
+    "patientId": 3,
+    "doctorId": 3,
+    "description": "Dental implant surgery plan",
+    "estimatedDuration": 30,
+    "status": "Completed",
+    "createdAt": "2025-08-04T15:53:02.779Z",
+    "updatedAt": "2025-08-04T15:53:02.779Z"
+  }]

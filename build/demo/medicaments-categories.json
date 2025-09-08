@@ -1,0 +1,95 @@
+[
+  {
+    "id": 1,
+    "name": "Antibiotics",
+    "description": "Used to treat bacterial infections.",
+    "medicaments": [
+      {
+        "medicamentId": "11111111-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Amoxicillin"
+      },
+      {
+        "medicamentId": "11111111-aaaa-bbbb-cccc-222222222222",
+        "medicamentName": "Clindamycin"
+      }
+    ],
+    "createdAt": "2025-07-08T17:49:06.406Z",
+    "updatedAt": "2025-07-08T17:49:06.406Z"
+  },
+  {
+    "id": 2,
+    "name": "Painkillers",
+    "description": "Used to relieve pain.",
+    "medicaments": [
+      {
+        "medicamentId": "22222222-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Ibuprofen"
+      },
+      {
+        "medicamentId": "22222222-aaaa-bbbb-cccc-222222222222",
+        "medicamentName": "Paracetamol"
+      }
+    ],
+    "createdAt": "2025-07-08T17:49:06.406Z",
+    "updatedAt": "2025-07-08T17:49:06.406Z"
+  },
+  {
+    "id": 3,
+    "name": "Mouthwash",
+    "description": "Used for oral hygiene and to reduce oral bacteria.",
+    "medicaments": [
+      {
+        "medicamentId": "33333333-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Chlorhexidine"
+      }
+    ],
+    "createdAt": "2025-07-08T17:49:06.406Z",
+    "updatedAt": "2025-07-08T17:49:06.406Z"
+  },
+  {
+    "id": 4,
+    "name": "Antibiotics",
+    "description": "Used to treat bacterial infections.",
+    "medicaments": [
+      {
+        "medicamentId": "11111111-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Amoxicillin"
+      },
+      {
+        "medicamentId": "11111111-aaaa-bbbb-cccc-222222222222",
+        "medicamentName": "Clindamycin"
+      }
+    ],
+    "createdAt": "2025-07-08T17:52:56.752Z",
+    "updatedAt": "2025-07-08T17:52:56.752Z"
+  },
+  {
+    "id": 5,
+    "name": "Painkillers",
+    "description": "Used to relieve pain.",
+    "medicaments": [
+      {
+        "medicamentId": "22222222-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Ibuprofen"
+      },
+      {
+        "medicamentId": "22222222-aaaa-bbbb-cccc-222222222222",
+        "medicamentName": "Paracetamol"
+      }
+    ],
+    "createdAt": "2025-07-08T17:52:56.752Z",
+    "updatedAt": "2025-07-08T17:52:56.752Z"
+  },
+  {
+    "id": 6,
+    "name": "Mouthwash",
+    "description": "Used for oral hygiene and to reduce oral bacteria.",
+    "medicaments": [
+      {
+        "medicamentId": "33333333-aaaa-bbbb-cccc-111111111111",
+        "medicamentName": "Chlorhexidine"
+      }
+    ],
+    "createdAt": "2025-07-08T17:52:56.752Z",
+    "updatedAt": "2025-07-08T17:52:56.752Z"
+  }]

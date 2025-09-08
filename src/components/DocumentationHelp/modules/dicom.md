@@ -1,0 +1,9 @@
+The Dicom Viewer module in Dentic provides a streamlined interface for viewing and managing dental imaging files associated with patients. Upon accessing the module, users are presented with a form that allows them to select a patient from a dropdown list. Each patient is clearly identified by their full name and medical record number (MRN), making selection straightforward and accurate.
+
+Once a patient is selected, the module automatically retrieves all available DICOM files for that patient from the backend. These files are displayed as a list of checkboxes, each labeled with the file name. Users can select one or multiple DICOM files they wish to view. If no files are found for the selected patient, a clear message is shown to inform the user.
+
+To view the selected images, users simply click the "Send to Viewer" button. The chosen files are then displayed in the integrated DentalPapayaViewer component, allowing for detailed examination of the dental images. The viewer supports multiple images, enabling users to compare and analyze several files at once.
+
+Additionally, the module includes a feature for uploading new DICOM files. By clicking the add icon, users open a modal dialog where they can select a patient and choose one or more DICOM files from their computer. After uploading, the files are immediately associated with the selected patient and become available for viewing.
+
+Throughout the module, all labels, buttons, and messages are translated according to the user's language preference, ensuring accessibility for a diverse user base. The interface is designed for clarity and efficiency, making it easy for dental professionals to manage and review patient imaging data within a single, user-friendly workflow.

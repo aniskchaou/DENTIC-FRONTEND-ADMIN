@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
 import { Button, Typography, TextField, Paper, Stack, Alert } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const AboutUsPage = () => {
+  const { t } = useTranslation();
   const [description, setDescription] = useState('');
   const [highlights, setHighlights] = useState([]);
   const [textarea, setTextarea] = useState('');
@@ -80,13 +82,13 @@ const AboutUsPage = () => {
   return (
     <Paper sx={{ maxWidth: 700, mx: 'auto', mt: 6, p: 4 }}>
       <Typography variant="h4" gutterBottom>
-        <i className="menu-icon fa fa-info-circle"></i> About Us
+        <i className="menu-icon fa fa-info-circle"></i> {t('about.title')}
       </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{t('about.load_error')}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{t('about.update_success')}</Alert>}
       <Stack spacing={2}>
         <TextField
-          label="Description"
+          label={t('about.description')}
           multiline
           minRows={3}
           value={description}
@@ -95,14 +97,14 @@ const AboutUsPage = () => {
           disabled={!editMode || loading}
         />
         <TextField
-          label="Highlights"
+          label={t('about.highlights')}
           multiline
           minRows={5}
           value={textarea}
           onChange={handleChangeHighlights}
           fullWidth
           disabled={!editMode || loading}
-          helperText="One highlight per line"
+          helperText={t('about.highlights_helper')}
         />
         {!editMode ? (
           <Button
@@ -112,7 +114,7 @@ const AboutUsPage = () => {
             disabled={loading}
             sx={{ width: 120 }}
           >
-            Edit
+            {t('about.edit')}
           </Button>
         ) : (
           <Stack direction="row" spacing={2}>
@@ -122,7 +124,7 @@ const AboutUsPage = () => {
               onClick={handleSave}
               disabled={loading}
             >
-              Save
+              {t('about.save')}
             </Button>
             <Button
               variant="outlined"
@@ -130,7 +132,7 @@ const AboutUsPage = () => {
               onClick={handleCancel}
               disabled={loading}
             >
-              Cancel
+              {t('about.cancel')}
             </Button>
           </Stack>
         )}
@@ -138,7 +140,7 @@ const AboutUsPage = () => {
       {!editMode && (
         <div style={{ marginTop: 24 }}>
           <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Highlights:
+            {t('about.highlights')}:
           </Typography>
           <ul className="list-group list-group-flush">
             {highlights.map((h, idx) => (

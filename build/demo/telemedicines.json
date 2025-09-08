@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 2,
+    "meetingLink": "https://meet.example.com/session/123456",
+    "sessionDuration": 30,
+    "status": "Scheduled",
+    "createdAt": "2025-08-08T14:44:50.078Z",
+    "updatedAt": "2025-08-08T14:44:50.078Z"
+  },
+  {
+    "id": 2,
+    "patientId": 1,
+    "doctorId": 2,
+    "meetingLink": "https://meet.example.com/session/123456",
+    "sessionDuration": 30,
+    "status": "Scheduled",
+    "createdAt": "2025-08-08T14:45:04.071Z",
+    "updatedAt": "2025-08-08T14:45:04.071Z"
+  },
+  {
+    "id": 3,
+    "patientId": 3,
+    "doctorId": 5,
+    "meetingLink": "https://meet.google.com/sps-fytf-yqy",
+    "sessionDuration": 30,
+    "status": "Scheduled",
+    "createdAt": "2025-08-13T14:47:00.000Z",
+    "updatedAt": "2025-08-08T14:47:46.566Z"
+  },
+  {
+    "id": 4,
+    "patientId": 1,
+    "doctorId": 2,
+    "meetingLink": "https://meet.example.com/session/123456",
+    "sessionDuration": 30,
+    "status": "Scheduled",
+    "createdAt": "2025-08-08T15:53:56.915Z",
+    "updatedAt": "2025-08-08T15:53:56.915Z"
+  }]

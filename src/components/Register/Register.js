@@ -16,7 +16,18 @@ import BASE_URL from '../../main/urls/urls';
 const Register = () => {
   const history = useHistory();
   const { register, handleSubmit, errors } = useForm();
-  const [user, setUser] = useState({ username: '', password: '' });
+  const [user, setUser] = useState({
+    username: '',
+    password: '',
+    fullName: '',
+    email: '',
+    role: '',
+    phone: '',
+    profilePicture: '',
+    dateOfBirth: '',
+    gender: '',
+    status: 'active'
+  });
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = event => {
@@ -27,10 +38,21 @@ const Register = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await fetch(BASE_URL+'/users', {
+      const response = await fetch(BASE_URL + '/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user.username, password: user.password }),
+        body: JSON.stringify({
+          username: user.username,
+          password: user.password,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role.toLocaleLowerCase(),
+          phone: user.phone,
+          profilePicture: 'http://example.com/profile.jpg',
+          birthday: user.dateOfBirth,
+          gender: user.gender,
+          status: user.status
+        }),
       });
       if (response.ok) {
         alert('Registration successful! You can now log in.');
@@ -72,32 +94,36 @@ const Register = () => {
           </Typography>
         </Stack>
         <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 24 }}>
-          <TextField
-            label="Username"
-            name="username"
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            value={user.username}
-            onChange={handleInputChange}
-            inputRef={register({ required: true })}
-            error={!!errors?.username}
-            helperText={errors?.username && "Username is required"}
-            autoFocus
-          />
-          <TextField
-            label="Password"
-            name="password"
-            type="password"
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            value={user.password}
-            onChange={handleInputChange}
-            inputRef={register({ required: true })}
-            error={!!errors?.password}
-            helperText={errors?.password && "Password is required"}
-          />
+          <TextField label="Username" name="username" fullWidth margin="normal" variant="outlined" value={user.username} onChange={handleInputChange} inputRef={register({ required: true })} error={!!errors?.username} helperText={errors?.username && "Username is required"} autoFocus />
+          <TextField label="Password" name="password" type="password" fullWidth margin="normal" variant="outlined" value={user.password} onChange={handleInputChange} inputRef={register({ required: true })} error={!!errors?.password} helperText={errors?.password && "Password is required"} />
+          <TextField label="Full Name" name="fullName" fullWidth margin="normal" variant="outlined" value={user.fullName} onChange={handleInputChange} />
+          <TextField label="Email" name="email" fullWidth margin="normal" variant="outlined" value={user.email} onChange={handleInputChange} />
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>Role</Typography>
+            <select name="role" value={user.role} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}>
+              <option value="">Select role</option>
+              <option value="doctor">Doctor</option>
+              <option value="accountant">Accountant</option>
+              <option value="staff">Staff</option>
+              <option value="technical">Technical</option>
+            </select>
+          </Box>
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>Gender</Typography>
+            <select name="gender" value={user.gender} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}>
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </Box>
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>Birth Date</Typography>
+            <input type="date" name="dateOfBirth" value={user.dateOfBirth} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }} />
+          </Box>
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>Phone</Typography>
+            <input type="tel" name="phone" value={user.phone} onChange={handleInputChange} placeholder="+1 234 567 890" style={{ width: '100%', padding: '12px', borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }} />
+          </Box>
           <Button
             type="submit"
             variant="contained"

@@ -1,3 +1,6 @@
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 import PropTypes from 'prop-types';
 import './Expense.css';
 import expenseHTTPService from '../../main/services/expenseHTTPService';
@@ -16,11 +19,13 @@ import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement } from 'chart.js';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
 
 
 const Expense = () => {
+  const { t } = useTranslation();
 
   const [expenses, setExpenses] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
@@ -35,6 +40,33 @@ const Expense = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
 
+  const handleExportPDF = async () => {
+    const element = document.getElementById('expense-details-pdf');
+    if (!element) return;
+    // Hide export button before rendering
+    const exportBtn = document.getElementById('expense-export-btn');
+    if (exportBtn) exportBtn.style.display = 'none';
+    // Use higher scale for better quality
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    if (exportBtn) exportBtn.style.display = '';
+    const imgData = canvas.toDataURL('image/png', 1.0);
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    // Center image and fit to page
+    const imgProps = pdf.getImageProperties(imgData);
+    let imgWidth = pdfWidth;
+    let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+    if (imgHeight > pdfHeight) {
+      imgHeight = pdfHeight;
+      imgWidth = (imgProps.width * imgHeight) / imgProps.height;
+    }
+    const x = (pdfWidth - imgWidth) / 2;
+    const y = 20;
+    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+    pdf.save('expense-details.pdf');
+  };
+
   useEffect(() => {
     LoadJSFiles()
     getAllExpenses()
@@ -43,14 +75,28 @@ const Expense = () => {
 
   const getAllExpenses = () => {
     setLoading(true);
-    expenseHTTPService.getAllExpense()
-      .then(response => {
-        setExpenses(response.data);
-        setLoading(false);
-      })
-      .catch(e => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning')
-      });
+
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/expenses.json')
+        .then(res => res.json())
+        .then(data => {
+          setExpenses(data);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    } else {
+      expenseHTTPService.getAllExpense()
+        .then(response => {
+          setExpenses(response.data);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning')
+        });
+    }
   };
 
 
@@ -88,6 +134,9 @@ const Expense = () => {
     closeButtonAdd.current.click()
   }
 
+
+
+
   // Actions menu for each row
   const renderActionsMenu = (params) => (
     <div>
@@ -99,9 +148,8 @@ const Expense = () => {
           setViewExpense(params.row);
           setViewDialogOpen(true);
           setAnchorEl(null);
-        }}>View</MenuItem>
-        <MenuItem onClick={e => updateExpenseAction(e, params.row)}>Edit</MenuItem>
-        <MenuItem onClick={e => removeExpenseAction(e, [params.row.id])}>Delete</MenuItem>
+        }}>{t('expense.view')}</MenuItem>
+        <MenuItem onClick={e => removeExpenseAction(e, [params.row.id])}>{t('expense.delete')}</MenuItem>
       </Menu>
     </div>
   );
@@ -110,36 +158,40 @@ const Expense = () => {
   const columns = [
     {
       field: 'expenseCategory',
-      headerName: 'Category',
+      headerName: t('expense.category'),
       width: 150,
+      // Removed Chip, now plain text
       renderCell: (params) => (
-        <Chip label={params.value} color="primary" size="small" sx={{ fontWeight: 600 }} />
+        <span style={{ fontWeight: 600 }}>{params.value}</span>
       )
     },
-    { field: 'description', headerName: 'Description', width: 220 },
+    { field: 'description', headerName: t('expense.description'), width: 220 },
     {
       field: 'amount',
-      headerName: 'Amount',
+      headerName: t('expense.amount'),
       width: 120,
+      // Removed Chip, now plain text
       renderCell: (params) => (
-        <Chip label={params.value} color="success" size="small" sx={{ fontWeight: 600 }} />
+        <span style={{ fontWeight: 600, color: '#43a047' }}>{params.value}</span>
       )
     },
     {
       field: 'paymentMethod',
-      headerName: 'Payment Method',
+      headerName: t('expense.payment_method'),
       width: 150,
+      // Removed Chip, now plain text
       renderCell: (params) => (
-        <Chip label={params.value} color="info" size="small" sx={{ fontWeight: 600 }} />
+        <span style={{ fontWeight: 600, color: '#1976d2' }}>{params.value}</span>
       )
     },
     {
       field: 'paymentStatus',
-      headerName: 'Status',
+      headerName: t('expense.status'),
       width: 120,
+      // Keep Chip for status only
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`expense.status_${params.value.toLowerCase()}`)}
           color={
             params.value === 'Paid'
               ? 'success'
@@ -154,7 +206,7 @@ const Expense = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('expense.actions'),
       width: 120,
       renderCell: renderActionsMenu
     }
@@ -242,21 +294,21 @@ const Expense = () => {
     <div className="card">
       <div className="card-body">
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i>   Expenses
+          <i className="menu-icon fa fa-bars"></i> {t('expense.title')}
         </Typography>
         <br />
         {/* Widgets row */}
         <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2 }}>
           <Box sx={{ flex: 1, bgcolor: '#e3f2fd', p: 2, borderRadius: 2, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="primary">Total Expenses</Typography>
+            <Typography variant="subtitle2" color="primary">{t('expense.total_expenses')}</Typography>
             <Typography variant="h6">{totalExpenses}</Typography>
           </Box>
           <Box sx={{ flex: 1, bgcolor: '#e8f5e9', p: 2, borderRadius: 2, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="success.main">Paid</Typography>
+            <Typography variant="subtitle2" color="success.main">{t('expense.paid')}</Typography>
             <Typography variant="h6">{paidExpenses}</Typography>
           </Box>
           <Box sx={{ flex: 1, bgcolor: '#fffde7', p: 2, borderRadius: 2, textAlign: 'center' }}>
-            <Typography variant="subtitle2" color="warning.main">Pending</Typography>
+            <Typography variant="subtitle2" color="warning.main">{t('expense.pending')}</Typography>
             <Typography variant="h6">{pendingExpenses}</Typography>
           </Box>
         </Box>
@@ -264,15 +316,15 @@ const Expense = () => {
         {/* Charts row */}
         <Box sx={{ display: 'flex', gap: 4, mb: 4, mt: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
           <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-            <Typography variant="subtitle1" align="center">Expenses by Category</Typography>
+            <Typography variant="subtitle1" align="center">{t('expense.by_category')}</Typography>
             <Doughnut data={doughnutData} />
           </Box>
           <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-            <Typography variant="subtitle1" align="center">Expenses per Category</Typography>
+            <Typography variant="subtitle1" align="center">{t('expense.per_category')}</Typography>
             <Bar data={barData} />
           </Box>
           <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-            <Typography variant="subtitle1" align="center">Status Trends by Category</Typography>
+            <Typography variant="subtitle1" align="center">{t('expense.status_trends_by_category')}</Typography>
             <Line data={lineData} />
           </Box>
         </Box>
@@ -307,16 +359,7 @@ const Expense = () => {
           onClick={() => setAddDialogOpen(true)}
           startIcon={<i className="fas fa-plus"></i>}
         >
-          Create Expense
-        </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          sx={{ mb: 2, mr: 1, fontWeight: 600 }}
-          onClick={e => updateExpenseAction(e, updatedItemId)}
-          startIcon={<i className="fas fa-edit"></i>}
-        >
-          Edit
+          {t('expense.create')}
         </Button>
         <Button
           variant="outlined"
@@ -325,7 +368,7 @@ const Expense = () => {
           onClick={e => removeExpenseAction(e, updatedItemIds)}
           startIcon={<i className="fas fa-trash-alt"></i>}
         >
-          Remove
+          {t('expense.remove')}
         </Button>
         <Button
           variant="outlined"
@@ -334,7 +377,7 @@ const Expense = () => {
           onClick={() => getAllExpenses()}
           startIcon={<i className="fas fa-refresh"></i>}
         >
-          Reload
+          {t('expense.reload')}
         </Button>
 
         <br /><br />
@@ -357,7 +400,7 @@ const Expense = () => {
 
         {/* Material-UI Add Expense Dialog */}
         <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Create Expense</DialogTitle>
+          <DialogTitle>{t('expense.create')}</DialogTitle>
           <DialogContent>
             <AddExpense
               closeModal={() => setAddDialogOpen(false)}
@@ -366,51 +409,11 @@ const Expense = () => {
           </DialogContent>
         </Dialog>
 
-        <div class="modal fade" id="editPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Edit</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <EditExpense expense={updatedItem} closeModal={closeModalEdit} />
-              </div>
-              <div class="modal-footer">
-                <button type="button" onClick={resfreshComponent} ref={closeButtonEdit} class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal fade" id="viewPayment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Voir</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
-
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Add this MUI Dialog for viewing expense details */}
+        {/* Material-UI Edit Expense Dialog */}
         <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ bgcolor: '#e3f2fd', fontWeight: 700, fontSize: 22 }}>
             <i className="fas fa-file-invoice-dollar" style={{ color: '#1976d2', marginRight: 10 }} />
-            Expense Details
+            {t('expense.details')}
           </DialogTitle>
           <DialogContent dividers sx={{ bgcolor: '#fafdff' }}>
             {viewExpense ? (
@@ -420,7 +423,7 @@ const Expense = () => {
                     {viewExpense.expenseCategory}
                   </Typography>
                   <Chip
-                    label={viewExpense.paymentStatus}
+                    label={t(`expense.status_${viewExpense.paymentStatus.toLowerCase()}`)}
                     color={
                       viewExpense.paymentStatus === 'Paid'
                         ? 'success'
@@ -432,50 +435,38 @@ const Expense = () => {
                   />
                 </Box>
                 <Divider sx={{ mb: 2 }} />
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2 }} id="expense-details-pdf">
+            <Button id="expense-export-btn" onClick={handleExportPDF} color="secondary" variant="contained" sx={{ minWidth: 100, mr: 2 }}>
+              <i className="fas fa-file-pdf" style={{ marginRight: 8 }} />
+              {t('expense.export_pdf')}
+            </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    <b>Description:</b> {viewExpense.description}
+                    <b>{t('expense.description')}:</b> {viewExpense.description}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Amount:</b> <span style={{ color: '#1976d2', fontWeight: 600 }}>{viewExpense.amount}</span>
+                    <b>{t('expense.amount')}:</b> <span style={{ color: '#1976d2', fontWeight: 600 }}>{viewExpense.amount}</span>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Payment Method:</b> {viewExpense.paymentMethod}
+                    <b>{t('expense.payment_method')}:</b> {viewExpense.paymentMethod}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Vendor:</b> {viewExpense.vendorName}
+                    <b>{t('expense.vendor')}:</b> {viewExpense.vendorName}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Invoice ID:</b> {viewExpense.invoiceId}
+                    <b>{t('expense.transaction_date')}:</b> {viewExpense.transactionDate ? new Date(viewExpense.transactionDate).toLocaleString() : '-'}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Clinic ID:</b> {viewExpense.clinicId}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Transaction Date:</b> {viewExpense.transactionDate ? new Date(viewExpense.transactionDate).toLocaleString() : '-'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Notes:</b> {viewExpense.notes || '-'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <b>Receipt:</b>{' '}
-                    {viewExpense.receiptAttachments && viewExpense.receiptAttachments.length > 0 ? (
-                      <a href={viewExpense.receiptAttachments[0]} target="_blank" rel="noopener noreferrer">
-                        Download
-                      </a>
-                    ) : (
-                      '-'
-                    )}
+                    <b>{t('expense.notes')}:</b> {viewExpense.notes || '-'}
                   </Typography>
                 </Box>
               </Box>
             ) : (
-              <Typography color="text.secondary" sx={{ p: 2 }}>No expense selected.</Typography>
+              <Typography color="text.secondary" sx={{ p: 2 }}>{t('expense.no_expense_selected')}</Typography>
             )}
           </DialogContent>
           <DialogActions sx={{ bgcolor: '#fafdff' }}>
             <Button onClick={() => setViewDialogOpen(false)} color="primary" variant="outlined" sx={{ minWidth: 100 }}>
-              Close
+              {t('expense.close')}
             </Button>
           </DialogActions>
         </Dialog>

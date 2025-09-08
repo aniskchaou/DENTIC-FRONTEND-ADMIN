@@ -28,8 +28,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import SubjectIcon from '@mui/icons-material/Subject';
 import MessageIcon from '@mui/icons-material/Message';
 import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 const Message = () => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -50,20 +52,21 @@ const Message = () => {
         setLoading(false);
       })
       .catch(e => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+        showMessage(t('message.error'), CurrentUser.ERR_MSG, 'warning');
         setLoading(false);
       });
   };
 
   const handleDelete = () => {
+    console.log(selectedMessage.id)
     if (selectedMessage) {
-      messageHTTPService.removeMessage(selectedMessage)
+      messageHTTPService.removeMessage(selectedMessage.id)
         .then(() => {
-          showMessage('Confirmation', CurrentUser.REMOVE_MSG, 'success');
+          showMessage(t('message.confirmation'), CurrentUser.REMOVE_MSG, 'success');
           getAllMessages();
         })
         .catch(() => {
-          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          showMessage(t('message.error'), CurrentUser.ERR_MSG, 'warning');
         });
     }
     setOpenConfirmDialog(false);
@@ -80,17 +83,16 @@ const Message = () => {
   );
 
   const columns = [
-    { field: 'id', headerName: '#', width: 50 },
-    { field: 'name', headerName: 'From', width: 200 },
-    { field: 'subject', headerName: 'Subject', width: 200 },
-    { field: 'message', headerName: 'Message', width: 200 },
+    { field: 'name', headerName: t('message.from'), width: 200 },
+    { field: 'subject', headerName: t('message.subject'), width: 200 },
+    { field: 'message', headerName: t('message.message'), width: 200 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('message.actions'),
       width: 120,
       renderCell: (params) => (
         <Box>
-          <Tooltip title="View">
+          <Tooltip title={t('message.view')}>
             <IconButton
               color="primary"
               onClick={() => {
@@ -101,7 +103,7 @@ const Message = () => {
               <VisibilityIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete">
+          <Tooltip title={t('message.delete')}>
             <IconButton
               color="secondary"
               onClick={() => {
@@ -121,11 +123,21 @@ const Message = () => {
     <div className="card">
       <div className="card-body">
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i> Messages
+          <i className="menu-icon fa fa-bars"></i> {t('message.title')}
         </Typography>
 
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            onClick={getAllMessages}
+          >
+            Refresh
+          </Button>
+        </Stack>
         <TextField
-          label="Search"
+          label={t('message.search')}
           variant="outlined"
           fullWidth
           margin="normal"
@@ -166,7 +178,7 @@ const Message = () => {
         >
           <DialogTitle sx={{ bgcolor: '#1976d2', color: '#fff', pb: 2, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
             <MessageIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            View Message
+            {t('message.view_message')}
           </DialogTitle>
           <DialogContent dividers sx={{ p: 3 }}>
             {selectedMessage && (
@@ -198,7 +210,7 @@ const Message = () => {
           </DialogContent>
           <DialogActions sx={{ bgcolor: '#f5f5f5', borderBottomLeftRadius: 12, borderBottomRightRadius: 12 }}>
             <Button onClick={() => setOpenViewDialog(false)} color="primary">
-              Close
+              {t('message.close')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -208,18 +220,18 @@ const Message = () => {
           open={openConfirmDialog}
           onClose={() => setOpenConfirmDialog(false)}
         >
-          <DialogTitle>Confirmation</DialogTitle>
+          <DialogTitle>{t('message.confirmation')}</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Are you sure you want to delete this message?
+              {t('message.confirm_delete')}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenConfirmDialog(false)} color="primary">
-              Cancel
+              {t('message.cancel')}
             </Button>
             <Button onClick={handleDelete} color="secondary">
-              Delete
+              {t('message.delete')}
             </Button>
           </DialogActions>
         </Dialog>

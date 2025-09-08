@@ -1,8 +1,8 @@
-$(function () {
-    const choices = new Choices("select", {
-        removeItems: true,
-        removeItemButton: true
-    });
+// $(function () {
+    // const choices = new Choices("select", {
+    //     removeItems: true,
+    //     removeItemButton: true
+    // });
 
     /*
         var table = $('table').DataTable({
@@ -69,4 +69,4 @@ $(function () {
                $(this).find('span').empty().append($(this).attr('tooltip'));
            }); 
   */
-});
+// });

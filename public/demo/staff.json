@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "fullName": "erzerzer",
+    "role": "Dentist",
+    "email": "zerzer@gmail.com",
+    "phone": "12312312312",
+    "shiftSchedule": {
+      "Fri": {
+        "end": "",
+        "start": ""
+      },
+      "Mon": {
+        "end": "18:31",
+        "start": "09:26"
+      },
+      "Sat": {
+        "end": "",
+        "start": ""
+      },
+      "Sun": {
+        "end": "",
+        "start": ""
+      },
+      "Thu": {
+        "end": "",
+        "start": ""
+      },
+      "Tue": {
+        "end": "",
+        "start": ""
+      },
+      "Wed": {
+        "end": "",
+        "start": ""
+      }
+    },
+    "permissions": [
+      "View Patients",
+      "Edit Patients",
+      "View Appointments",
+      "Manage Inventory"
+    ],
+    "status": "Active",
+    "createdAt": "2025-08-04T16:26:31.109Z",
+    "updatedAt": "2025-08-04T16:31:38.386Z"
+  }
+]

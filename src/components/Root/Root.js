@@ -9,6 +9,7 @@ import HomePage from '../Home/HomePage';
 import Register from '../Register/Register';
 import SendMessage from '../Home/SendMessage';
 import BookAppointment from '../Appointments/BookAppointment';
+import { BrowserRouter } from 'react-router-dom/cjs/react-router-dom';
 
 const Root = () => {
   const [connected, setConnected] = useState(false);
@@ -19,7 +20,7 @@ const Root = () => {
 
   return (
     <div>
-      <Router>
+       <BrowserRouter>
         <Switch>
           <Route exact path="/">
             <HomePage />
@@ -33,7 +34,7 @@ const Root = () => {
            <Route path="/book-appointment">
             <BookAppointment />
            </Route>
-          <Route>
+          <Route path="*">
             {connected === true ? (
               <div>
                 <Navigation connected={connected} />
@@ -55,7 +56,7 @@ const Root = () => {
             )}
           </Route>
         </Switch>
-      </Router>
+      </BrowserRouter>
     </div>
   );
 };

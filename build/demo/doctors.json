@@ -1,0 +1,1313 @@
+[
+  {
+    "id": 1,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:14:41.889Z",
+    "updatedAt": "2025-08-04T16:14:41.889Z"
+  },
+  {
+    "id": 2,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:14:41.889Z",
+    "updatedAt": "2025-08-04T16:14:41.889Z"
+  },
+  {
+    "id": 3,
+    "fullName": "sdfd",
+    "licenseNumber": "sdfsdf",
+    "specialization": "Endodontist",
+    "experienceYears": 5,
+    "consultationFee": "6.00",
+    "availableDays": [
+      "Fri"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "20:11",
+        "startTime": "18:11"
+      }
+    ],
+    "rating": 2.3,
+    "reviews": null,
+    "createdAt": "2025-08-04T16:15:17.797Z",
+    "updatedAt": "2025-08-04T16:15:17.797Z"
+  },
+  {
+    "id": 4,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:21:00.965Z",
+    "updatedAt": "2025-08-04T16:21:00.965Z"
+  },
+  {
+    "id": 5,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:21:00.965Z",
+    "updatedAt": "2025-08-04T16:21:00.965Z"
+  },
+  {
+    "id": 6,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:22:46.368Z",
+    "updatedAt": "2025-08-04T16:22:46.368Z"
+  },
+  {
+    "id": 7,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:22:46.368Z",
+    "updatedAt": "2025-08-04T16:22:46.368Z"
+  },
+  {
+    "id": 8,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:52:27.727Z",
+    "updatedAt": "2025-08-04T16:52:27.727Z"
+  },
+  {
+    "id": 9,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:52:27.728Z",
+    "updatedAt": "2025-08-04T16:52:27.728Z"
+  },
+  {
+    "id": 10,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:53:32.281Z",
+    "updatedAt": "2025-08-04T16:53:32.281Z"
+  },
+  {
+    "id": 11,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:53:32.281Z",
+    "updatedAt": "2025-08-04T16:53:32.281Z"
+  },
+  {
+    "id": 12,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:53:57.985Z",
+    "updatedAt": "2025-08-04T16:53:57.985Z"
+  },
+  {
+    "id": 13,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T16:53:57.985Z",
+    "updatedAt": "2025-08-04T16:53:57.985Z"
+  },
+  {
+    "id": 14,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:29:01.387Z",
+    "updatedAt": "2025-08-04T18:29:01.387Z"
+  },
+  {
+    "id": 15,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:29:01.387Z",
+    "updatedAt": "2025-08-04T18:29:01.387Z"
+  },
+  {
+    "id": 16,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:38:42.061Z",
+    "updatedAt": "2025-08-04T18:38:42.061Z"
+  },
+  {
+    "id": 17,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:38:42.061Z",
+    "updatedAt": "2025-08-04T18:38:42.061Z"
+  },
+  {
+    "id": 18,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:40:21.909Z",
+    "updatedAt": "2025-08-04T18:40:21.909Z"
+  },
+  {
+    "id": 19,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:40:21.909Z",
+    "updatedAt": "2025-08-04T18:40:21.909Z"
+  },
+  {
+    "id": 20,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:43:01.250Z",
+    "updatedAt": "2025-08-04T18:43:01.250Z"
+  },
+  {
+    "id": 21,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:43:01.250Z",
+    "updatedAt": "2025-08-04T18:43:01.250Z"
+  },
+  {
+    "id": 22,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:50:03.912Z",
+    "updatedAt": "2025-08-04T18:50:03.912Z"
+  },
+  {
+    "id": 23,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:50:03.912Z",
+    "updatedAt": "2025-08-04T18:50:03.912Z"
+  },
+  {
+    "id": 24,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:51:22.005Z",
+    "updatedAt": "2025-08-04T18:51:22.005Z"
+  },
+  {
+    "id": 25,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T18:51:22.006Z",
+    "updatedAt": "2025-08-04T18:51:22.006Z"
+  },
+  {
+    "id": 26,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:07:15.543Z",
+    "updatedAt": "2025-08-04T19:07:15.543Z"
+  },
+  {
+    "id": 27,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:07:15.543Z",
+    "updatedAt": "2025-08-04T19:07:15.543Z"
+  },
+  {
+    "id": 28,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:20:27.669Z",
+    "updatedAt": "2025-08-04T19:20:27.669Z"
+  },
+  {
+    "id": 29,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:20:27.669Z",
+    "updatedAt": "2025-08-04T19:20:27.669Z"
+  },
+  {
+    "id": 30,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:22:40.877Z",
+    "updatedAt": "2025-08-04T19:22:40.877Z"
+  },
+  {
+    "id": 31,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-04T19:22:40.877Z",
+    "updatedAt": "2025-08-04T19:22:40.877Z"
+  },
+  {
+    "id": 32,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T07:57:13.668Z",
+    "updatedAt": "2025-08-05T07:57:13.668Z"
+  },
+  {
+    "id": 33,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T07:57:13.668Z",
+    "updatedAt": "2025-08-05T07:57:13.668Z"
+  },
+  {
+    "id": 34,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:12:06.113Z",
+    "updatedAt": "2025-08-05T08:12:06.113Z"
+  },
+  {
+    "id": 35,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:12:06.113Z",
+    "updatedAt": "2025-08-05T08:12:06.113Z"
+  },
+  {
+    "id": 36,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:20:18.615Z",
+    "updatedAt": "2025-08-05T08:20:18.615Z"
+  },
+  {
+    "id": 37,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:20:18.615Z",
+    "updatedAt": "2025-08-05T08:20:18.615Z"
+  },
+  {
+    "id": 38,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:22:09.610Z",
+    "updatedAt": "2025-08-05T08:22:09.610Z"
+  },
+  {
+    "id": 39,
+    "fullName": "Dr. Ahmed Patel",
+    "licenseNumber": "ORTHO-2025002",
+    "specialization": "Orthodontist",
+    "experienceYears": 12,
+    "consultationFee": "120.00",
+    "availableDays": [
+      "Monday",
+      "Wednesday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "13:00",
+        "startTime": "10:00"
+      }
+    ],
+    "rating": 4.9,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Great with kids and very thorough.",
+        "patientId": "44444444-dddd-eeee-ffff-444444444444",
+        "reviewDate": "2025-07-02T11:30:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:22:09.610Z",
+    "updatedAt": "2025-08-05T08:22:09.610Z"
+  },
+  {
+    "id": 40,
+    "fullName": "Dr. Sarah Lee",
+    "licenseNumber": "DENT-2025001",
+    "specialization": "General Dentist",
+    "experienceYears": 8,
+    "consultationFee": "75.00",
+    "availableDays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "availableTimeSlots": [
+      {
+        "endTime": "12:00",
+        "startTime": "09:00"
+      },
+      {
+        "endTime": "18:00",
+        "startTime": "14:00"
+      }
+    ],
+    "rating": 4.7,
+    "reviews": [
+      {
+        "rating": 5,
+        "comment": "Very professional and friendly.",
+        "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+        "reviewDate": "2025-07-01T10:00:00Z"
+      }
+    ],
+    "createdAt": "2025-08-05T08:48:34.197Z",
+    "updatedAt": "2025-08-05T08:48:34.197Z"
+  }
+]

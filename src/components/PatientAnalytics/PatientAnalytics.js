@@ -17,6 +17,8 @@ import { Bar, Pie, Doughnut, Line, PolarArea, Radar, Scatter, Bubble } from 'rea
 import { chartBarOption } from '../../main/config/chart.bar';
 import showMessage from '../../libraries/messages/messages';
 import BASE_URL from '../../main/urls/urls';
+import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 // Register RadialLinearScale for PolarArea and Radar charts
 ChartJS.register(
@@ -33,6 +35,7 @@ ChartJS.register(
 );
 
 const PatientAnalytics = () => {
+  const { t } = useTranslation();
   const [patients, setPatients] = useState([]);
   const [charts, setCharts] = useState({
     bar: { labels: [], datasets: [] },
@@ -47,15 +50,27 @@ const PatientAnalytics = () => {
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/patients`)
-      .then(res => res.json())
-      .then(data => {
-        setPatients(data);
-        prepareCharts(data);
-      })
-      .catch(e => {
-        showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
-      });
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/patients.json')
+        .then(res => res.json())
+        .then(data => {
+          setPatients(data);
+          prepareCharts(data);
+        })
+        .catch(e => {
+          showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
+        });
+    } else {
+      fetch(`${BASE_URL}/patients`)
+        .then(res => res.json())
+        .then(data => {
+          setPatients(data);
+          prepareCharts(data);
+        })
+        .catch(e => {
+          showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
+        });
+    }
   }, []);
 
   // Helper to get full name by id
@@ -218,39 +233,39 @@ const PatientAnalytics = () => {
           }}
         >
           <div>
-            <h5>Patients by Insurance (Bar)</h5>
+            <h5>{t('patient_analytics.by_insurance')}</h5>
             <Bar options={chartBarOption} data={charts.bar} />
           </div>
           <div>
-            <h5>Patients by Blood Type (Pie)</h5>
+            <h5>{t('patient_analytics.by_blood_type')}</h5>
             <Pie data={charts.pie} />
           </div>
           <div>
-            <h5>Patients by City (Doughnut)</h5>
+            <h5>{t('patient_analytics.by_city')}</h5>
             <Doughnut data={charts.doughnut} />
           </div>
           <div>
-            <h5>Registrations per Month (Line)</h5>
+            <h5>{t('patient_analytics.registrations_per_month')}</h5>
             <Line data={charts.line} />
           </div>
           <div>
-            <h5>Payment Status (PolarArea)</h5>
+            <h5>{t('patient_analytics.payment_status')}</h5>
             <PolarArea data={charts.polar} />
           </div>
           <div>
-            <h5>Allergies (Radar)</h5>
+            <h5>{t('patient_analytics.allergies')}</h5>
             <Radar data={charts.radar} />
           </div>
           <div>
-            <h5>Age vs Amount (Scatter)</h5>
+            <h5>{t('patient_analytics.age_vs_amount')}</h5>
             <Scatter data={charts.scatter} />
           </div>
           <div>
-            <h5>Amount by Blood Type (Bubble)</h5>
+            <h5>{t('patient_analytics.amount_by_blood_type')}</h5>
             <Bubble data={charts.bubble} />
           </div>
           <div>
-            <h5>Patients by Gender (Pie)</h5>
+            <h5>{t('patient_analytics.by_gender')}</h5>
             <Pie data={charts.genderPie} />
           </div>
         </div>

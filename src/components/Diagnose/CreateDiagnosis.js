@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Stack } from '@mui/material';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const severityOptions = ['Mild', 'Moderate', 'Severe'];
 
 const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     patientId: '',
     doctorId: '',
@@ -39,7 +41,6 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
     const now = new Date().toISOString();
     const data = {
       ...form,
-      id: Math.random().toString(36).substr(2, 9),
       createdAt: now,
       updatedAt: now
     };
@@ -54,12 +55,12 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Diagnosis</DialogTitle>
+      <DialogTitle>{t('diagnosis.title')}</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit} autoComplete="off">
           <TextField
             select
-            label="Patient"
+            label={t('diagnosis.patient')}
             name="patientId"
             value={form.patientId}
             onChange={handleChange}
@@ -75,7 +76,7 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
           </TextField>
           <TextField
             select
-            label="Doctor"
+            label={t('diagnosis.doctor')}
             name="doctorId"
             value={form.doctorId}
             onChange={handleChange}
@@ -90,7 +91,7 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
             ))}
           </TextField>
           <TextField
-            label="Diagnosis Date"
+            label={t('diagnosis.date')}
             name="diagnosisDate"
             type="datetime-local"
             value={form.diagnosisDate}
@@ -101,7 +102,7 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
             required
           />
           <TextField
-            label="Condition"
+            label={t('diagnosis.condition')}
             name="condition"
             value={form.condition}
             onChange={handleChange}
@@ -111,7 +112,7 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
           />
           <TextField
             select
-            label="Severity"
+            label={t('diagnosis.severity')}
             name="severity"
             value={form.severity}
             onChange={handleChange}
@@ -119,11 +120,11 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
             margin="normal"
           >
             {severityOptions.map(opt => (
-              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+              <MenuItem key={opt} value={opt}>{t(`diagnosis.severity_${opt.toLowerCase()}`)}</MenuItem>
             ))}
           </TextField>
           <TextField
-            label="Notes"
+            label={t('diagnosis.notes')}
             name="notes"
             value={form.notes}
             onChange={handleChange}
@@ -134,10 +135,10 @@ const CreateDiagnosis = ({ open, onClose, onSuccess }) => {
           />
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button type="submit" variant="contained" color="success" disabled={loading}>
-              {loading ? 'Saving...' : 'Create Diagnosis'}
+              {loading ? t('diagnosis.saving') : t('diagnosis.create')}
             </Button>
             <Button variant="outlined" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('diagnosis.cancel')}
             </Button>
           </Stack>
         </form>

@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ProfessionalOdontogram.css';
 import axios from 'axios';
 import { FaUserMd, FaUser, FaClinicMedical, FaCalendarAlt, FaIdBadge } from "react-icons/fa";
 import BASE_URL from '../../main/urls/urls';
+import InsightsIcon from '@mui/icons-material/Insights';
+import ScienceIcon from '@mui/icons-material/Science';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import Plot from 'react-plotly.js';
+import Jaw3DPlot from './Jaw3DPlot';
 
 const TOOTH_STATUSES = ['healthy', 'decayed', 'missing', 'filled'];
 const TOOTH_SURFACES = ['mesial', 'distal', 'occlusal', 'buccal', 'lingual'];
@@ -36,8 +43,77 @@ const statusColors = {
   missing: '#e0e0e0'
 };
 
+const teethData = [
+  { id: 1, x: 0, y: 0, z: 0, status: 'healthy' },
+  { id: 2, x: 1, y: 0.2, z: 0, status: 'decayed' },
+  { id: 3, x: 2, y: 0.4, z: 0, status: 'filled' },
+  // ...add all teeth with their positions and status
+];
+
+
+const statusColor = {
+  healthy: 'green',
+  decayed: 'red',
+  filled: 'yellow',
+  missing: 'gray'
+};
+
+const getJawTeeth = (teeth, start, end, yOffset) =>
+  Array.from({ length: end - start + 1 }, (_, i) => {
+    const t = teeth[start + i];
+    return {
+      id: t.id,
+      x: Math.cos(Math.PI * (i / (end - start))) * 10,
+      y: Math.sin(Math.PI * (i / (end - start))) * 3 + yOffset,
+      z: 0,
+      status: t.status
+    };
+  });
+
+// Realistic arch logic for 3D chart
+const getArchTeeth3D = (teethSlice, arch) =>
+  teethSlice.map((tooth, idx) => {
+    const archRadius = 10; // scale for Plotly
+    const archCenterY = arch === 'upper' ? 6 : -6;
+    const angle = arch === 'upper'
+      ? Math.PI * (1 - idx / (teethSlice.length - 1))
+      : -Math.PI * (idx / (teethSlice.length - 1));
+    return {
+      id: tooth.id,
+      x: archRadius * Math.cos(angle),
+      y: archRadius * Math.sin(angle) + archCenterY,
+      z: 0,
+      status: tooth.status
+    };
+  });
+
 const ProfessionalOdontogram = () => {
   const [teeth, setTeeth] = useState(getInitialTeeth());
+  // Use fixed arch radius for 3D chart
+  const archRadius = 20;
+  // Helper for 3D jaw layout
+  const getSemiCircleTeeth3D = (teethSlice, arch) => {
+    const verticalOffset = 2.5 * archRadius;
+    const archCenterY = arch === 'upper' ? verticalOffset : -verticalOffset;
+    return teethSlice.map((tooth, idx) => {
+      const angle = arch === 'upper'
+        ? Math.PI * (1 - idx / (teethSlice.length - 1))
+        : -Math.PI * (idx / (teethSlice.length - 1));
+      return {
+        id: tooth.id,
+        x: archRadius * Math.cos(angle),
+        y: archRadius * Math.sin(angle) + archCenterY,
+        z: 0,
+        status: tooth.status
+      };
+    });
+  };
+  const upperJawTeeth3D = getSemiCircleTeeth3D(teeth.slice(0, 16), 'upper');
+  const lowerJawTeeth3D = getSemiCircleTeeth3D(teeth.slice(16), 'lower');
+  const allTeeth3D = [...upperJawTeeth3D, ...lowerJawTeeth3D].filter(t => t.status !== 'missing');
+  const { t } = useTranslation();
+
+  
   const [selectedTooth, setSelectedTooth] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [procedures, setProcedures] = useState([]);
@@ -56,6 +132,18 @@ const ProfessionalOdontogram = () => {
   const [selectedMembership, setSelectedMembership] = useState('');
   const [sentFormData, setSentFormData] = useState(null);
   const [backendTeethHistory, setBackendTeethHistory] = useState([]); // <-- New state for backend teeth history
+
+  // Add state for Condition Prediction AI
+  const [conditionPredictionOpen, setConditionPredictionOpen] = useState(false);
+  const [conditionPredictionLoading, setConditionPredictionLoading] = useState(false);
+  const [conditionPredictionResult, setConditionPredictionResult] = useState(null);
+
+  // Treatment Simulation AI states
+  const [treatmentSimOpen, setTreatmentSimOpen] = useState(false);
+  const [treatmentSimLoading, setTreatmentSimLoading] = useState(false);
+  const [treatmentSimOdontogram, setTreatmentSimOdontogram] = useState('');
+  const [treatmentSimPlan, setTreatmentSimPlan] = useState('');
+  const [treatmentSimResult, setTreatmentSimResult] = useState(null);
 
   // Fetch select box data and lists
   useEffect(() => {
@@ -421,7 +509,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
         boxShadow: '0 4px 24px rgba(25, 118, 210, 0.07)'
       }}>
         <div style={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 12, fontSize: 20 }}>
-          All Teeth Treatment History for Patient
+          {t('odontogram.all_teeth_treatment_history')}
         </div>
         <table style={{
           width: '100%',
@@ -433,14 +521,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
         }}>
           <thead style={{ background: '#e3f2fd' }}>
             <tr>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Tooth Number</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Date</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Status</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Notes</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Procedure</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Operation</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Diagnosis</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Treatment Summary</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.tooth_number')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.date')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.status')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.notes')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.procedure')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.operation')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.diagnosis')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.treatment_summary')}</th>
             </tr>
           </thead>
           <tbody>
@@ -461,7 +549,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
             {backendTeethHistory.length === 0 && (
               <tr>
                 <td colSpan={8} style={{ color: '#888', textAlign: 'center', padding: 12 }}>
-                  No history yet.
+                  {t('odontogram.no_history_yet')}
                 </td>
               </tr>
             )}
@@ -493,122 +581,78 @@ Treatment: ${tooth.treatmentSummary || '-'}
     >
       <div style={{ minWidth: 200 }}>
         <label style={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaUser style={{ color: '#1976d2' }} /> Patient
+          <FaUser style={{ color: '#1976d2' }} /> {t('odontogram.patient')}
         </label>
-        <select
-          value={selectedPatient}
-          onChange={e => setSelectedPatient(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginTop: '8px',
-            borderRadius: '8px',
-            border: '1.5px solid #90caf9',
-            background: '#f8fafd',
-            fontSize: 16
-          }}
-        >
-          <option value="">Select Patient</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>{p.fullName || p.name}</option>
-          ))}
-        </select>
+        <Autocomplete
+          options={patients}
+          getOptionLabel={(option) => option.fullName || option.name || ''}
+          value={patients.find(p => p.id === selectedPatient) || null}
+          onChange={(event, newValue) => setSelectedPatient(newValue ? newValue.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label={t('odontogram.select_patient')} variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </div>
       <div style={{ minWidth: 200 }}>
         <label style={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaUserMd style={{ color: '#1976d2' }} /> Doctor
+          <FaUserMd style={{ color: '#1976d2' }} /> {t('odontogram.doctor')}
         </label>
-        <select
-          value={selectedDoctor}
-          onChange={e => setSelectedDoctor(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginTop: '8px',
-            borderRadius: '8px',
-            border: '1.5px solid #90caf9',
-            background: '#f8fafd',
-            fontSize: 16
-          }}
-        >
-          <option value="">Select Doctor</option>
-          {doctors.map((d) => (
-            <option key={d.id} value={d.id}>{d.fullName || d.name}</option>
-          ))}
-        </select>
+        <Autocomplete
+          options={doctors}
+          getOptionLabel={(option) => option.fullName || option.name || ''}
+          value={doctors.find(d => d.id === selectedDoctor) || null}
+          onChange={(event, newValue) => setSelectedDoctor(newValue ? newValue.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label={t('odontogram.select_doctor')} variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </div>
       <div style={{ minWidth: 200 }}>
         <label style={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaClinicMedical style={{ color: '#1976d2' }} /> Clinic
+          <FaClinicMedical style={{ color: '#1976d2' }} /> {t('odontogram.clinic')}
         </label>
-        <select
-          value={selectedClinic}
-          onChange={e => setSelectedClinic(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginTop: '8px',
-            borderRadius: '8px',
-            border: '1.5px solid #90caf9',
-            background: '#f8fafd',
-            fontSize: 16
-          }}
-        >
-          <option value="">Select Clinic</option>
-          {clinics.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        <Autocomplete
+          options={clinics}
+          getOptionLabel={(option) => option.name || ''}
+          value={clinics.find(c => c.id === selectedClinic) || null}
+          onChange={(event, newValue) => setSelectedClinic(newValue ? newValue.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label={t('odontogram.select_clinic')} variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </div>
       <div style={{ minWidth: 200 }}>
         <label style={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaCalendarAlt style={{ color: '#1976d2' }} /> Appointment
+          <FaCalendarAlt style={{ color: '#1976d2' }} /> {t('odontogram.appointment')}
         </label>
-        <select
-          value={selectedAppointment}
-          onChange={e => setSelectedAppointment(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginTop: '8px',
-            borderRadius: '8px',
-            border: '1.5px solid #90caf9',
-            background: '#f8fafd',
-            fontSize: 16
-          }}
-        >
-          <option value="">Select Appointment</option>
-          {appointments.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.appointmentDate
-                ? `${a.appointmentDate} (${a.startTime} - ${a.endTime})`
-                : a.name}
-            </option>
-          ))}
-        </select>
+        <Autocomplete
+          options={appointments}
+          getOptionLabel={(option) => option.appointmentDate ? `${option.appointmentDate} (${option.startTime} - ${option.endTime})` : option.name || ''}
+          value={appointments.find(a => a.id === selectedAppointment) || null}
+          onChange={(event, newValue) => setSelectedAppointment(newValue ? newValue.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label={t('odontogram.select_appointment')} variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </div>
       <div style={{ minWidth: 200 }}>
         <label style={{ fontWeight: 600, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FaIdBadge style={{ color: '#1976d2' }} /> Membership
+          <FaIdBadge style={{ color: '#1976d2' }} /> {t('odontogram.membership')}
         </label>
-        <select
-          value={selectedMembership}
-          onChange={e => setSelectedMembership(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            marginTop: '8px',
-            borderRadius: '8px',
-            border: '1.5px solid #90caf9',
-            background: '#f8fafd',
-            fontSize: 16
-          }}
-        >
-          <option value="">Select Membership</option>
-          <option value="basic">Basic</option>
-          <option value="premium">Premium</option>
-          <option value="vip">VIP</option>
-        </select>
+        <Autocomplete
+          options={[{id: 'basic', name: t('odontogram.basic')}, {id: 'premium', name: t('odontogram.premium')}, {id: 'vip', name: t('odontogram.vip')} ]}
+          getOptionLabel={(option) => option.name}
+          value={['basic','premium','vip'].includes(selectedMembership) ? {id: selectedMembership, name: t(`odontogram.${selectedMembership}`)} : null}
+          onChange={(event, newValue) => setSelectedMembership(newValue ? newValue.id : '')}
+          renderInput={(params) => (
+            <TextField {...params} label={t('odontogram.select_membership')} variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </div>
     </div>
   );
@@ -631,10 +675,10 @@ Treatment: ${tooth.treatmentSummary || '-'}
       {selectedTooth ? (
         <>
           <h2 style={{ color: '#1976d2', marginBottom: 18, fontWeight: 700 }}>
-            Tooth #{selectedTooth.id} Details
+            {t('odontogram.tooth_details', { id: selectedTooth.id })}
           </h2>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Status</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.status')}</label>
             <select
               style={{
                 width: '100%',
@@ -648,14 +692,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
               value={selectedTooth.status}
               onChange={e => handleModalChange('status', e.target.value)}
             >
-              <option value="">Select Status</option>
+              <option value="">{t('odontogram.select_status')}</option>
               {TOOTH_STATUSES.map(status => (
-                <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
+                <option key={status} value={status}>{t(`odontogram.statuses.${status}`)}</option>
               ))}
             </select>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Notes</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.notes')}</label>
             <textarea
               style={{
                 width: '100%',
@@ -671,11 +715,11 @@ Treatment: ${tooth.treatmentSummary || '-'}
               }}
               value={selectedTooth.notes || ''}
               onChange={e => handleModalChange('notes', e.target.value)}
-              placeholder="Enter notes..."
+              placeholder={t('odontogram.enter_notes')}
             />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Procedure</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.procedure')}</label>
             <select
               style={{
                 width: '100%',
@@ -689,14 +733,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
               value={selectedTooth.procedure}
               onChange={e => handleModalChange('procedure', e.target.value)}
             >
-              <option value="">Select Procedure</option>
+              <option value="">{t('odontogram.select_procedure')}</option>
               {procedures.map(p => (
                 <option key={p.id} value={p.procedureName}>{p.procedureName}</option>
               ))}
             </select>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Operation</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.operation')}</label>
             <select
               style={{
                 width: '100%',
@@ -710,14 +754,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
               value={selectedTooth.operation}
               onChange={e => handleModalChange('operation', e.target.value)}
             >
-              <option value="">Select Operation</option>
+              <option value="">{t('odontogram.select_operation')}</option>
               {operations.map(o => (
                 <option key={o.id} value={o.procedureName}>{o.procedureName}</option>
               ))}
             </select>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Diagnosis</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.diagnosis')}</label>
             <select
               style={{
                 width: '100%',
@@ -731,14 +775,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
               value={selectedTooth.diagnosis}
               onChange={e => handleModalChange('diagnosis', e.target.value)}
             >
-              <option value="">Select Diagnosis</option>
+              <option value="">{t('odontogram.select_diagnosis')}</option>
               {diagnoses.map(d => (
                 <option key={d.id} value={d.condition}>{d.condition}</option>
               ))}
             </select>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontWeight: 600, color: '#1976d2' }}>Treatment Summary</label>
+            <label style={{ fontWeight: 600, color: '#1976d2' }}>{t('odontogram.treatment_summary')}</label>
             <textarea
               style={{
                 width: '100%',
@@ -754,7 +798,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
               }}
               value={selectedTooth.treatmentSummary || ''}
               onChange={e => handleModalChange('treatmentSummary', e.target.value)}
-              placeholder="Add treatment summary..."
+              placeholder={t('odontogram.add_treatment_summary')}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
@@ -772,13 +816,13 @@ Treatment: ${tooth.treatmentSummary || '-'}
               }}
               onClick={handleSaveToothDetails}
             >
-              Save
+              {t('odontogram.save')}
             </button>
           </div>
         </>
       ) : (
         <div style={{ color: '#888', marginTop: 40, fontSize: 18, textAlign: 'center' }}>
-          Select a tooth to see details
+          {t('odontogram.select_tooth_to_see_details')}
         </div>
       )}
     </div>
@@ -798,7 +842,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
       boxShadow: '0 4px 24px rgba(25, 118, 210, 0.07)'
     }}>
       <div style={{ fontWeight: 'bold', color: '#1976d2', marginBottom: 12, fontSize: 20 }}>
-        Tooth Treatment History
+        {t('odontogram.tooth_treatment_history')}
       </div>
       {selectedTooth ? (
         <table style={{
@@ -811,14 +855,13 @@ Treatment: ${tooth.treatmentSummary || '-'}
         }}>
           <thead style={{ background: '#e3f2fd' }}>
             <tr>
-              {/* <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Date</th> */}
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Created At</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Status</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Notes</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Procedure</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Operation</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Diagnosis</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Treatment Summary</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.date')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.status')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.notes')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.procedure')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.operation')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.diagnosis')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.treatment_summary')}</th>
             </tr>
           </thead>
           <tbody>
@@ -826,7 +869,6 @@ Treatment: ${tooth.treatmentSummary || '-'}
               .filter((t) => t.toothNumber === selectedTooth.id)
               .map((t, idx) => (
                 <tr key={'backend-' + idx}>
-                  {/* <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{formatDate(t.date)}</td> */}
                   <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{formatDate(t.createdAt)}</td>
                   <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{t.status}</td>
                   <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{t.notes}</td>
@@ -838,7 +880,6 @@ Treatment: ${tooth.treatmentSummary || '-'}
               ))}
             {selectedTooth.history.map((h, idx) => (
               <tr key={'local-' + idx}>
-                {/* <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{formatDate(h.date)}</td> */}
                 <td style={{ padding: 10, border: '1px solid #cce3f6' }}>-</td>
                 <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{h.status}</td>
                 <td style={{ padding: 10, border: '1px solid #cce3f6' }}>{h.notes}</td>
@@ -852,20 +893,21 @@ Treatment: ${tooth.treatmentSummary || '-'}
               selectedTooth.history.length === 0 && (
                 <tr>
                   <td colSpan={7} style={{ color: '#888', textAlign: 'center', padding: 12 }}>
-                    No history yet.
+                    {t('odontogram.no_history_yet')}
                   </td>
                 </tr>
               )}
           </tbody>
         </table>
       ) : (
-        <div style={{ color: '#888', marginTop: 24, fontSize: 16 }}>Select a tooth to see history</div>
+        <div style={{ color: '#888', marginTop: 24, fontSize: 16 }}>
+          {t('odontogram.select_tooth_to_see_history')}
+        </div>
       )}
     </div>
   );
 
   // --- All Teeth Treatment History for Patient Section ---
-  // (leave your renderAllTeethHistoryTable as is, but you can update the style for consistency)
   const renderAllTeethHistoryTableStyled = () => {
     if (!selectedPatient || backendTeethHistory.length === 0) return null;
     return (
@@ -893,14 +935,14 @@ Treatment: ${tooth.treatmentSummary || '-'}
         }}>
           <thead style={{ background: '#e3f2fd' }}>
             <tr>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Tooth Number</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Date</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Status</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Notes</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Procedure</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Operation</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Diagnosis</th>
-              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>Treatment Summary</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.tooth_number')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.date')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.status')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.notes')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.procedure')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.operation')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.diagnosis')}</th>
+              <th style={{ padding: 10, border: '1px solid #cce3f6' }}>{t('odontogram.treatment_summary')}</th>
             </tr>
           </thead>
           <tbody>
@@ -919,7 +961,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
             {backendTeethHistory.length === 0 && (
               <tr>
                 <td colSpan={8} style={{ color: '#888', textAlign: 'center', padding: 12 }}>
-                  No history yet.
+                  {t('odontogram.no_history_yet')}
                 </td>
               </tr>
             )}
@@ -928,6 +970,66 @@ Treatment: ${tooth.treatmentSummary || '-'}
       </div>
     );
   };
+
+  // Condition Prediction AI function
+  const handleConditionPrediction = async () => {
+    setConditionPredictionLoading(true);
+    setConditionPredictionResult(null);
+    try {
+      // Build odontogram object from current teeth state
+      const odontogram = {};
+      teeth.forEach(tooth => {
+        odontogram[tooth.id] = tooth.diagnosis
+          ? `${tooth.diagnosis}${tooth.status !== 'healthy' ? ', ' + tooth.status : ''}`
+          : (tooth.status.charAt(0).toUpperCase() + tooth.status.slice(1));
+      });
+
+      const payload = { odontogram };
+      const res = await axios.post(`${BASE_URL}/ai/condition-prediction`, payload);
+
+      // Handle code block response
+      let predictions = {};
+      
+        predictions = res.data.predictions;
+
+      setConditionPredictionResult(predictions);
+    } catch {
+      setConditionPredictionResult({ error: 'Error predicting conditions.' });
+    }
+    setConditionPredictionLoading(false);
+  };
+
+  // Treatment Simulation AI function
+  const handleTreatmentSimulation = async () => {
+    setTreatmentSimLoading(true);
+    setTreatmentSimResult(null);
+    try {
+      // Parse odontogram and treatmentPlan from textarea inputs
+      let odontogram = {};
+      let treatmentPlan = {};
+      try {
+        odontogram = JSON.parse(treatmentSimOdontogram);
+      } catch {
+        odontogram = {};
+      }
+      try {
+        treatmentPlan = JSON.parse(treatmentSimPlan);
+      } catch {
+        treatmentPlan = {};
+      }
+      const payload = {
+        odontogram,
+        treatmentPlan
+      };
+      const res = await axios.post(`${BASE_URL}/ai/treatment-simulation`, payload);
+      setTreatmentSimResult(res.data.simulatedOdontogram || {});
+    } catch {
+      setTreatmentSimResult({ error: 'Error simulating treatment.' });
+    }
+    setTreatmentSimLoading(false);
+  };
+
+  const [show3DModal, setShow3DModal] = useState(false);
 
   return (
     <div>
@@ -965,39 +1067,374 @@ Treatment: ${tooth.treatmentSummary || '-'}
             </svg>
           </div>
           <div style={{ width: '100%', textAlign: 'center', marginTop: '16px' }}>
-            <button
-              style={{
-                background: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '10px 32px',
-                fontWeight: 'bold',
-                fontSize: 16,
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
-              }}
-              onClick={() => {
-                const odontogramEl = document.querySelector('.odontogram');
-                if (!odontogramEl) return;
-                import('html2canvas').then((html2canvas) => {
-                  html2canvas.default(odontogramEl.parentNode).then((canvas) => {
-                    const link = document.createElement('a');
-                    link.download = 'odontogram.png';
-                    link.href = canvas.toDataURL();
-                    link.click();
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
+              <button
+                style={{
+                  background: '#1976d2',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
+                }}
+                onClick={() => setShow3DModal(true)}
+              >
+                Show 3D Jaw Chart
+              </button>
+              <button
+                style={{
+                  background: '#388e3c',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(56, 142, 60, 0.08)'
+                }}
+                onClick={() => {
+                  const odontogramEl = document.querySelector('.odontogram');
+                  if (!odontogramEl) return;
+                  import('html2canvas').then((html2canvas) => {
+                    html2canvas.default(odontogramEl.parentNode).then((canvas) => {
+                      const link = document.createElement('a');
+                      link.download = 'odontogram.png';
+                      link.href = canvas.toDataURL();
+                      link.click();
+                    });
                   });
-                });
-              }}
-            >
-              Download Odontogram Image
-            </button>
+                }}
+              >
+                Download Odontogram Image
+              </button>
+            </div>
           </div>
         </div>
         {renderToothDetailsSection()}
       </div>
       {renderToothTreatmentHistorySection()}
       {renderAllTeethHistoryTableStyled()}
+
+      {/* Condition Prediction AI & Treatment Simulation AI Buttons in same line */}
+      <div style={{ width: '100%', textAlign: 'center', margin: '24px 0', display: 'flex', justifyContent: 'center', gap: 16 }}>
+        <button
+          style={{
+            background: '#fff',
+            color: '#1976d2',
+            border: '2px solid #1976d2',
+            borderRadius: '6px',
+            padding: '10px 32px',
+            fontWeight: 'bold',
+            fontSize: 16,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+          onClick={() => setConditionPredictionOpen(true)}
+        >
+          <InsightsIcon style={{ color: '#1976d2' }} />
+          {t('odontogram.condition_prediction_ai')}
+        </button>
+        <button
+          style={{
+            background: '#fff',
+            color: '#388e3c',
+            border: '2px solid #388e3c',
+            borderRadius: '6px',
+            padding: '10px 32px',
+            fontWeight: 'bold',
+            fontSize: 16,
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(56, 142, 60, 0.08)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8
+          }}
+          onClick={() => setTreatmentSimOpen(true)}
+        >
+          <ScienceIcon style={{ color: '#388e3c' }} />
+          {t('odontogram.treatment_simulation_ai')}
+        </button>
+      </div>
+
+      {/* Condition Prediction Dialog */}
+      {conditionPredictionOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.18)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: 32,
+              minWidth: 400,
+              maxWidth: 540,
+              boxShadow: '0 4px 24px rgba(25, 118, 210, 0.15)',
+              position: 'relative'
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: 22, color: '#1976d2', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <InsightsIcon />
+              {t('odontogram.condition_prediction_ai')}
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <p>
+                {t('odontogram.predict_future_dental_issues')}
+              </p>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <button
+                style={{
+                  background: '#1976d2',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
+                }}
+                onClick={handleConditionPrediction}
+                disabled={conditionPredictionLoading}
+              >
+                {t('odontogram.predict_conditions')}
+              </button>
+              <button
+                style={{
+                  background: '#fff',
+                  color: '#1976d2',
+                  border: '1.5px solid #1976d2',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer'
+                }}
+                onClick={() => setConditionPredictionOpen(false)}
+              >
+                {t('odontogram.close')}
+              </button>
+            </div>
+            {conditionPredictionLoading && (
+              <div style={{ marginTop: 18 }}>
+                <span style={{ color: '#1976d2', fontWeight: 500 }}>{t('odontogram.predicting')}...</span>
+              </div>
+            )}
+            {conditionPredictionResult && (
+              <div style={{ marginTop: 18 }}>
+                {conditionPredictionResult.error ? (
+                  <span style={{ color: '#f44336', fontWeight: 500 }}>{conditionPredictionResult.error}</span>
+                ) : (
+                  <>
+                    <div style={{ fontWeight: 600, color: '#1976d2', marginBottom: 8 }}>{t('odontogram.predicted_conditions')}:</div>
+                    <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 8, color: '#333', fontSize: 15 }}>
+                      {typeof conditionPredictionResult === 'object'
+                        ? JSON.stringify(conditionPredictionResult).replace(/```json|```/g, '')
+                        : String(conditionPredictionResult).replace(/```json|```/g, '')}
+                    </pre>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Treatment Simulation Dialog */}
+      {treatmentSimOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.18)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: 16,
+              padding: 32,
+              minWidth: 400,
+              maxWidth: 540,
+              boxShadow: '0 4px 24px rgba(56, 142, 60, 0.15)',
+              position: 'relative'
+            }}
+          >
+            <div style={{ fontWeight: 700, fontSize: 22, color: '#388e3c', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ScienceIcon />
+              {t('odontogram.treatment_simulation_ai')}
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <p>
+                {t('odontogram.simulate_dental_chart_evolution')}
+              </p>
+              <label style={{ fontWeight: 600, color: '#388e3c' }}>{t('odontogram.odontogram_json')}</label>
+              <textarea
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid #a5d6a7',
+                  background: '#f8fafd',
+                  fontSize: 15,
+                  minHeight: 60,
+                  marginTop: 4,
+                  marginBottom: 8,
+                  resize: 'vertical'
+                }}
+                value={treatmentSimOdontogram}
+                onChange={e => setTreatmentSimOdontogram(e.target.value)}
+                placeholder={`{\n  "14": "Caries present",\n  "15": "Healthy",\n  "16": "Recurrent decay, old filling"\n}`}
+              />
+              <label style={{ fontWeight: 600, color: '#388e3c' }}>{t('odontogram.treatment_plan_json')}</label>
+              <textarea
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid #a5d6a7',
+                  background: '#f8fafd',
+                  fontSize: 15,
+                  minHeight: 60,
+                  marginTop: 4,
+                  marginBottom: 8,
+                  resize: 'vertical'
+                }}
+                value={treatmentSimPlan}
+                onChange={e => setTreatmentSimPlan(e.target.value)}
+                placeholder={`{\n  "14": "Filling",\n  "16": "Replace filling"\n}`}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <button
+                style={{
+                  background: '#388e3c',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(56, 142, 60, 0.08)'
+                }}
+                onClick={handleTreatmentSimulation}
+                disabled={treatmentSimLoading}
+              >
+                {t('odontogram.simulate_treatment')}
+              </button>
+              <button
+                style={{
+                  background: '#fff',
+                  color: '#388e3c',
+                  border: '1.5px solid #388e3c',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer'
+                }}
+                onClick={() => setTreatmentSimOpen(false)}
+              >
+                {t('odontogram.close')}
+              </button>
+            </div>
+            {treatmentSimLoading && (
+              <div style={{ marginTop: 18 }}>
+                <span style={{ color: '#388e3c', fontWeight: 500 }}>{t('odontogram.simulating')}...</span>
+              </div>
+            )}
+            {treatmentSimResult && (
+              <div style={{ marginTop: 18 }}>
+                {treatmentSimResult.error ? (
+                  <span style={{ color: '#f44336', fontWeight: 500 }}>{treatmentSimResult.error}</span>
+                ) : (
+                  <>
+                    <div style={{ fontWeight: 600, color: '#388e3c', marginBottom: 8 }}>{t('odontogram.simulated_odontogram')}:</div>
+                    <pre style={{ background: '#f5f5f5', padding: 12, borderRadius: 8, color: '#333', fontSize: 15 }}>
+                      {typeof treatmentSimResult === 'object' && treatmentSimResult.simulatedOdontogram
+                        ? JSON.stringify(treatmentSimResult.simulatedOdontogram, null, 2).replace(/```json|```/g, '')
+                        : String(treatmentSimResult).replace(/```json|```/g, '')}
+                    </pre>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {/* ...existing dialogs... */}
+      <div style={{ width: '100%', textAlign: 'center', margin: '32px 0', position: 'relative' }}>
+       
+        {show3DModal && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.18)',
+              zIndex: 9999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={() => setShow3DModal(false)}
+          >
+            <div
+              style={{
+                background: '#fff',
+                borderRadius: 16,
+                padding: 32,
+                minWidth: 400,
+                maxWidth: 900,
+                boxShadow: '0 4px 24px rgba(25, 118, 210, 0.15)',
+                position: 'relative'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ fontWeight: 700, fontSize: 22, color: '#1976d2', marginBottom: 18 }}>
+                3D Jaw Chart
+              </div>
+              <Jaw3DPlot allTeeth3D={allTeeth3D} statusColor={statusColor} />
+              <button
+                style={{
+                  marginTop: 24,
+                  background: '#1976d2',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 32px',
+                  fontWeight: 'bold',
+                  fontSize: 16,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
+                }}
+                onClick={() => setShow3DModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

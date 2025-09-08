@@ -1,0 +1,96 @@
+[
+  {
+    "benefits": [
+      "Free Cleanings",
+      "Discounted Treatments",
+      "Priority Booking",
+      "Emergency Support"
+    ],
+    "validityPeriod": {
+      "endDate": "2025-12-31T23:59:59Z",
+      "startDate": "2025-01-01T00:00:00Z"
+    },
+    "id": 4,
+    "membershipPlan": "Premium",
+    "paymentStatus": "Active",
+    "renewalDate": "2025-12-01T00:00:00.000Z",
+    "lastPaymentAmount": "299.99",
+    "lastPaymentDate": "2025-01-01T10:00:00.000Z",
+    "createdAt": "2025-08-04T12:38:15.185Z",
+    "updatedAt": "2025-08-04T12:38:15.185Z"
+  },
+  {
+    "benefits": [
+      "Free Cleanings",
+      "Discounted Treatments",
+      "Priority Booking"
+    ],
+    "validityPeriod": {
+      "endDate": "2025-06-30T23:59:59Z",
+      "startDate": "2024-07-01T00:00:00Z"
+    },
+    "id": 5,
+    "membershipPlan": "Family",
+    "paymentStatus": "Expired",
+    "renewalDate": "2025-06-01T00:00:00.000Z",
+    "lastPaymentAmount": "499.99",
+    "lastPaymentDate": "2024-07-01T09:00:00.000Z",
+    "createdAt": "2025-08-04T12:38:15.185Z",
+    "updatedAt": "2025-08-04T12:38:15.185Z"
+  },
+  {
+    "benefits": [
+      "Free Cleanings"
+    ],
+    "validityPeriod": {
+      "endDate": "2026-02-28T23:59:59Z",
+      "startDate": "2025-03-01T00:00:00Z"
+    },
+    "id": 6,
+    "membershipPlan": "Basic",
+    "paymentStatus": "Active",
+    "renewalDate": "2026-02-01T00:00:00.000Z",
+    "lastPaymentAmount": "99.99",
+    "lastPaymentDate": "2025-03-01T08:30:00.000Z",
+    "createdAt": "2025-08-04T12:38:15.185Z",
+    "updatedAt": "2025-08-04T12:38:15.185Z"
+  },
+  {
+    "benefits": [
+      "Free Cleanings",
+      "Discounted Treatments",
+      "Priority Booking",
+      "Emergency Support"
+    ],
+    "validityPeriod": {
+      "endDate": "2025-12-31T23:59:59Z",
+      "startDate": "2025-01-01T00:00:00Z"
+    },
+    "id": 7,
+    "membershipPlan": "Premium",
+    "paymentStatus": "Active",
+    "renewalDate": "2025-12-01T00:00:00.000Z",
+    "lastPaymentAmount": "299.99",
+    "lastPaymentDate": "2025-01-01T10:00:00.000Z",
+    "createdAt": "2025-08-04T12:39:46.273Z",
+    "updatedAt": "2025-08-04T12:39:46.273Z"
+  },
+  {
+    "benefits": [
+      "Free Cleanings",
+      "Discounted Treatments",
+      "Priority Booking"
+    ],
+    "validityPeriod": {
+      "endDate": "2025-06-30T23:59:59Z",
+      "startDate": "2024-07-01T00:00:00Z"
+    },
+    "id": 8,
+    "membershipPlan": "Family",
+    "paymentStatus": "Expired",
+    "renewalDate": "2025-06-01T00:00:00.000Z",
+    "lastPaymentAmount": "499.99",
+    "lastPaymentDate": "2024-07-01T09:00:00.000Z",
+    "createdAt": "2025-08-04T12:39:46.273Z",
+    "updatedAt": "2025-08-04T12:39:46.273Z"
+  }]

@@ -1,0 +1,44 @@
+{
+  "system": {
+    "appName": "Dentic",
+    "address": "123 Dentic St",
+    "email": "support@dentic.fr",
+    "showLogo": true
+  },
+  "localisation": {
+    "language": "en",
+    "dateFormat": "YYYY-MM-DD",
+    "currency": "USD",
+    "currencySymbol": "$"
+  },
+  "openHours": [
+    {
+      "day": "Monday",
+      "hours": "08:00 - 18:00"
+    },
+    {
+      "day": "Tuesday",
+      "hours": "08:00 - 18:00"
+    },
+    {
+      "day": "Wednesday",
+      "hours": "08:00 - 18:00"
+    },
+    {
+      "day": "Thursday",
+      "hours": "08:00 - 18:00"
+    },
+    {
+      "day": "Friday",
+      "hours": "08:00 - 18:00"
+    },
+    {
+      "day": "Saturday",
+      "hours": "09:00 - 16:00"
+    },
+    {
+      "day": "Sunday",
+      "hours": "Closed"
+    }
+  ]
+}

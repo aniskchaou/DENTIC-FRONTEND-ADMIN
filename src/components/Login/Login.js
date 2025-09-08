@@ -18,12 +18,17 @@ import {
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
-
-;
+import { useTranslation } from 'react-i18next';
 
 const Login = ({ handleClick }) => {
+  const { t } = useTranslation();
   let history = useHistory();
-  var userInit = { username: "admin", password: "admin" };
+  let userInit;
+  if (CurrentUser.DEMO_MODE === true) {
+    userInit = { username: "admin", password: "admin" };
+  } else {
+    userInit = { username: "", password: "" };
+  }
   const { register, handleSubmit, errors } = useForm();
   const [user, setUser] = useState(userInit);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
@@ -36,22 +41,38 @@ const Login = ({ handleClick }) => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${BASE_URL}/users/login`, {
-        username: user.username,
-        password: user.password,
-      });
-      if (response.data && response.data.id) {
-        // Save user info in localStorage
-        localStorage.setItem('user', JSON.stringify(response.data));
-        handleClick(true);
-        CurrentUser.USER_DETAIL = response.data;
+      // Always clear localStorage before setting new user info
+      localStorage.clear();
+      if (CurrentUser.DEMO_MODE === true) {
+        const demoUser = { id: 1, username: "admin", role: "admin" };
+        // Set CurrentUser first, then localStorage
+        CurrentUser.USER_DETAIL = demoUser;
+        localStorage.setItem('user', JSON.stringify(CurrentUser.USER_DETAIL));
         localStorage.setItem('connected', CurrentUser.CONNECTED_USER);
-        setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
+        handleClick(true);
         setTimeout(() => {
           history.push("/dashboard");
         }, 800);
+        return; // Prevent further execution
       } else {
-        setSnackbar({ open: true, message: 'Login failed. Please check your credentials.', severity: 'error' });
+        const response = await axios.post(`${BASE_URL}/users/login`, {
+          username: user.username,
+          password: user.password,
+        });
+
+        if (response.data && response.data.id) {
+          // Set CurrentUser first, then localStorage
+          CurrentUser.USER_DETAIL = response.data;
+          localStorage.setItem('user', JSON.stringify(CurrentUser.USER_DETAIL));
+          localStorage.setItem('connected', CurrentUser.CONNECTED_USER);
+          handleClick(true);
+          setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
+          setTimeout(() => {
+            history.push("/dashboard");
+          }, 800);
+        } else {
+          setSnackbar({ open: true, message: 'Login failed. Please check your credentials.', severity: 'error' });
+        }
       }
     } catch (error) {
       setSnackbar({ open: true, message: 'Login failed. Please check your credentials.', severity: 'error' });
@@ -83,12 +104,12 @@ const Login = ({ handleClick }) => {
             <LockOutlinedIcon fontSize="large" />
           </Avatar>
           <Typography variant="h5" fontWeight={700} color="primary">
-            Dentic Clinic Login
+            {t('login.title')}
           </Typography>
         </Stack>
         <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 24 }}>
           <TextField
-            label="Username"
+            label={t('login.username')}
             name="username"
             fullWidth
             margin="normal"
@@ -97,11 +118,11 @@ const Login = ({ handleClick }) => {
             onChange={handleInputChange}
             inputRef={register({ required: true })}
             error={!!errors?.username}
-            helperText={errors?.username && "Username is required"}
+            helperText={errors?.username && t('login.username_required')}
             autoFocus
           />
           <TextField
-            label="Password"
+            label={t('login.password')}
             name="password"
             type="password"
             fullWidth
@@ -111,7 +132,7 @@ const Login = ({ handleClick }) => {
             onChange={handleInputChange}
             inputRef={register({ required: true })}
             error={!!errors?.password}
-            helperText={errors?.password && "Password is required"}
+            helperText={errors?.password && t('login.password_required')}
           />
           <Button
             type="submit"
@@ -122,7 +143,7 @@ const Login = ({ handleClick }) => {
             sx={{ mt: 2, mb: 1, fontWeight: 600 }}
             startIcon={<LockOutlinedIcon />}
           >
-            Sign In
+            {t('login.sign_in')}
           </Button>
           <Link to="/register" style={{ textDecoration: 'none' }}>
             <Button
@@ -132,7 +153,7 @@ const Login = ({ handleClick }) => {
               fullWidth
               sx={{ mb: 1, fontWeight: 600 }}
             >
-              Register
+              {t('login.register')}
             </Button>
           </Link>
           <Button
@@ -143,7 +164,7 @@ const Login = ({ handleClick }) => {
             sx={{ fontWeight: 600 }}
             onClick={() => history.push('/')}
           >
-            Back to Website
+            {t('login.back_to_website')}
           </Button>
         </form>
         <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>

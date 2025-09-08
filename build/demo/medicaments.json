@@ -1,0 +1,103 @@
+[
+  {
+    "name": "Amoxicillin",
+    "genericName": "Amoxil",
+    "category": "Antibiotic",
+    "description": "Used to treat bacterial infections. Avoid if allergic to penicillin.",
+    "activeIngredients": [
+      {
+        "ingredient": "Amoxicillin trihydrate",
+        "concentration": "500mg"
+      }
+    ],
+    "dosageForm": "Capsule",
+    "strength": "500mg",
+    "manufacturerId": 1,
+    "requiresPrescription": "Yes",
+    "sideEffects": [
+      "Nausea",
+      "Rash",
+      "Diarrhea"
+    ],
+    "contraindications": [
+      "Allergy to Penicillin",
+      "Pregnancy"
+    ],
+    "usageInstructions": "Take orally every 8 hours with food.",
+    "stockQuantity": 150,
+    "pricePerUnit": 0.75,
+    "expirationDate": "2026-05-01T00:00:00.000Z",
+    "storageConditions": "Store below 25°C, keep away from sunlight",
+    "barcode": "1234567890123",
+    "batchNumber": "AMX202507",
+    "status": "Available",
+    "createdAt": "2025-08-05T08:49:13.887Z",
+    "updatedAt": "2025-08-05T08:49:13.887Z"
+  },
+  {
+    "name": "vsfg",
+    "genericName": "sfgdg",
+    "category": "Antiseptic",
+    "description": "dfgdfg",
+    "activeIngredients": [
+      {
+        "ingredient": "232",
+        "concentration": "33"
+      }
+    ],
+    "dosageForm": "Syrup",
+    "strength": "33",
+    "manufacturerId": 4,
+    "requiresPrescription": "Yes",
+    "sideEffects": [
+      "33"
+    ],
+    "contraindications": [
+      "33"
+    ],
+    "usageInstructions": "333",
+    "stockQuantity": 33,
+    "pricePerUnit": 33,
+    "expirationDate": "2025-08-05T00:00:00.000Z",
+    "storageConditions": "33",
+    "barcode": "333",
+    "batchNumber": "333",
+    "status": "Available",
+    "createdAt": "2025-08-05T08:52:26.165Z",
+    "updatedAt": "2025-08-05T08:52:26.229Z"
+  },
+  {
+    "name": "Amoxicillin",
+    "genericName": "Amoxil",
+    "category": "Antibiotic",
+    "description": "Used to treat bacterial infections. Avoid if allergic to penicillin.",
+    "activeIngredients": [
+      {
+        "ingredient": "Amoxicillin trihydrate",
+        "concentration": "500mg"
+      }
+    ],
+    "dosageForm": "Capsule",
+    "strength": "500mg",
+    "manufacturerId": 1,
+    "requiresPrescription": "Yes",
+    "sideEffects": [
+      "Nausea",
+      "Rash",
+      "Diarrhea"
+    ],
+    "contraindications": [
+      "Allergy to Penicillin",
+      "Pregnancy"
+    ],
+    "usageInstructions": "Take orally every 8 hours with food.",
+    "stockQuantity": 150,
+    "pricePerUnit": 0.75,
+    "expirationDate": "2026-05-01T00:00:00.000Z",
+    "storageConditions": "Store below 25°C, keep away from sunlight",
+    "barcode": "1234567890123",
+    "batchNumber": "AMX202507",
+    "status": "Available",
+    "createdAt": "2025-08-05T09:54:58.870Z",
+    "updatedAt": "2025-08-05T09:54:58.870Z"
+  }]

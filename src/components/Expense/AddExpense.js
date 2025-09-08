@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, MenuItem, Stack } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import expenseHTTPService from '../../main/services/expenseHTTPService';
 import BASE_URL from '../../main/urls/urls';
 
@@ -8,6 +9,7 @@ const expenseCategories = ['Consultation', 'Treatment', 'Medication', 'Lab', 'Ot
 const paymentMethods = ['Cash', 'Card', 'Insurance', 'Online'];
 
 const AddExpense = ({ closeModal, onCreate }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     patientId: '',
     doctorId: '',
@@ -65,7 +67,7 @@ const AddExpense = ({ closeModal, onCreate }) => {
       <Stack spacing={2}>
         <TextField
           select
-          label="Patient"
+          label={t('expense.patient')}
           name="patientId"
           value={form.patientId}
           onChange={handleChange}
@@ -80,7 +82,7 @@ const AddExpense = ({ closeModal, onCreate }) => {
         </TextField>
         <TextField
           select
-          label="Doctor"
+          label={t('expense.doctor')}
           name="doctorId"
           value={form.doctorId}
           onChange={handleChange}
@@ -94,7 +96,7 @@ const AddExpense = ({ closeModal, onCreate }) => {
           ))}
         </TextField>
         <TextField
-          label="Description"
+          label={t('expense.description')}
           name="description"
           value={form.description}
           onChange={handleChange}
@@ -102,7 +104,7 @@ const AddExpense = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Estimated Duration (days)"
+          label={t('expense.estimated_duration')}
           name="estimatedDuration"
           type="number"
           value={form.estimatedDuration}
@@ -112,19 +114,19 @@ const AddExpense = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Status"
+          label={t('expense.status')}
           name="status"
           value={form.status}
           onChange={handleChange}
           fullWidth
         >
           {statusOptions.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`expense.status_${opt.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
           select
-          label="Expense Category"
+          label={t('expense.expense_category')}
           name="expenseCategory"
           value={form.expenseCategory}
           onChange={handleChange}
@@ -132,11 +134,11 @@ const AddExpense = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {expenseCategories.map(cat => (
-            <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+            <MenuItem key={cat} value={cat}>{t(`expense.category_${cat.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Amount"
+          label={t('expense.amount')}
           name="amount"
           type="number"
           value={form.amount}
@@ -146,7 +148,7 @@ const AddExpense = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Payment Method"
+          label={t('expense.payment_method')}
           name="paymentMethod"
           value={form.paymentMethod}
           onChange={handleChange}
@@ -154,15 +156,15 @@ const AddExpense = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {paymentMethods.map(method => (
-            <MenuItem key={method} value={method}>{method}</MenuItem>
+            <MenuItem key={method} value={method}>{t(`expense.payment_${method.toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Expense'}
+            {loading ? t('expense.saving') : t('expense.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('expense.cancel')}
           </Button>
         </Stack>
       </Stack>

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "patientId": "11111111-aaaa-bbbb-cccc-111111111111",
+    "doctorId": "22222222-bbbb-cccc-dddd-222222222222",
+    "diagnosisDate": "2025-07-01T09:00:00.000Z",
+    "condition": "Dental Caries",
+    "severity": "Moderate",
+    "recommendedTreatmentPlanId": "33333333-cccc-dddd-eeee-333333333333",
+    "notes": "Caries observed on lower left molar. Recommend filling.",
+    "createdAt": "2025-07-08T18:10:02.958Z",
+    "updatedAt": "2025-07-08T18:10:02.958Z"
+  },
+  {
+    "id": 2,
+    "patientId": "44444444-dddd-eeee-ffff-444444444444",
+    "doctorId": "55555555-eeee-ffff-aaaa-555555555555",
+    "diagnosisDate": "2025-07-02T14:30:00.000Z",
+    "condition": "Gingivitis",
+    "severity": "Mild",
+    "recommendedTreatmentPlanId": null,
+    "notes": "Mild gum inflammation. Advise improved oral hygiene.",
+    "createdAt": "2025-07-08T18:10:02.958Z",
+    "updatedAt": "2025-07-08T18:10:02.958Z"
+  },
+  {
+    "id": 3,
+    "patientId": "66666666-ffff-aaaa-bbbb-666666666666",
+    "doctorId": "77777777-aaaa-bbbb-cccc-777777777777",
+    "diagnosisDate": "2025-07-03T11:15:00.000Z",
+    "condition": "Impacted Wisdom Tooth",
+    "severity": "Severe",
+    "recommendedTreatmentPlanId": "88888888-bbbb-cccc-dddd-888888888888",
+    "notes": "Extraction recommended. Patient experiencing pain and swelling.",
+    "createdAt": "2025-07-08T18:10:02.958Z",
+    "updatedAt": "2025-07-08T18:10:02.958Z"
+  },
+  {
+    "id": 4,
+    "patientId": "11111111-aaaa-bbbb-cccc-111111111111",
+    "doctorId": "22222222-bbbb-cccc-dddd-222222222222",
+    "diagnosisDate": "2025-07-01T09:00:00.000Z",
+    "condition": "Dental Caries",
+    "severity": "Moderate",
+    "recommendedTreatmentPlanId": "33333333-cccc-dddd-eeee-333333333333",
+    "notes": "Caries observed on lower left molar. Recommend filling.",
+    "createdAt": "2025-07-08T18:11:16.046Z",
+    "updatedAt": "2025-07-08T18:11:16.046Z"
+  },
+  {
+    "id": 5,
+    "patientId": "44444444-dddd-eeee-ffff-444444444444",
+    "doctorId": "55555555-eeee-ffff-aaaa-555555555555",
+    "diagnosisDate": "2025-07-02T14:30:00.000Z",
+    "condition": "Gingivitis",
+    "severity": "Mild",
+    "recommendedTreatmentPlanId": null,
+    "notes": "Mild gum inflammation. Advise improved oral hygiene.",
+    "createdAt": "2025-07-08T18:11:16.046Z",
+    "updatedAt": "2025-07-08T18:11:16.046Z"
+  }
+]

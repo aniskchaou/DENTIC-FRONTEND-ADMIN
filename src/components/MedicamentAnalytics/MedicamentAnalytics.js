@@ -17,6 +17,8 @@ import { Bar, Pie, Doughnut, Line, PolarArea, Radar, Scatter, Bubble } from 'rea
 import { chartBarOption } from '../../main/config/chart.bar';
 import showMessage from '../../libraries/messages/messages';
 import BASE_URL from '../../main/urls/urls';
+import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(
   CategoryScale,
@@ -32,6 +34,7 @@ ChartJS.register(
 );
 
 const MedicamentAnalytics = () => {
+  const { t } = useTranslation();
   const [medicaments, setMedicaments] = useState([]);
   const [charts, setCharts] = useState({
     bar: { labels: [], datasets: [] },
@@ -46,15 +49,27 @@ const MedicamentAnalytics = () => {
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/medicaments`)
-      .then(res => res.json())
-      .then(data => {
-        setMedicaments(data);
-        prepareCharts(data);
-      })
-      .catch(e => {
-        showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
-      });
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/medicaments.json')
+        .then(res => res.json())
+        .then(data => {
+          setMedicaments(data);
+          prepareCharts(data);
+        })
+        .catch(e => {
+          showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
+        });
+    } else {
+      fetch(`${BASE_URL}/medicaments`)
+        .then(res => res.json())
+        .then(data => {
+          setMedicaments(data);
+          prepareCharts(data);
+        })
+        .catch(e => {
+          showMessage('Error', "HTTP_ERR_MESSAGE", 'warning');
+        });
+    }
   }, []);
 
   const prepareCharts = (data) => {
@@ -205,39 +220,39 @@ const MedicamentAnalytics = () => {
           }}
         >
           <div>
-            <h5>Medicaments by Category (Bar)</h5>
+            <h5>{t('medicament_analytics.by_category')}</h5>
             <Bar options={chartBarOption} data={charts.bar} />
           </div>
           <div>
-            <h5>Medicaments by Manufacturer (Pie)</h5>
+            <h5>{t('medicament_analytics.by_manufacturer')}</h5>
             <Pie data={charts.pie} />
           </div>
           <div>
-            <h5>Medicaments by Type (Doughnut)</h5>
+            <h5>{t('medicament_analytics.by_type_doughnut')}</h5>
             <Doughnut data={charts.doughnut} />
           </div>
           <div>
-            <h5>Added per Month (Line)</h5>
+            <h5>{t('medicament_analytics.added_per_month')}</h5>
             <Line data={charts.line} />
           </div>
           <div>
-            <h5>Stock Status (PolarArea)</h5>
+            <h5>{t('medicament_analytics.stock_status')}</h5>
             <PolarArea data={charts.polar} />
           </div>
           <div>
-            <h5>Active Ingredients (Radar)</h5>
+            <h5>{t('medicament_analytics.active_ingredients')}</h5>
             <Radar data={charts.radar} />
           </div>
           <div>
-            <h5>Price vs Stock (Scatter)</h5>
+            <h5>{t('medicament_analytics.price_vs_stock')}</h5>
             <Scatter data={charts.scatter} />
           </div>
           <div>
-            <h5>Price by Category (Bubble)</h5>
+            <h5>{t('medicament_analytics.price_by_category')}</h5>
             <Bubble data={charts.bubble} />
           </div>
           <div>
-            <h5>Medicaments by Type (Pie)</h5>
+            <h5>{t('medicament_analytics.by_type_pie')}</h5>
             <Pie data={charts.typePie} />
           </div>
         </div>

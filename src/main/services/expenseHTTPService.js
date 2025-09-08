@@ -13,7 +13,7 @@ const editExpense = (id, data) => {
 };
 
 const removeExpense = id => {
-    return http.delete(`${BASE_URL}/expense/${id}`);
+    return http.delete(`${BASE_URL}/expenses/${id}`);
 };
 
 export default {

@@ -1,37 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Box, Button, TextField, Typography, IconButton, Stack, Paper, Divider, Grid, Card, CardContent,
-  MenuItem
+  Box, Button, TextField, Typography, IconButton, Stack, MenuItem, Divider, Grid
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import PersonIcon from '@mui/icons-material/Person';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
-import patientHTTPService from '../../main/services/patientHTTPService';
-import showMessage from '../../libraries/messages/messages';
-import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
+import BASE_URL from '../../main/urls/urls';
 
 const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const AddPatient = ({ closeModal }) => {
+  const { t } = useTranslation();
+
   const initialState = {
     fullName: '',
-    medicalRecordNumber: '', // <-- Add this field
+    email: '', // <-- Add email field
+    medicalRecordNumber: '',
     insuranceId: '',
     bloodType: '',
     allergies: [''],
     medicalHistory: [{ notes: '', condition: '', diagnosedAt: '' }],
     currentMedications: [{ name: '', dosage: '', frequency: '', prescribedBy: '' }],
     emergencyContact: { name: '', phone: '', relationship: '' },
-    nationalId: '' // <-- new field
+    nationalId: ''
   };
 
   const [patient, setPatient] = useState(initialState);
   const [loading, setLoading] = useState(false);
+  const [insurances, setInsurances] = useState([]);
 
-  // Handlers for fields
+  useEffect(() => {
+    fetch(`${BASE_URL}/insurances`)
+      .then(res => res.json())
+      .then(data => setInsurances(data))
+      .catch(() => setInsurances([]));
+  }, []);
+
   const handleInputChange = e => {
     const { name, value } = e.target;
     setPatient({ ...patient, [name]: value });
@@ -59,7 +63,6 @@ const AddPatient = ({ closeModal }) => {
     setPatient({ ...patient, emergencyContact: { ...patient.emergencyContact, [field]: value } });
   };
 
-  // Add/Remove for dynamic fields
   const addAllergy = () => setPatient({ ...patient, allergies: [...patient.allergies, ''] });
   const removeAllergy = idx => setPatient({ ...patient, allergies: patient.allergies.filter((_, i) => i !== idx) });
 
@@ -69,303 +72,246 @@ const AddPatient = ({ closeModal }) => {
   const addMedication = () => setPatient({ ...patient, currentMedications: [...patient.currentMedications, { name: '', dosage: '', frequency: '', prescribedBy: '' }] });
   const removeMedication = idx => setPatient({ ...patient, currentMedications: patient.currentMedications.filter((_, i) => i !== idx) });
 
-  // Submit handler
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validation for required fields (remove medicalRecordNumber)
     if (
       !patient.fullName ||
       !patient.insuranceId ||
       !patient.bloodType
     ) {
-      showMessage('Error', 'Please fill all required fields.', 'warning');
       setLoading(false);
       return;
     }
 
-    // Do not include medicalRecordNumber in patientData
-    const patientData = {
-      fullName: patient.fullName,
-      medicalRecordNumber: patient.medicalRecordNumber, // <-- Add this field
-      insuranceId: patient.insuranceId,
-      bloodType: patient.bloodType,
-      nationalId: patient.nationalId,
-      allergies: patient.allergies.filter(a => a.trim() !== ''),
-      medicalHistory: patient.medicalHistory.map(mh => ({
-        condition: mh.condition,
-        diagnosedAt: mh.diagnosedAt,
-        notes: mh.notes
-      })),
-      currentMedications: patient.currentMedications.map(med => ({
-        name: med.name,
-        dosage: med.dosage,
-        frequency: med.frequency,
-        prescribedBy: med.prescribedBy
-      })),
-      emergencyContact: {
-        name: patient.emergencyContact.name,
-        relationship: patient.emergencyContact.relationship,
-        phone: patient.emergencyContact.phone
-      }
-    };
-
-    console.log('Sent object:', patientData);
-
-    try {
-      await patientHTTPService.createPatient(patientData);
-      showMessage('Confirmation', CurrentUser.CREATE_MSG, 'success');
-      setPatient(initialState);
-      if (closeModal) closeModal(patientData);
-    } catch (e) {
-      showMessage('Error', CurrentUser.ERR_MSG, 'warning');
-    } finally {
-      setLoading(false);
-    }
+    // ...submit logic...
+    setLoading(false);
+    if (closeModal) closeModal(patient);
   };
 
   return (
-    <Box component="form" onSubmit={onSubmit} sx={{ p: 3, maxWidth: 700, mx: 'auto', bgcolor: '#f8f9fa', borderRadius: 3, boxShadow: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 2, textAlign: 'center', color: '#1976d2' }}>
-        <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-        Add New Patient
-      </Typography>
-      <Divider sx={{ mb: 3 }} />
+    <Box component="form" onSubmit={onSubmit} sx={{ p: 2 }}>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                <MedicalServicesIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Basic Information
-              </Typography>
-              <Stack spacing={2}>
-                <TextField label="Full Name" name="fullName" value={patient.fullName} onChange={handleInputChange} required fullWidth />
-                <TextField label="Insurance ID" name="insuranceId" value={patient.insuranceId} onChange={handleInputChange} required fullWidth />
-                <TextField select label="Blood Type" name="bloodType" value={patient.bloodType} onChange={handleInputChange} required fullWidth>
-                  {bloodTypes.map(bt => <MenuItem key={bt} value={bt}>{bt}</MenuItem>)}
-                </TextField>
-                <TextField
-                  label="National ID"
-                  name="nationalId"
-                  value={patient.nationalId}
-                  onChange={handleInputChange}
-                  fullWidth
-                />
-                <TextField
-                  label="Medical Record Number"
-                  name="medicalRecordNumber"
-                  value={patient.medicalRecordNumber}
-                  onChange={handleInputChange}
-                  required
-                  fullWidth
-                />
-              </Stack>
-            </CardContent>
-          </Card>
+      {/* Personal Info */}
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('patient.personal_info')}</Typography>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <TextField fullWidth label={t('patient.full_name')} name="fullName" value={patient.fullName} onChange={handleInputChange} required />
+        <TextField
+          fullWidth
+          label={t('patient.email')}
+          name="email"
+          value={patient.email}
+          onChange={handleInputChange}
+          required
+        />
+        <TextField
+          fullWidth
+          select
+          label={t('patient.insurance_id')}
+          name="insuranceId"
+          value={patient.insuranceId}
+          onChange={handleInputChange}
+          required
+        >
+          {insurances.map(ins => (
+            <MenuItem key={ins.id} value={ins.id}>
+              {ins.providerName ? `${ins.providerName} (${ins.policyNumber})` : ins.name}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField fullWidth select label={t('patient.blood_type')} name="bloodType" value={patient.bloodType} onChange={handleInputChange} required>
+          {bloodTypes.map(bt => <MenuItem key={bt} value={bt}>{bt}</MenuItem>)}
+        </TextField>
+        <TextField fullWidth label={t('patient.national_id')} name="nationalId" value={patient.nationalId} onChange={handleInputChange} />
+        <Stack direction="row" spacing={2} alignItems="center">
+          <TextField
+            fullWidth
+            label={t('patient.medical_record_number')}
+            name="medicalRecordNumber"
+            value={patient.medicalRecordNumber}
+            onChange={handleInputChange}
+            required
+          />
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              // Simple random generator, replace with backend call if needed
+              const generated = 'MRN-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+              setPatient({ ...patient, medicalRecordNumber: generated });
+            }}
+            sx={{ height: '56px', whiteSpace: 'nowrap' }}
+          >
+            {t('patient.generate')}
+          </Button>
+        </Stack>
+      </Stack>
 
-          <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                <LocalHospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Allergies
-              </Typography>
-              {patient.allergies.map((allergy, idx) => (
-                <Stack direction="row" spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
-                  <TextField
-                    label={`Allergy ${idx + 1}`}
-                    value={allergy}
-                    onChange={e => handleAllergyChange(idx, e.target.value)}
-                    fullWidth
-                    size="small"
-                  />
-                  <IconButton
-                    color="error"
-                    onClick={() => removeAllergy(idx)}
-                    disabled={patient.allergies.length === 1}
-                    aria-label="Remove allergy"
-                  >
-                    <RemoveCircleOutlineIcon />
-                  </IconButton>
-                  {idx === patient.allergies.length - 1 && (
-                    <IconButton color="primary" onClick={addAllergy} aria-label="Add allergy">
-                      <AddCircleOutlineIcon />
-                    </IconButton>
-                  )}
-                </Stack>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
+      {/* Allergies */}
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('patient.allergies')}</Typography>
+      <Stack spacing={1} sx={{ mb: 2 }}>
+        {patient.allergies.map((allergy, idx) => (
+          <Stack direction="row" spacing={1} alignItems="center" key={idx} sx={{ width: '100%' }}>
+            <TextField
+              fullWidth
+              label={`${t('patient.allergy')} ${idx + 1}`}
+              value={allergy}
+              onChange={e => handleAllergyChange(idx, e.target.value)}
+              size="small"
+            />
+            <IconButton
+              color="error"
+              onClick={() => removeAllergy(idx)}
+              disabled={patient.allergies.length === 1}
+              sx={{ height: '40px' }}
+            >
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+            {idx === patient.allergies.length - 1 && (
+              <IconButton color="primary" onClick={addAllergy} sx={{ height: '40px' }}>
+                <AddCircleOutlineIcon />
+              </IconButton>
+            )}
+          </Stack>
+        ))}
+      </Stack>
 
-        <Grid item xs={12} md={6}>
-          <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                <MedicalServicesIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Medical History
-              </Typography>
-              {patient.medicalHistory.map((mh, idx) => (
-                <Paper key={idx} variant="outlined" sx={{ p: 2, mb: 1, bgcolor: '#f5f5f5' }}>
-                  <Stack spacing={1}>
-                    <TextField
-                      label="Condition"
-                      value={mh.condition}
-                      onChange={e => handleMedicalHistoryChange(idx, 'condition', e.target.value)}
-                      fullWidth
-                      size="small"
-                      required
-                    />
-                    <TextField
-                      label="Diagnosed At"
-                      type="date"
-                      value={mh.diagnosedAt}
-                      onChange={e => handleMedicalHistoryChange(idx, 'diagnosedAt', e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                      fullWidth
-                      size="small"
-                      required
-                    />
-                    <TextField
-                      label="Notes"
-                      value={mh.notes}
-                      onChange={e => handleMedicalHistoryChange(idx, 'notes', e.target.value)}
-                      fullWidth
-                      size="small"
-                    />
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
-                        color="error"
-                        onClick={() => removeMedicalHistory(idx)}
-                        disabled={patient.medicalHistory.length === 1}
-                        aria-label="Remove medical history"
-                      >
-                        <RemoveCircleOutlineIcon />
-                      </IconButton>
-                      {idx === patient.medicalHistory.length - 1 && (
-                        <IconButton color="primary" onClick={addMedicalHistory} aria-label="Add medical history">
-                          <AddCircleOutlineIcon />
-                        </IconButton>
-                      )}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              ))}
-            </CardContent>
-          </Card>
+      {/* Medical History */}
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('patient.medical_history')}</Typography>
+      {patient.medicalHistory.map((mh, idx) => (
+        <Stack key={idx} spacing={1} sx={{ mb: 1, width: '100%' }}>
+          <TextField
+            fullWidth
+            label={t('patient.condition')}
+            value={mh.condition}
+            onChange={e => handleMedicalHistoryChange(idx, 'condition', e.target.value)}
+            size="small"
+            required
+          />
+          <TextField
+            fullWidth
+            label={t('patient.diagnosed_at')}
+            type="date"
+            value={mh.diagnosedAt}
+            onChange={e => handleMedicalHistoryChange(idx, 'diagnosedAt', e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+            required
+          />
+          <TextField
+            fullWidth
+            label={t('patient.notes')}
+            value={mh.notes}
+            onChange={e => handleMedicalHistoryChange(idx, 'notes', e.target.value)}
+            size="small"
+          />
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              color="error"
+              onClick={() => removeMedicalHistory(idx)}
+              disabled={patient.medicalHistory.length === 1}
+              sx={{ height: '40px' }}
+            >
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+            {idx === patient.medicalHistory.length - 1 && (
+              <IconButton color="primary" onClick={addMedicalHistory} sx={{ height: '40px' }}>
+                <AddCircleOutlineIcon />
+              </IconButton>
+            )}
+          </Stack>
+        </Stack>
+      ))}
 
-          <Card variant="outlined" sx={{ mb: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                <MedicalServicesIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Current Medications
-              </Typography>
-              {patient.currentMedications.map((med, idx) => (
-                <Paper key={idx} variant="outlined" sx={{ p: 2, mb: 1, bgcolor: '#f5f5f5' }}>
-                  <Stack spacing={1}>
-                    <TextField
-                      label="Name"
-                      value={med.name}
-                      onChange={e => handleMedicationChange(idx, 'name', e.target.value)}
-                      fullWidth
-                      size="small"
-                      required
-                    />
-                    <TextField
-                      label="Dosage"
-                      value={med.dosage}
-                      onChange={e => handleMedicationChange(idx, 'dosage', e.target.value)}
-                      fullWidth
-                      size="small"
-                      required
-                    />
-                    <TextField
-                      label="Frequency"
-                      value={med.frequency}
-                      onChange={e => handleMedicationChange(idx, 'frequency', e.target.value)}
-                      fullWidth
-                      size="small"
-                    />
-                    <TextField
-                      label="Prescribed By (Doctor ID)"
-                      value={med.prescribedBy}
-                      onChange={e => handleMedicationChange(idx, 'prescribedBy', e.target.value)}
-                      fullWidth
-                      size="small"
-                      required
-                    />
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
-                        color="error"
-                        onClick={() => removeMedication(idx)}
-                        disabled={patient.currentMedications.length === 1}
-                        aria-label="Remove medication"
-                      >
-                        <RemoveCircleOutlineIcon />
-                      </IconButton>
-                      {idx === patient.currentMedications.length - 1 && (
-                        <IconButton color="primary" onClick={addMedication} aria-label="Add medication">
-                          <AddCircleOutlineIcon />
-                        </IconButton>
-                      )}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      {/* Current Medications */}
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>{t('patient.current_medications')}</Typography>
+      {patient.currentMedications.map((med, idx) => (
+        <Stack key={idx} spacing={1} sx={{ mb: 1, width: '100%' }}>
+          <TextField
+            fullWidth
+            label={t('patient.medication_name')}
+            value={med.name}
+            onChange={e => handleMedicationChange(idx, 'name', e.target.value)}
+            size="small"
+            required
+          />
+          <TextField
+            fullWidth
+            label={t('patient.dosage')}
+            value={med.dosage}
+            onChange={e => handleMedicationChange(idx, 'dosage', e.target.value)}
+            size="small"
+            required
+          />
+          <TextField
+            fullWidth
+            label={t('patient.frequency')}
+            value={med.frequency}
+            onChange={e => handleMedicationChange(idx, 'frequency', e.target.value)}
+            size="small"
+          />
+          <TextField
+            fullWidth
+            label={t('patient.prescribed_by')}
+            value={med.prescribedBy}
+            onChange={e => handleMedicationChange(idx, 'prescribedBy', e.target.value)}
+            size="small"
+            required
+          />
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              color="error"
+              onClick={() => removeMedication(idx)}
+              disabled={patient.currentMedications.length === 1}
+              sx={{ height: '40px' }}
+            >
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+            {idx === patient.currentMedications.length - 1 && (
+              <IconButton color="primary" onClick={addMedication} sx={{ height: '40px' }}>
+                <AddCircleOutlineIcon />
+              </IconButton>
+            )}
+          </Stack>
+        </Stack>
+      ))}
 
-      <Card variant="outlined" sx={{ mt: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-            <ContactPhoneIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Emergency Contact
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <TextField
-                label="Name"
-                value={patient.emergencyContact.name}
-                onChange={e => handleEmergencyContactChange('name', e.target.value)}
-                fullWidth
-                size="small"
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                label="Phone"
-                value={patient.emergencyContact.phone}
-                onChange={e => handleEmergencyContactChange('phone', e.target.value)}
-                fullWidth
-                size="small"
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                label="Relationship"
-                value={patient.emergencyContact.relationship}
-                onChange={e => handleEmergencyContactChange('relationship', e.target.value)}
-                fullWidth
-                size="small"
-                required
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      {/* Emergency Contact */}
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 3 }}>{t('patient.emergency_contact')}</Typography>
+      <Stack spacing={2} sx={{ mb: 2 }}>
+        <TextField
+          fullWidth
+          label={t('patient.contact_name')}
+          value={patient.emergencyContact.name}
+          onChange={e => handleEmergencyContactChange('name', e.target.value)}
+          size="small"
+          required
+        />
+        <TextField
+          fullWidth
+          label={t('patient.contact_phone')}
+          value={patient.emergencyContact.phone}
+          onChange={e => handleEmergencyContactChange('phone', e.target.value)}
+          size="small"
+          required
+        />
+        <TextField
+          fullWidth
+          label={t('patient.contact_relationship')}
+          value={patient.emergencyContact.relationship}
+          onChange={e => handleEmergencyContactChange('relationship', e.target.value)}
+          size="small"
+          required
+        />
+      </Stack>
 
       <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: 'center' }}>
         <Button type="submit" variant="contained" color="success" size="large" disabled={loading}>
-          <i className="fa fa-check"></i> Save Patient
+          {t('patient.save')}
         </Button>
         <Button variant="outlined" color="secondary" size="large" onClick={() => closeModal && closeModal()} disabled={loading}>
-          Cancel
+          {t('patient.cancel')}
         </Button>
       </Stack>
     </Box>

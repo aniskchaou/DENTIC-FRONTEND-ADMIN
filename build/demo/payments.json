@@ -1,0 +1,13 @@
+[
+    {
+  "id": 1,
+  "invoiceNumber": "1001",
+  "paymentDate": "2025-08-11T08:56:39.306Z",
+  "paymenMode": "CASH",
+  "amountReceived": 0,
+  "invoiceBlanceDue": 0,
+  "patient": 1,
+  "createdAt": "2025-08-11T08:56:39.306Z",
+  "updatedAt": "2025-08-11T08:56:39.306Z"
+}
+]

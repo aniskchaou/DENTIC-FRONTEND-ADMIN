@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, MenuItem, Stack, Box, Chip, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
-const roles = ["Admin", "Dentist", "Assistant", "Receptionist", "Accountant"];
+const roles = [ "Assistant", "Receptionist", "Accountant"];
 const permissionsList = [
   "View Patients", "Edit Patients", "View Appointments", "Edit Appointments",
-  "View Billing", "Edit Billing", "Manage Inventory", "Manage Staff"
+  "View Billing", "Edit Billing", "Manage Inventory"
 ];
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const statusOptions = ["Active", "Inactive"];
 
 const AddStaff = ({ closeModal }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     fullName: '',
     role: '',
@@ -82,7 +84,7 @@ const AddStaff = ({ closeModal }) => {
     <Box component="form" onSubmit={handleSubmit} autoComplete="off" sx={{ p: 2 }}>
       <Stack spacing={2}>
         <TextField
-          label="Full Name"
+          label={t('staff.full_name')}
           name="fullName"
           value={form.fullName}
           onChange={handleChange}
@@ -91,7 +93,7 @@ const AddStaff = ({ closeModal }) => {
         />
         <TextField
           select
-          label="Role"
+          label={t('staff.role')}
           name="role"
           value={form.role}
           onChange={handleChange}
@@ -99,11 +101,11 @@ const AddStaff = ({ closeModal }) => {
           required
         >
           {roles.map(role => (
-            <MenuItem key={role} value={role}>{role}</MenuItem>
+            <MenuItem key={role} value={role}>{t(`staff.role_${role.toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Email"
+          label={t('staff.email')}
           name="email"
           value={form.email}
           onChange={handleChange}
@@ -112,7 +114,7 @@ const AddStaff = ({ closeModal }) => {
           required
         />
         <TextField
-          label="Phone"
+          label={t('staff.phone')}
           name="phone"
           value={form.phone}
           onChange={handleChange}
@@ -120,13 +122,13 @@ const AddStaff = ({ closeModal }) => {
           required
         />
         <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Shift Schedule</Typography>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>{t('staff.shift_schedule')}</Typography>
           <Stack spacing={1}>
             {daysOfWeek.map(day => (
               <Stack direction="row" spacing={1} alignItems="center" key={day}>
-                <Typography sx={{ width: 40 }}>{day}</Typography>
+                <Typography sx={{ width: 40 }}>{t(`staff.day_${day.toLowerCase()}`)}</Typography>
                 <TextField
-                  label="Start"
+                  label={t('staff.start')}
                   type="time"
                   size="small"
                   value={form.shiftSchedule[day].start}
@@ -135,7 +137,7 @@ const AddStaff = ({ closeModal }) => {
                   sx={{ width: 120 }}
                 />
                 <TextField
-                  label="End"
+                  label={t('staff.end')}
                   type="time"
                   size="small"
                   value={form.shiftSchedule[day].end}
@@ -147,24 +149,9 @@ const AddStaff = ({ closeModal }) => {
             ))}
           </Stack>
         </Box>
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>Permissions</Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {permissionsList.map(perm => (
-              <Chip
-                key={perm}
-                label={perm}
-                color={form.permissions.includes(perm) ? "primary" : "default"}
-                variant={form.permissions.includes(perm) ? "filled" : "outlined"}
-                onClick={() => handlePermissionToggle(perm)}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Box>
-        </Box>
         <TextField
           select
-          label="Status"
+          label={t('staff.status')}
           name="status"
           value={form.status}
           onChange={handleChange}

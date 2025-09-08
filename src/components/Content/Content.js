@@ -67,6 +67,10 @@ import Register from '../Register/Register.js';
 import AboutUsPage from '../AboutUsPage/AboutUsPage.jsx';
 import AddInventoryItem from '../InventoryItem/AddInventoryItem.js';
 import AddAppointment from '../Appointements/AddAppointment.js';
+import ReminderAppointment from '../Reminders/ReminderAppointment';
+import ReminderFollowUp from '../Reminders/ReminderFollowUp';
+import ReminderTreatementCompletion from '../Reminders/ReminderTreatementCompletion';
+import DicomViewer from '../DentalImaging/DicomViewer';
 
 const Content = ({ connected }) => (
   <div className="col-md-12" style={{ display: (connected ? 'block' : 'none') }}>
@@ -140,6 +144,10 @@ const Content = ({ connected }) => (
       <Route exact path="/appointments/add" component={AddAppointment} />
       <Route exact path="/patients/add" component={AddPatient} />
       <Route exact path="/inventory/add" component={AddInventoryItem} />
+      <Route exact path="/dicom-viewer" component={DicomViewer} />
+      <Route exact path="/reminders/appointment" component={ReminderAppointment} />
+      <Route exact path="/reminders/follow-up" component={ReminderFollowUp} />
+      <Route exact path="/reminders/treatment-completion" component={ReminderTreatementCompletion} />
     </div>
   </div>
 );

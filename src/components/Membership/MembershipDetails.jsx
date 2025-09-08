@@ -6,7 +6,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CreateMembership from './CreateMembership';
 import EditMembership from './EditMembership';
 import BASE_URL from '../../main/urls/urls';
-
+import { useTranslation } from 'react-i18next';
 
 const planColors = {
   Premium: 'success',
@@ -22,6 +22,7 @@ const statusColors = {
 };
 
 const Memberships = () => {
+  const { t } = useTranslation();
   const [memberships, setMemberships] = useState([]);
   const [selectedMembership, setSelectedMembership] = useState(null);
   const [selectedMembershipId, setSelectedMembershipId] = useState(null);
@@ -115,7 +116,7 @@ const Memberships = () => {
   const columns = [
     {
       field: 'membershipPlan',
-      headerName: 'Plan',
+      headerName: t('membership.plan'),
       width: 130,
       renderCell: (params) => (
         <Chip
@@ -128,7 +129,7 @@ const Memberships = () => {
     },
     {
       field: 'paymentStatus',
-      headerName: 'Payment Status',
+      headerName: t('membership.payment_status'),
       width: 130,
       renderCell: (params) => (
         <Chip
@@ -141,7 +142,7 @@ const Memberships = () => {
     },
     { 
       field: 'benefits', 
-      headerName: 'Benefits', 
+      headerName: t('membership.benefits'), 
       width: 300,
       renderCell: (params) => (
         <Stack direction="row" spacing={0.5} flexWrap="wrap">
@@ -153,7 +154,7 @@ const Memberships = () => {
     },
     {
       field: 'validityStart',
-      headerName: 'Start Date',
+      headerName: t('membership.start_date'),
       width: 140,
       valueGetter: (params) => params.row.validityPeriod?.startDate,
       renderCell: (params) =>
@@ -168,7 +169,7 @@ const Memberships = () => {
     },
     {
       field: 'validityEnd',
-      headerName: 'End Date',
+      headerName: t('membership.end_date'),
       width: 140,
       valueGetter: (params) => params.row.validityPeriod?.endDate,
       renderCell: (params) =>
@@ -183,13 +184,13 @@ const Memberships = () => {
     },
     {
       field: 'renewalDate',
-      headerName: 'Renewal Date',
+      headerName: t('membership.renewal_date'),
       width: 140,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : ''
     },
     {
       field: 'lastPaymentAmount',
-      headerName: 'Last Payment ($)',
+      headerName: t('membership.last_payment_amount'),
       width: 150,
       renderCell: (params) => (
         <Chip
@@ -202,13 +203,13 @@ const Memberships = () => {
     },
     {
       field: 'lastPaymentDate',
-      headerName: 'Last Payment Date',
+      headerName: t('membership.last_payment_date'),
       width: 160,
       valueFormatter: (params) => params.value ? new Date(params.value).toLocaleDateString() : ''
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('membership.actions'),
       width: 90,
       sortable: false,
       filterable: false,
@@ -231,11 +232,20 @@ const Memberships = () => {
   return (
     <div className="card">
       <div className="card-header">
-        <h4><i className="fas fa-id-card-alt"></i> Memberships</h4>
+        <h4><i className="fas fa-id-card-alt"></i> {t('membership.title')}</h4>
       </div>
 
       <div className="card-body">
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            size="small"
+            startIcon={<i className="fas fa-sync-alt"></i>}
+            onClick={refresh}
+          >
+            Refresh
+          </Button>
           <Button
             variant="outlined"
             color="primary"
@@ -243,7 +253,7 @@ const Memberships = () => {
             startIcon={<i className="far fa-plus-square"></i>}
             onClick={() => setOpen(true)}
           >
-            Add Membership
+            {t('membership.add')}
           </Button>
           <Button
             variant="outlined"
@@ -254,7 +264,7 @@ const Memberships = () => {
             data-target="#editMembershipModal"
             disabled={!selectedMembership}
           >
-            Edit
+            {t('membership.edit')}
           </Button>
           <Button
             variant="outlined"
@@ -264,7 +274,7 @@ const Memberships = () => {
             onClick={handleDelete}
             disabled={!selectedMembershipId}
           >
-            Delete
+            {t('membership.delete')}
           </Button>
         </Stack>
 
@@ -287,9 +297,9 @@ const Memberships = () => {
               open={Boolean(actionAnchorEl)}
               onClose={handleActionClose}
             >
-              <MenuItem onClick={handleViewMenu}>View</MenuItem>
-              <MenuItem onClick={handleEditMenu}>Edit</MenuItem>
-              <MenuItem onClick={handleDeleteRow}>Delete</MenuItem>
+              <MenuItem onClick={handleViewMenu}>{t('membership.view')}</MenuItem>
+              <MenuItem onClick={handleEditMenu}>{t('membership.edit')}</MenuItem>
+              <MenuItem onClick={handleDeleteRow}>{t('membership.delete')}</MenuItem>
             </Menu>
           </div>
         )}
@@ -299,8 +309,8 @@ const Memberships = () => {
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Membership</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <h5 className="modal-title">{t('membership.edit')}</h5>
+                <button type="button" className="close" data-dismiss="modal" aria-label={t('membership.close')}>
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -319,7 +329,7 @@ const Memberships = () => {
                   onClick={refresh}
                   ref={closeButtonEdit}
                 >
-                  Close
+                  {t('membership.close')}
                 </button>
               </div>
             </div>
@@ -327,7 +337,7 @@ const Memberships = () => {
         </div>
 
         <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Create Membership</DialogTitle>
+          <DialogTitle>{t('membership.create')}</DialogTitle>
           <DialogContent>
             <CreateMembership onSuccess={handleSuccess} onCancel={() => setOpen(false)} />
           </DialogContent>
@@ -338,7 +348,7 @@ const Memberships = () => {
           <DialogTitle>
             <Stack direction="row" alignItems="center" spacing={1}>
               <i className="fas fa-id-card-alt" style={{ color: '#1976d2', fontSize: 22 }} />
-              <span>Membership Details</span>
+              <span>{t('membership.details')}</span>
             </Stack>
           </DialogTitle>
           <DialogContent>
@@ -367,14 +377,14 @@ const Memberships = () => {
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Status: ${viewMembership.status || '-'}`}
+                    label={`${t('membership.status')}: ${viewMembership.status || '-'}`}
                     color={statusColors[viewMembership.status] || 'default'}
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                  Benefits:
+                  {t('membership.benefits')}:
                 </Typography>
                 <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
                   {(viewMembership.benefits || []).map((b, i) => (
@@ -384,41 +394,41 @@ const Memberships = () => {
                 <Divider sx={{ mb: 2 }} />
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
                   <Chip
-                    label={`Start: ${viewMembership.validityPeriod?.startDate ? new Date(viewMembership.validityPeriod.startDate).toLocaleDateString() : '-'}`}
+                    label={`${t('membership.start')}: ${viewMembership.validityPeriod?.startDate ? new Date(viewMembership.validityPeriod.startDate).toLocaleDateString() : '-'}`}
                     color="info"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`End: ${viewMembership.validityPeriod?.endDate ? new Date(viewMembership.validityPeriod.endDate).toLocaleDateString() : '-'}`}
+                    label={`${t('membership.end')}: ${viewMembership.validityPeriod?.endDate ? new Date(viewMembership.validityPeriod.endDate).toLocaleDateString() : '-'}`}
                     color="warning"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Renewal: ${viewMembership.renewalDate ? new Date(viewMembership.renewalDate).toLocaleDateString() : '-'}`}
+                    label={`${t('membership.renewal')}: ${viewMembership.renewalDate ? new Date(viewMembership.renewalDate).toLocaleDateString() : '-'}`}
                     color="primary"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                 </Stack>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
                   <Chip
-                    label={`Last Payment: ${viewMembership.lastPaymentAmount ? `$${viewMembership.lastPaymentAmount}` : '-'}`}
+                    label={`${t('membership.last_payment')}: ${viewMembership.lastPaymentAmount ? `$${viewMembership.lastPaymentAmount}` : '-'}`}
                     color="success"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Last Payment Date: ${viewMembership.lastPaymentDate ? new Date(viewMembership.lastPaymentDate).toLocaleDateString() : '-'}`}
+                    label={`${t('membership.last_payment_date')}: ${viewMembership.lastPaymentDate ? new Date(viewMembership.lastPaymentDate).toLocaleDateString() : '-'}`}
                     color="default"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                 </Stack>
               </Box>
             ) : (
-              <Typography>No membership selected.</Typography>
+              <Typography>{t('membership.no_selected')}</Typography>
             )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setViewDialogOpen(false)} color="secondary" variant="outlined">
-              Close
+              {t('membership.close')}
             </Button>
           </DialogActions>
         </Dialog>

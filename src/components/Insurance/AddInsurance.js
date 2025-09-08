@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem, Stack, Typography } from '@mui/material';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const statusOptions = ['Active', 'Expired', 'Pending'];
 
 const AddInsurance = ({ open, onClose, onSuccess }) => {
+  const { t } = useTranslation();
+  const [patients, setPatients] = useState([]);
   const [form, setForm] = useState({
     patientId: '',
     providerName: '',
@@ -21,6 +24,13 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
     status: 'Active'
   });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch patients from backend
+    axios.get(`${BASE_URL}/patients`)
+      .then(res => setPatients(res.data))
+      .catch(() => setPatients([]));
+  }, []);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -40,7 +50,6 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
     const now = new Date().toISOString();
     const data = {
       ...form,
-      id: Math.random().toString(36).substr(2, 9),
       coverageDetails: {
         maxAnnualCoverage: Number(form.coverageDetails.maxAnnualCoverage),
         treatmentCoverage: Number(form.coverageDetails.treatmentCoverage),
@@ -61,20 +70,27 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add Insurance Policy</DialogTitle>
+      <DialogTitle>{t('insurance.title')}</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit} autoComplete="off">
           <TextField
-            label="Patient ID"
+            select
+            label={t('insurance.patient_id')}
             name="patientId"
             value={form.patientId}
             onChange={handleChange}
             fullWidth
             margin="normal"
             required
-          />
+          >
+            {patients.map(p => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.fullName || p.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
-            label="Provider Name"
+            label={t('insurance.provider_name')}
             name="providerName"
             value={form.providerName}
             onChange={handleChange}
@@ -83,7 +99,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
             required
           />
           <TextField
-            label="Policy Number"
+            label={t('insurance.policy_number')}
             name="policyNumber"
             value={form.policyNumber}
             onChange={handleChange}
@@ -91,10 +107,10 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
             margin="normal"
             required
           />
-          <Typography variant="subtitle1" sx={{ mt: 2 }}>Coverage Details</Typography>
+          <Typography variant="subtitle1" sx={{ mt: 2 }}>{t('insurance.coverage_details')}</Typography>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
             <TextField
-              label="Max Annual Coverage"
+              label={t('insurance.max_annual_coverage')}
               name="maxAnnualCoverage"
               type="number"
               value={form.coverageDetails.maxAnnualCoverage}
@@ -102,7 +118,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
               required
             />
             <TextField
-              label="Treatment (%)"
+              label={t('insurance.treatment_coverage')}
               name="treatmentCoverage"
               type="number"
               value={form.coverageDetails.treatmentCoverage}
@@ -110,7 +126,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
               required
             />
             <TextField
-              label="Medication (%)"
+              label={t('insurance.medication_coverage')}
               name="medicationCoverage"
               type="number"
               value={form.coverageDetails.medicationCoverage}
@@ -118,7 +134,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
               required
             />
             <TextField
-              label="Consultation (%)"
+              label={t('insurance.consultation_coverage')}
               name="consultationCoverage"
               type="number"
               value={form.coverageDetails.consultationCoverage}
@@ -127,7 +143,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
             />
           </Stack>
           <TextField
-            label="Valid From"
+            label={t('insurance.valid_from')}
             name="validFrom"
             type="date"
             value={form.validFrom}
@@ -138,7 +154,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
             required
           />
           <TextField
-            label="Valid Until"
+            label={t('insurance.valid_until')}
             name="validUntil"
             type="date"
             value={form.validUntil}
@@ -150,7 +166,7 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
           />
           <TextField
             select
-            label="Status"
+            label={t('insurance.status')}
             name="status"
             value={form.status}
             onChange={handleChange}
@@ -158,15 +174,15 @@ const AddInsurance = ({ open, onClose, onSuccess }) => {
             margin="normal"
           >
             {statusOptions.map(opt => (
-              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+              <MenuItem key={opt} value={opt}>{t(`insurance.status_${opt.toLowerCase()}`)}</MenuItem>
             ))}
           </TextField>
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
             <Button type="submit" variant="contained" color="success" disabled={loading}>
-              {loading ? 'Saving...' : 'Create Insurance'}
+              {loading ? t('insurance.saving') : t('insurance.create')}
             </Button>
             <Button variant="outlined" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('insurance.cancel')}
             </Button>
           </Stack>
         </form>

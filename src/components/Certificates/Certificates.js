@@ -21,11 +21,14 @@ import TemplateIcon from '@mui/icons-material/Description';
 import SignatureIcon from '@mui/icons-material/BorderColor';
 import jsPDF from 'jspdf';
 import BASE_URL from '../../main/urls/urls';
+import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
 const Certificates = () => {
+  const { t } = useTranslation();
   // State
   const [loading, setLoading] = useState(true);
   const [skeleton, setSkeleton] = useState(true);
@@ -59,16 +62,31 @@ const Certificates = () => {
   const getAllCertificates = () => {
     setLoading(true);
     setSkeleton(true);
-    certificateHTTPService.getAllCertificate()
-      .then(response => {
-        setCertificates(response.data);
-        setTimeout(() => setSkeleton(false), 800);
-        setLoading(false);
-      })
-      .catch(e => {
-        showMessage('Error', 'Failed to load certificates', 'warning');
-        setLoading(false);
-      });
+
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/certificates.json')
+        .then(res => res.json())
+        .then(data => {
+          setCertificates(data);
+          setTimeout(() => setSkeleton(false), 800);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', 'Failed to load certificates', 'warning');
+          setLoading(false);
+        });
+    } else {
+      certificateHTTPService.getAllCertificate()
+        .then(response => {
+          setCertificates(response.data);
+          setTimeout(() => setSkeleton(false), 800);
+          setLoading(false);
+        })
+        .catch(e => {
+          showMessage('Error', 'Failed to load certificates', 'warning');
+          setLoading(false);
+        });
+    }
   };
 
   // Filtering
@@ -84,9 +102,9 @@ const Certificates = () => {
   });
 
   // Helper functions
-  const getPatientName = id => patients.find(p => p.id === id)?.fullName || 'Patient not found';
-  const getDoctorName = id => doctors.find(d => d.id === id)?.fullName || 'Doctor not found';
-  const getClinicName = id => clinics.find(c => c.id === id)?.name || 'Clinic not found';
+  const getPatientName = id => patients.find(p => p.id === id)?.fullName || t('certificates.patient_not_found');
+  const getDoctorName = id => doctors.find(d => d.id === id)?.fullName || t('certificates.doctor_not_found');
+  const getClinicName = id => clinics.find(c => c.id === id)?.name || t('certificates.clinic_not_found');
 
   // Inline editing
   const handleEditRowsModelChange = (model) => setEditRowsModel(model);
@@ -138,9 +156,13 @@ const Certificates = () => {
         <MoreVertIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-        <MenuItem onClick={() => { setDrawerCertificate(selectedRow); setDrawerOpen(true); setAnchorEl(null); }}>View</MenuItem>
+        <MenuItem onClick={() => { setDrawerCertificate(selectedRow); setDrawerOpen(true); setAnchorEl(null); }}>
+          {t('certificates.view')}
+        </MenuItem>
         {userRole === 'admin' && (
-          <MenuItem onClick={async () => { await certificateHTTPService.removeCertificate(selectedRow.id); setSnackbar({ open: true, message: 'Deleted', severity: 'success' }); getAllCertificates(); setAnchorEl(null); }}>Delete</MenuItem>
+          <MenuItem onClick={async () => { await certificateHTTPService.removeCertificate(selectedRow.id); setSnackbar({ open: true, message: t('certificates.deleted'), severity: 'success' }); getAllCertificates(); setAnchorEl(null); }}>
+            {t('certificates.delete')}
+          </MenuItem>
         )}
         <MenuItem
           onClick={() => {
@@ -148,7 +170,7 @@ const Certificates = () => {
             setAnchorEl(null);
           }}
         >
-          Download
+          {t('certificates.download')}
         </MenuItem>
       </Menu>
     </div>
@@ -156,10 +178,10 @@ const Certificates = () => {
 
   // Columns for Certificates table
   const columns = [
-    { field: 'certificateNumber', headerName: 'Certificate #', width: 150, editable: false },
+    { field: 'certificateNumber', headerName: t('certificates.certificate_number'), width: 150, editable: false },
     {
       field: 'certificateType',
-      headerName: 'Type',
+      headerName: t('certificates.type'),
       width: 150,
       editable: false,
       renderCell: (params) => (
@@ -174,30 +196,30 @@ const Certificates = () => {
     },
     {
       field: 'patientId',
-      headerName: 'Patient',
+      headerName: t('certificates.patient'),
       width: 220,
       renderCell: (params) => (<span>{getPatientName(params.value)}</span>)
     },
     {
       field: 'doctorId',
-      headerName: 'Doctor',
+      headerName: t('certificates.doctor'),
       width: 220,
       renderCell: (params) => (<span>{getDoctorName(params.value)}</span>)
     },
     {
       field: 'clinicId',
-      headerName: 'Clinic',
+      headerName: t('certificates.clinic'),
       width: 220,
       renderCell: (params) => (<span>{getClinicName(params.value)}</span>)
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('certificates.status'),
       width: 120,
       editable: userRole === 'admin',
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`certificates.status_${params.value.toLowerCase()}`)}
           color={
             params.value === 'Active'
               ? 'success'
@@ -213,7 +235,7 @@ const Certificates = () => {
     },
     {
       field: 'issueDate',
-      headerName: 'Issued On',
+      headerName: t('certificates.issued_on'),
       width: 150,
       renderCell: (params) => (
         <Chip
@@ -227,7 +249,7 @@ const Certificates = () => {
     },
     {
       field: 'validUntil',
-      headerName: 'Valid Until',
+      headerName: t('certificates.valid_until'),
       width: 150,
       renderCell: (params) => (
         <Chip
@@ -241,7 +263,7 @@ const Certificates = () => {
     },
     {
       field: 'recommendations',
-      headerName: 'Recommendations',
+      headerName: t('certificates.recommendations'),
       width: 200,
       renderCell: (params) =>
         params.value ? (
@@ -258,7 +280,7 @@ const Certificates = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('certificates.actions'),
       width: 120,
       renderCell: renderActionsMenu
     }
@@ -279,7 +301,7 @@ const Certificates = () => {
   const barData = {
     labels: Object.keys(types),
     datasets: [{
-      label: 'Certificates per Type',
+      label: t('certificates.per_type'),
       data: Object.values(types),
       backgroundColor: '#1976d2'
     }]
@@ -288,13 +310,13 @@ const Certificates = () => {
     labels: Object.keys(types),
     datasets: [
       {
-        label: 'Active',
+        label: t('certificates.active'),
         data: Object.keys(types).map(type => certificates.filter(c => c.certificateType === type && c.status === 'Active').length),
         borderColor: '#43a047',
         fill: false,
       },
       {
-        label: 'Expired',
+        label: t('certificates.expired'),
         data: Object.keys(types).map(type => certificates.filter(c => c.certificateType === type && c.status === 'Expired').length),
         borderColor: '#e53935',
         fill: false,
@@ -377,9 +399,6 @@ const Certificates = () => {
     doc.setFont('times', 'normal');
     doc.text(lines, leftMargin, y, { maxWidth });
 
-    // Optionally, highlight important info in bold by overprinting (simple approach)
-    // You can bold the patient, doctor, clinic, diagnosis, treatment, and dates by calculating their positions in the lines array if needed.
-
     // Notes
     if (certificate.notes) {
       y += lines.length * 18 + 15;
@@ -391,7 +410,7 @@ const Certificates = () => {
     }
 
     // Signature area
-    y = 500;
+    y = 600; // Move signature area further down
     doc.setDrawColor('#1976d2');
     doc.line(400, y, 555, y);
     doc.setFontSize(16);
@@ -399,11 +418,17 @@ const Certificates = () => {
     doc.setFont('times', 'italic');
     doc.text(doctorName, 420, y + 18);
 
+    // Show signature image if available
+    if (certificate.signature) {
+      doc.text('Signature:', 420, y + 35);
+      doc.addImage(certificate.signature, 'PNG', 420, y + 40, 120, 40);
+    }
+
     // Label under signature
     doc.setFont('times', 'normal');
     doc.setFontSize(12);
     doc.setTextColor('#222');
-    doc.text('Doctor Signature', 420, y + 36);
+    //doc.text('Doctor Signature', 420, y + 90);
 
     // Footer
     doc.setFontSize(10);
@@ -421,21 +446,21 @@ const Certificates = () => {
         <div className="card-body">
           {/* Page Title */}
           <Typography variant="h4" gutterBottom sx={{ mb: 3, mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <AssignmentIcon sx={{ mr: 1 }} /> Manage Certificates
+            <AssignmentIcon sx={{ mr: 1 }} /> {t('certificates.title')}
           </Typography>
 
           {/* Widgets row */}
           <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2, flexWrap: 'wrap' }}>
             <Box sx={{ flex: 1, bgcolor: '#e3f2fd', p: 2, borderRadius: 2, textAlign: 'center' }}>
-              <Typography variant="subtitle2" color="primary">Total Certificates</Typography>
+              <Typography variant="subtitle2" color="primary">{t('certificates.total')}</Typography>
               <Typography variant="h6">{certificates.length}</Typography>
             </Box>
             <Box sx={{ flex: 1, bgcolor: '#e8f5e9', p: 2, borderRadius: 2, textAlign: 'center' }}>
-              <Typography variant="subtitle2" color="success.main">Active</Typography>
+              <Typography variant="subtitle2" color="success.main">{t('certificates.active')}</Typography>
               <Typography variant="h6">{certificates.filter(c => c.status === 'Active').length}</Typography>
             </Box>
             <Box sx={{ flex: 1, bgcolor: '#ffebee', p: 2, borderRadius: 2, textAlign: 'center' }}>
-              <Typography variant="subtitle2" color="error.main">Expired</Typography>
+              <Typography variant="subtitle2" color="error.main">{t('certificates.expired')}</Typography>
               <Typography variant="h6">{certificates.filter(c => c.status === 'Expired').length}</Typography>
             </Box>
           </Box>
@@ -443,15 +468,15 @@ const Certificates = () => {
           {/* Charts row */}
           <Box sx={{ display: 'flex', gap: 4, mb: 4, mt: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-              <Typography variant="subtitle1" align="center">Certificates by Type</Typography>
+              <Typography variant="subtitle1" align="center">{t('certificates.by_type')}</Typography>
               <Doughnut data={doughnutData} />
             </Box>
             <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-              <Typography variant="subtitle1" align="center">Certificates per Type</Typography>
+              <Typography variant="subtitle1" align="center">{t('certificates.per_type')}</Typography>
               <Bar data={barData} />
             </Box>
             <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-              <Typography variant="subtitle1" align="center">Status Trends by Type</Typography>
+              <Typography variant="subtitle1" align="center">{t('certificates.status_trends')}</Typography>
               <Line data={lineData} />
             </Box>
           </Box>
@@ -464,7 +489,7 @@ const Certificates = () => {
               startIcon={<TemplateIcon />}
               onClick={() => setAddDialogOpen(true)}
             >
-              Create Certificate
+              {t('certificates.create')}
             </Button>
             <Button
               variant="outlined"
@@ -472,7 +497,7 @@ const Certificates = () => {
               startIcon={<DownloadIcon />}
               onClick={exportToExcel}
             >
-              Export Excel
+              {t('certificates.export_excel')}
             </Button>
             <Button
               variant="outlined"
@@ -480,78 +505,78 @@ const Certificates = () => {
               startIcon={<PrintIcon />}
               onClick={exportToPDF}
             >
-              Export PDF
+              {t('certificates.export_pdf')}
             </Button>
           </Stack>
 
           {/* Advanced Filters */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
             <TextField
-              label="Type"
+              label={t('certificates.type')}
               select
               value={filter.type}
               onChange={e => setFilter(f => ({ ...f, type: e.target.value }))}
               size="small"
               fullWidth
             >
-              <MenuItem value="">All Types</MenuItem>
+              <MenuItem value="">{t('certificates.all_types')}</MenuItem>
               {Object.keys(types).map(type => (
                 <MenuItem key={type} value={type}>{type}</MenuItem>
               ))}
             </TextField>
             <TextField
-              label="Status"
+              label={t('certificates.status')}
               select
               value={filter.status}
               onChange={e => setFilter(f => ({ ...f, status: e.target.value }))}
               size="small"
               fullWidth
             >
-              <MenuItem value="">All Statuses</MenuItem>
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Expired">Expired</MenuItem>
+              <MenuItem value="">{t('certificates.all_statuses')}</MenuItem>
+              <MenuItem value="Active">{t('certificates.status_active')}</MenuItem>
+              <MenuItem value="Expired">{t('certificates.status_expired')}</MenuItem>
             </TextField>
             <TextField
-              label="Patient"
+              label={t('certificates.patient')}
               select
               value={filter.patient}
               onChange={e => setFilter(f => ({ ...f, patient: e.target.value }))}
               size="small"
               fullWidth
             >
-              <MenuItem value="">All Patients</MenuItem>
+              <MenuItem value="">{t('certificates.all_patients')}</MenuItem>
               {patients.map(p => (
                 <MenuItem key={p.id} value={p.id}>{p.fullName}</MenuItem>
               ))}
             </TextField>
             <TextField
-              label="Doctor"
+              label={t('certificates.doctor')}
               select
               value={filter.doctor}
               onChange={e => setFilter(f => ({ ...f, doctor: e.target.value }))}
               size="small"
               fullWidth
             >
-              <MenuItem value="">All Doctors</MenuItem>
+              <MenuItem value="">{t('certificates.all_doctors')}</MenuItem>
               {doctors.map(d => (
                 <MenuItem key={d.id} value={d.id}>{d.fullName}</MenuItem>
               ))}
             </TextField>
             <TextField
-              label="Clinic"
+              label={t('certificates.clinic')}
               select
               value={filter.clinic}
               onChange={e => setFilter(f => ({ ...f, clinic: e.target.value }))}
               size="small"
               fullWidth
             >
-              <MenuItem value="">All Clinics</MenuItem>
+              <MenuItem value="">{t('certificates.all_clinics')}</MenuItem>
               {clinics.map(c => (
                 <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
               ))}
             </TextField>
             <TextField
-              label="From"
+              label={t('certificates.from')}
               type="date"
               value={filter.from}
               onChange={e => setFilter(f => ({ ...f, from: e.target.value }))}
@@ -560,7 +585,7 @@ const Certificates = () => {
               fullWidth
             />
             <TextField
-              label="To"
+              label={t('certificates.to')}
               type="date"
               value={filter.to}
               onChange={e => setFilter(f => ({ ...f, to: e.target.value }))}
@@ -585,7 +610,7 @@ const Certificates = () => {
                 editMode="row"
                 onRowEditCommit={handleRowEditCommit}
                 onEditRowsModelChange={handleEditRowsModelChange}
-                aria-label="Certificates Table"
+                aria-label={t('certificates.table_aria')}
               />
             </div>
           )}
@@ -593,7 +618,7 @@ const Certificates = () => {
           {/* Add Certificate Dialog */}
           <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="md" fullWidth>
             <DialogTitle>
-              <TemplateIcon sx={{ mr: 1 }} /> Create Certificate
+              <TemplateIcon sx={{ mr: 1 }} /> {t('certificates.create')}
             </DialogTitle>
             <DialogContent>
               <AddCertificate
@@ -602,20 +627,20 @@ const Certificates = () => {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setAddDialogOpen(false)} color="secondary">Close</Button>
+              <Button onClick={() => setAddDialogOpen(false)} color="secondary">{t('certificates.close')}</Button>
             </DialogActions>
           </Dialog>
 
           {/* Edit Certificate Dialog */}
           <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="md" fullWidth>
             <DialogTitle>
-              <TemplateIcon sx={{ mr: 1 }} /> Edit Certificate
+              <TemplateIcon sx={{ mr: 1 }} /> {t('certificates.edit')}
             </DialogTitle>
             <DialogContent>
               <EditCertificate closeModal={() => { setEditDialogOpen(false); getAllCertificates(); }} certificate={selectedRow} />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setEditDialogOpen(false)} color="secondary">Close</Button>
+              <Button onClick={() => setEditDialogOpen(false)} color="secondary">{t('certificates.close')}</Button>
             </DialogActions>
           </Dialog>
 
@@ -630,24 +655,24 @@ const Certificates = () => {
               {drawerCertificate && (
                 <>
                   <Typography variant="h6" gutterBottom>
-                    Certificate Preview
+                    {t('certificates.preview')}
                   </Typography>
-                  <Typography variant="subtitle2">Type: {drawerCertificate.certificateType}</Typography>
-                  <Typography variant="subtitle2">Patient: {getPatientName(drawerCertificate.patientId)}</Typography>
-                  <Typography variant="subtitle2">Doctor: {getDoctorName(drawerCertificate.doctorId)}</Typography>
-                  <Typography variant="subtitle2">Clinic: {getClinicName(drawerCertificate.clinicId)}</Typography>
-                  <Typography variant="subtitle2">Diagnosis: {drawerCertificate.diagnosis}</Typography>
-                  <Typography variant="subtitle2">Treatment: {drawerCertificate.treatmentDetails}</Typography>
-                  <Typography variant="subtitle2">Recommendations: {drawerCertificate.recommendations}</Typography>
-                  <Typography variant="subtitle2">Status: {drawerCertificate.status}</Typography>
-                  <Typography variant="subtitle2">Issued: {new Date(drawerCertificate.issueDate).toLocaleDateString()}</Typography>
-                  <Typography variant="subtitle2">Valid Until: {new Date(drawerCertificate.validUntil).toLocaleDateString()}</Typography>
-                  <Typography variant="subtitle2" sx={{ mt: 2 }}>Notes:</Typography>
+                  <Typography variant="subtitle2">{t('certificates.type')}: {drawerCertificate.certificateType}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.patient')}: {getPatientName(drawerCertificate.patientId)}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.doctor')}: {getDoctorName(drawerCertificate.doctorId)}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.clinic')}: {getClinicName(drawerCertificate.clinicId)}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.diagnosis')}: {drawerCertificate.diagnosis}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.treatment')}: {drawerCertificate.treatmentDetails}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.recommendations')}: {drawerCertificate.recommendations}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.status')}: {drawerCertificate.status}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.issued_on')}: {new Date(drawerCertificate.issueDate).toLocaleDateString()}</Typography>
+                  <Typography variant="subtitle2">{t('certificates.valid_until')}: {new Date(drawerCertificate.validUntil).toLocaleDateString()}</Typography>
+                  <Typography variant="subtitle2" sx={{ mt: 2 }}>{t('certificates.notes')}:</Typography>
                   <Typography variant="body2">{drawerCertificate.notes}</Typography>
                   <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-                    <Button variant="outlined" startIcon={<PrintIcon />} onClick={() => exportCertificateToPDF(drawerCertificate)}>Export PDF</Button>
-                    <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportToExcel}>Download Excel</Button>
-                    <Button variant="outlined" startIcon={<ShareIcon />} onClick={() => setSnackbar({ open: true, message: 'Share not implemented', severity: 'info' })}>Share</Button>
+                    <Button variant="outlined" startIcon={<PrintIcon />} onClick={() => exportCertificateToPDF(drawerCertificate)}>{t('certificates.export_pdf')}</Button>
+                    <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportToExcel}>{t('certificates.export_excel')}</Button>
+                    <Button variant="outlined" startIcon={<ShareIcon />} onClick={() => setSnackbar({ open: true, message: t('certificates.share_not_implemented'), severity: 'info' })}>{t('certificates.share')}</Button>
                   </Stack>
                 </>
               )}

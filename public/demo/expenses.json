@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "expenseCategory": "Equipment",
+    "description": "Purchase of new dental chair",
+    "amount": 3500,
+    "paymentMethod": "Bank Transfer",
+    "paymentStatus": "Paid",
+    "vendorId": "11111111-aaaa-bbbb-cccc-111111111111",
+    "vendorName": "Dental Supplies Inc.",
+    "invoiceId": "22222222-bbbb-cccc-dddd-222222222222",
+    "clinicId": "33333333-cccc-dddd-eeee-333333333333",
+    "transactionDate": "2025-07-01T10:00:00.000Z",
+    "receiptAttachments": [
+      "https://example.com/receipts/chair-invoice.pdf"
+    ],
+    "notes": "Chair installed in Room 2.",
+    "createdAt": "2025-08-05T09:58:17.604Z",
+    "updatedAt": "2025-08-05T09:58:17.604Z"
+  },
+  {
+    "id": 2,
+    "expenseCategory": "Salaries",
+    "description": "Monthly salary for July",
+    "amount": 12000,
+    "paymentMethod": "Bank Transfer",
+    "paymentStatus": "Paid",
+    "vendorId": null,
+    "vendorName": "",
+    "invoiceId": null,
+    "clinicId": "33333333-cccc-dddd-eeee-333333333333",
+    "transactionDate": "2025-07-05T09:00:00.000Z",
+    "receiptAttachments": [],
+    "notes": "Salary paid to all staff.",
+    "createdAt": "2025-08-05T09:58:17.604Z",
+    "updatedAt": "2025-08-05T09:58:17.604Z"
+  },
+  {
+    "id": 3,
+    "expenseCategory": "Utilities",
+    "description": "Electricity bill for June",
+    "amount": 450.75,
+    "paymentMethod": "Credit Card",
+    "paymentStatus": "Paid",
+    "vendorId": null,
+    "vendorName": "City Power Co.",
+    "invoiceId": "44444444-dddd-eeee-ffff-444444444444",
+    "clinicId": "33333333-cccc-dddd-eeee-333333333333",
+    "transactionDate": "2025-07-03T15:30:00.000Z",
+    "receiptAttachments": [
+      "https://example.com/receipts/electricity-june.pdf"
+    ],
+    "notes": "",
+    "createdAt": "2025-08-05T09:58:17.604Z",
+    "updatedAt": "2025-08-05T09:58:17.604Z"
+  }
+]

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { TextField, Button, MenuItem, Stack, FormControlLabel, Checkbox } from '@mui/material';
 import BASE_URL from '../../main/urls/urls';
 
@@ -7,6 +8,8 @@ const statuses = ['Pending', 'Confirmed', 'Completed', 'No-show', 'Cancelled'];
 const types = ['Consultation', 'Follow-up', 'Emergency', 'Routine', 'Other'];
 
 const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [], onSuccess }) => {
+  const { t } = useTranslation();
+
   const [form, setForm] = useState({
     patientId: '',
     doctorId: '',
@@ -48,7 +51,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
     <form onSubmit={handleSubmit} autoComplete="off">
       <TextField
         select
-        label="Patient"
+        label={t('appointments.patient')}
         name="patientId"
         value={form.patientId}
         onChange={handleChange}
@@ -62,7 +65,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
       </TextField>
       <TextField
         select
-        label="Doctor"
+        label={t('appointments.doctor')}
         name="doctorId"
         value={form.doctorId}
         onChange={handleChange}
@@ -76,7 +79,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
       </TextField>
       <TextField
         select
-        label="Clinic Location"
+        label={t('appointments.clinic')}
         name="clinicLocationId"
         value={form.clinicLocationId}
         onChange={handleChange}
@@ -89,7 +92,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
         ))}
       </TextField>
       <TextField
-        label="Appointment Date"
+        label={t('appointments.date')}
         name="appointmentDate"
         type="date"
         value={form.appointmentDate}
@@ -101,7 +104,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
       />
       <Stack direction="row" spacing={2}>
         <TextField
-          label="Start Time"
+          label={t('appointments.start_time')}
           name="startTime"
           type="time"
           value={form.startTime}
@@ -111,7 +114,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
           required
         />
         <TextField
-          label="End Time"
+          label={t('appointments.end_time')}
           name="endTime"
           type="time"
           value={form.endTime}
@@ -123,7 +126,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
       </Stack>
       <TextField
         select
-        label="Status"
+        label={t('appointments.status')}
         name="status"
         value={form.status}
         onChange={handleChange}
@@ -132,12 +135,12 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
         required
       >
         {statuses.map(s => (
-          <MenuItem key={s} value={s}>{s}</MenuItem>
+          <MenuItem key={s} value={s}>{t(`appointments.status_${s.toLowerCase().replace('-', '_')}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
         select
-        label="Appointment Type"
+        label={t('appointments.type')}
         name="appointmentType"
         value={form.appointmentType}
         onChange={handleChange}
@@ -145,12 +148,12 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
         margin="normal"
         required
       >
-        {types.map(t => (
-          <MenuItem key={t} value={t}>{t}</MenuItem>
+        {types.map(ti => (
+          <MenuItem key={ti} value={ti}>{t(`appointments.type_${ti.toLowerCase().replace('-', '_')}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
-        label="Reason for Visit"
+        label={t('appointments.reason')}
         name="reasonForVisit"
         value={form.reasonForVisit}
         onChange={handleChange}
@@ -158,7 +161,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
         margin="normal"
       />
       <TextField
-        label="Notes"
+        label={t('appointments.notes')}
         name="notes"
         value={form.notes}
         onChange={handleChange}
@@ -168,7 +171,7 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
         rows={2}
       />
       <TextField
-        label="Room Number"
+        label={t('appointments.room_number')}
         name="roomNumber"
         value={form.roomNumber}
         onChange={handleChange}
@@ -184,10 +187,10 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
             color="primary"
           />
         }
-        label="Is First Visit"
+        label={t('appointments.is_first_visit')}
       />
       <TextField
-        label="Follow Up Date"
+        label={t('appointments.follow_up_date')}
         name="followUpDate"
         type="date"
         value={form.followUpDate}
@@ -198,14 +201,21 @@ const AddAppointment = ({ closeModal, doctors = [], patients = [], clinics = [],
       />
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button type="submit" variant="contained" color="primary" disabled={loading}>
-          {loading ? 'Saving...' : 'Add Appointment'}
+          {loading ? t('appointments.saving') : t('appointments.add_appointment')}
         </Button>
         <Button variant="outlined" onClick={closeModal} disabled={loading}>
-          Cancel
+          {t('appointments.cancel')}
         </Button>
       </Stack>
     </form>
   );
 };
+
+// Suppress ResizeObserver loop error in development
+const ignoreResizeObserverError = (message) => {
+  if (message.includes('ResizeObserver loop completed')) return;
+  console.error(message);
+};
+window.addEventListener('error', e => ignoreResizeObserverError(e.message));
 
 export default AddAppointment;

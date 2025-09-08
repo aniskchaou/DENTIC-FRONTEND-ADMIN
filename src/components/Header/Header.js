@@ -10,11 +10,59 @@ import appointementHTTPService from '../../main/services/appointementHTTPService
 import { FaPlus, FaBell, FaQuestionCircle, FaBars, FaCircle, FaUserCircle, FaCog, FaPowerOff, FaUser, FaGlobe, FaTooth } from 'react-icons/fa';
 import axios from 'axios'; // Add this if not already imported
 import BASE_URL from '../../main/urls/urls';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import en from './locales/en.json';
+import fr from './locales/fr.json';
+import ar from './locales/ar.json';
+import es from './locales/es.json'; // Add this import
+import vi from './locales/vi.json';
+import th from './locales/th.json';
+import pt from './locales/pt.json';
+import hi from './locales/hi.json';
+import bn from './locales/bn.json';
+import tr from './locales/tr.json';
+import fil from './locales/fil.json';
+import id from './locales/id.json';
+import { useTranslation } from 'react-i18next';
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: { translation: en },
+      fr: { translation: fr },
+      ar: { translation: ar },
+      es: { translation: es },
+      vi: { translation: vi },
+      th: { translation: th },
+      pt: { translation: pt },
+      hi: { translation: hi },
+      bn: { translation: bn },
+      tr: { translation: tr },
+      fil: { translation: fil },
+      id: { translation: id }
+    },
+    lng: 'en',
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false }
+  });
+
+
 
 const languages = [
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
-  { code: 'ar', label: 'العربية' }
+  { code: 'ar', label: 'العربية' },
+  { code: 'es', label: 'Español' },
+  { code: 'vi', label: 'Tiếng Việt' },
+  { code: 'th', label: 'ไทย' },
+  { code: 'pt', label: 'Português' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'tr', label: 'Türkçe' },
+  { code: 'fil', label: 'Filipino' },
+  { code: 'id', label: 'Bahasa Indonesia' }
 ];
 
 // Get username from localStorage user object and capitalize first character
@@ -29,13 +77,37 @@ try {
 }
 
 // Example usage in header (e.g., greeting or profile menu)
-const user = {
-  name: username || "User",
-  role: "Administrator",
-  avatar: "images/admin.png"
-};
-
+function getCurrentUser() {
+    try {
+        const userObj = JSON.parse(localStorage.getItem('user'));
+        if (userObj) {
+            return {
+                name: userObj.fullName || userObj.username || "User",
+                role: userObj.role || "Administrator",
+                avatar: "images/admin.png"
+            };
+        }
+    } catch {}
+    return {
+        name: username || "User",
+        role: "Administrator",
+        avatar: "images/admin.png"
+    };
+}
 const Header = ({ connected, handleClick }) => {
+        // User state and refresh effect
+        const [user, setUser] = useState(getCurrentUser());
+        useEffect(() => {
+            const handleStorageChange = () => {
+                setUser(getCurrentUser());
+            };
+            window.addEventListener('storage', handleStorageChange);
+            // Refresh user on mount
+            setUser(getCurrentUser());
+            return () => {
+                window.removeEventListener('storage', handleStorageChange);
+            };
+        }, []);
     let history = useHistory();
     let location = useLocation();
     const [loading, setLoading] = useState(false);
@@ -48,9 +120,13 @@ const Header = ({ connected, handleClick }) => {
     const [darkMode, setDarkMode] = useState(false);
     const handleThemeChange = () => setDarkMode((prev) => !prev);
 
-    // Language selector
-    const [lang, setLang] = useState('en');
-    const handleLangChange = (e) => setLang(e.target.value);
+    const { i18n } = useTranslation();
+    const [lang, setLang] = useState(i18n.language);
+
+    const handleLangChange = (e) => {
+      setLang(e.target.value);
+      i18n.changeLanguage(e.target.value);
+    };
 
     // Hamburger menu for mobile
     const [navOpen, setNavOpen] = useState(true);
@@ -80,16 +156,24 @@ const Header = ({ connected, handleClick }) => {
     const [clinicSettings, setClinicSettings] = useState({ system: { appName: 'App' } });
 
     const logout = () => {
-        handleClick(false)
-        localStorage.clear()
-        history.push("/login")
+    handleClick(false)
+    localStorage.clear();
+    // For extra safety, also remove 'user' key directly
+    localStorage.removeItem('user');
+    history.push("/login")
     }
 
     useEffect(() => {
-        // Fetch clinic settings for appName
-        axios.get(`${BASE_URL}/clinicsettings`)
-            .then(res => setClinicSettings(res.data))
-            .catch(() => setClinicSettings({ system: { appName: 'App' } }));
+        if (CurrentUser.DEMO_MODE) {
+            fetch('/demo/clinicssettings.json')
+                .then(res => res.json())
+                .then(data => setClinicSettings(data))
+                .catch(() => setClinicSettings({ system: { appName: 'App' } }));
+        } else {
+            axios.get(`${BASE_URL}/clinicsettings`)
+                .then(res => setClinicSettings(res.data))
+                .catch(() => setClinicSettings({ system: { appName: 'App' } }));
+        }
         // LoadJS()
         //  getAllExpenses()
     }, []);
@@ -123,14 +207,29 @@ const Header = ({ connected, handleClick }) => {
 
     const getAllAppointements = () => {
         setLoading(true);
-        appointementHTTPService.getAllAppointement()
-            .then(response => {
-                setAppointements(response.data);
-                setLoading(false);
-            })
-            .catch(e => {
-                showMessage('Error', CurrentUser.ERR_MSG, 'warning')
-            });
+
+        if (CurrentUser.DEMO_MODE) {
+            fetch('/demo/appointments.json')
+                .then(res => res.json())
+                .then(data => {
+                    setAppointements(data);
+                    setLoading(false);
+                })
+                .catch(e => {
+                    showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+                    setLoading(false);
+                });
+        } else {
+            appointementHTTPService.getAllAppointement()
+                .then(response => {
+                    setAppointements(response.data);
+                    setLoading(false);
+                })
+                .catch(e => {
+                    showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+                    setLoading(false);
+                });
+        }
     };
 
     const handleAppointmentsClick = (event) => {
@@ -138,6 +237,8 @@ const Header = ({ connected, handleClick }) => {
         getAllAppointements(); // Fetch appointments when opening
     };
     const handleAppointmentsClose = () => setAppointmentsAnchorEl(null);
+
+    const { t } = useTranslation();
 
     return (
         <div id="right-panel" className={`right-panel${darkMode ? ' dark-mode' : ''}`} style={{ display: (connected ? 'block' : 'none') }}>
@@ -197,7 +298,7 @@ const Header = ({ connected, handleClick }) => {
                                 whiteSpace: 'nowrap',
                                 overflowX: 'auto'
                             }}>
-                                <li className="breadcrumb-item"><Link to="/">Home</Link></li>
+                                <li className="breadcrumb-item"><Link to="/">{t('home.menu_home')}</Link></li>
                                 {breadcrumbs.map((crumb, idx) => (
                                     <li key={idx} className="breadcrumb-item">
                                         <Link to={`/${breadcrumbs.slice(0, idx + 1).join('/')}`}>{crumb.charAt(0).toUpperCase() + crumb.slice(1)}</Link>
@@ -223,10 +324,18 @@ const Header = ({ connected, handleClick }) => {
                             size="small"
                             sx={{ minWidth: 90, fontSize: 14, background: '#fff' }}
                         >
-                            {/* Only English enabled, others disabled */}
                             <MenuItem key="en" value="en">English</MenuItem>
-                            <MenuItem key="fr" value="fr" disabled>Français</MenuItem>
-                            <MenuItem key="ar" value="ar" disabled>العربية</MenuItem>
+                            <MenuItem key="fr" value="fr">Français</MenuItem>
+                            <MenuItem key="ar" value="ar">العربية</MenuItem>
+                            <MenuItem key="es" value="es">Español</MenuItem> {/* Add Spanish option */}
+                            <MenuItem key="vi" value="vi">Tiếng Việt</MenuItem>
+                            <MenuItem key="th" value="th">ไทย</MenuItem>
+                            <MenuItem key="pt" value="pt">Português</MenuItem>
+                            <MenuItem key="hi" value="hi">हिन्दी</MenuItem>
+                            <MenuItem key="bn" value="bn">বাংলা</MenuItem>
+                            <MenuItem key="tr" value="tr">Türkçe</MenuItem>
+                            <MenuItem key="fil" value="fil">Filipino</MenuItem>
+                            <MenuItem key="id" value="id">Bahasa Indonesia</MenuItem>
                         </Select>
                         <div className="form-inline" style={{ marginRight: 0 }}>
                             <form className="search-form" onSubmit={e => { e.preventDefault(); print(); }}>
@@ -255,13 +364,13 @@ const Header = ({ connected, handleClick }) => {
                             onClose={handleQuickAddClose}
                         >
                             <MenuItem onClick={() => { handleQuickAddClose(); history.push('/appointments/add'); }}>
-                                Add Appointment
+                                {t('add_appointment')}
                             </MenuItem>
                             <MenuItem onClick={() => { handleQuickAddClose(); history.push('/patients/add'); }}>
-                                Add Patient
+                                {t('add_patient')}
                             </MenuItem>
                             <MenuItem onClick={() => { handleQuickAddClose(); history.push('/inventory/add'); }}>
-                                Add Inventory Item
+                                {t('add_inventory_item')}
                             </MenuItem>
                         </Menu>
                         <Tooltip title="Appointments">
@@ -280,12 +389,12 @@ const Header = ({ connected, handleClick }) => {
                             }}
                         >
                             <MenuItem disabled>
-                                <strong>You have {appointements.length} Appointments</strong>
+                                <strong>{t('appointments_count', { count: appointements.length })}</strong>
                             </MenuItem>
                             {loading ? (
-                                <MenuItem>Loading...</MenuItem>
+                                <MenuItem>{t('loading')}</MenuItem>
                             ) : appointements.length === 0 ? (
-                                <MenuItem>No appointments found.</MenuItem>
+                                <MenuItem>{t('no_appointments')}</MenuItem>
                             ) : (
                                 appointements.map(itemm => (
                                     <MenuItem
@@ -494,7 +603,7 @@ const Header = ({ connected, handleClick }) => {
                                 ))
                             )}
                         </Menu>
-                        <Tooltip title="Help & Support">
+                        <Tooltip title={t('help_support')}>
                             <IconButton color="info" component={Link} to="/help">
                                 <FaQuestionCircle />
                             </IconButton>
@@ -515,13 +624,13 @@ const Header = ({ connected, handleClick }) => {
                                 </div>
                             </MenuItem>
                             <MenuItem onClick={() => { handleUserClose(); history.push('/profile'); }}>
-                                <FaUserCircle style={{ marginRight: 8 }} /> My Profile
+                                <FaUserCircle style={{ marginRight: 8 }} /> {t('my_profile')}
                             </MenuItem>
                             <MenuItem onClick={() => { handleUserClose(); history.push('/configuration'); }}>
-                                <FaCog style={{ marginRight: 8 }} /> Settings
+                                <FaCog style={{ marginRight: 8 }} /> {t('settings')}
                             </MenuItem>
                             <MenuItem onClick={() => { handleUserClose(); logout(); }}>
-                                <FaPowerOff style={{ marginRight: 8 }} /> Log Out
+                                <FaPowerOff style={{ marginRight: 8 }} /> {t('log_out')}
                             </MenuItem>
                         </Menu>
                     </div>

@@ -10,8 +10,10 @@ import { Button, Chip, LinearProgress, Menu, MenuItem, Typography, Dialog, Dialo
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import IconButton from '@mui/material/IconButton';
+import { useTranslation } from 'react-i18next';
 
 const MedicamentManufacture = () => {
+  const { t } = useTranslation();
   const [medicamentManufactures, setMedicamentManufactures] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
   const [updatedItemId, setUpdatedItemId] = useState(0);
@@ -31,20 +33,39 @@ const MedicamentManufacture = () => {
 
   const fetchData = () => {
     setLoading(true);
-    medicamentManufactureHTTPService.getAllMedicamentManufacture()
-      .then(response => {
-        // Ensure every row has a unique id
-        const formatted = response.data.map((item, index) => ({
-          ...item,
-          id: item.id ? item.id : (item.barcode ? item.barcode : index + 1) // Use id, else barcode, else index
-        }));
-        setMedicamentManufactures(formatted);
-        setLoading(false);
-      })
-      .catch(() => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning');
-        setLoading(false);
-      });
+
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/medicament-manufactures.json')
+        .then(res => res.json())
+        .then(data => {
+          // Ensure every row has a unique id
+          const formatted = data.map((item, index) => ({
+            ...item,
+            id: item.id ? item.id : (item.barcode ? item.barcode : index + 1)
+          }));
+          setMedicamentManufactures(formatted);
+          setLoading(false);
+        })
+        .catch(() => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    } else {
+      medicamentManufactureHTTPService.getAllMedicamentManufacture()
+        .then(response => {
+          // Ensure every row has a unique id
+          const formatted = response.data.map((item, index) => ({
+            ...item,
+            id: item.id ? item.id : (item.barcode ? item.barcode : index + 1) // Use id, else barcode, else index
+          }));
+          setMedicamentManufactures(formatted);
+          setLoading(false);
+        })
+        .catch(() => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    }
   };
 
   const handleRowSelection = (ids) => {
@@ -81,6 +102,13 @@ const MedicamentManufacture = () => {
     closeButtonAdd.current.click();
   };
 
+  const handleEditMedicamentManufacture = (row) => {
+    setUpdatedItem(row);
+    setUpdatedItemId(row.id);
+    // Open the edit modal (React Dialog recommended)
+    document.querySelector('[data-target="#editModal"]').click();
+  };
+
   // Update actions menu for View
   const renderActionsMenu = (params) => (
     <div>
@@ -92,29 +120,34 @@ const MedicamentManufacture = () => {
           setViewItem(params.row);
           setViewOpen(true);
           setAnchorEl(null);
-        }}>View</MenuItem>
-        <MenuItem onClick={() => {/* Edit logic */}}>Edit</MenuItem>
-        <MenuItem onClick={() => {/* Delete logic */}}>Delete</MenuItem>
+        }}>{t('manufacture.view')}</MenuItem>
+        <MenuItem onClick={() => {
+          handleEditMedicamentManufacture(params.row);
+          setAnchorEl(null);
+        }}>{t('manufacture.edit')}</MenuItem>
+        <MenuItem onClick={() => {
+          removeMedicamentManufactureAction({ preventDefault: () => {} }, [params.row.id]);
+          setAnchorEl(null);
+        }}>{t('manufacture.delete')}</MenuItem>
       </Menu>
     </div>
   );
 
   // Columns for MedicamentManufacture table (delete id column, add chip for status, add actions column)
   const columns = [
-    // { field: 'id', headerName: '#', width: 60 }, // deleted
-    { field: 'name', headerName: 'Manufacture', width: 150 },
-    { field: 'licenseNumber', headerName: 'License No.', width: 130 },
+    { field: 'name', headerName: t('manufacture.name'), width: 150 },
+    { field: 'licenseNumber', headerName: t('manufacture.license_number'), width: 130 },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('manufacture.status'),
       width: 120,
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`manufacture.status_${params.value?.toLowerCase()}`)}
           color={
-            params.value === 'Active'
+            params.value === t('manufacture.status_active')
               ? 'success'
-              : params.value === 'Inactive'
+              : params.value === t('manufacture.status_inactive')
               ? 'default'
               : 'warning'
           }
@@ -124,11 +157,11 @@ const MedicamentManufacture = () => {
         />
       )
     },
-    { field: 'phone', headerName: 'Phone', width: 140 },
-    { field: 'email', headerName: 'Email', width: 200 },
+    { field: 'phone', headerName: t('manufacture.phone'), width: 140 },
+    { field: 'email', headerName: t('manufacture.email'), width: 200 },
     {
       field: 'website',
-      headerName: 'Website',
+      headerName: t('manufacture.website'),
       width: 180,
       renderCell: (params) => (
         <a href={params.value} target="_blank" rel="noopener noreferrer">
@@ -137,74 +170,20 @@ const MedicamentManufacture = () => {
       )
     },
     {
-      field: 'contactPerson',
-      headerName: 'Contact',
-      width: 230,
-      renderCell: (params) => {
-        const cp = params.row.contactPerson;
-        return cp ? (
-          <div>
-            <div><strong>{cp.fullName}</strong></div>
-            <div>{cp.email}</div>
-            <div>{cp.phone}</div>
-          </div>
-        ) : 'N/A';
-      }
-    },
-    {
-      field: 'address',
-      headerName: 'Address',
-      width: 300,
-      renderCell: (params) => {
-        const addr = params.row.address;
-        return addr ? `${addr.street}, ${addr.city}, ${addr.state}, ${addr.country} ${addr.postalCode}` : 'N/A';
-      }
-    },
-    {
-      field: 'certifications',
-      headerName: 'Certifications',
-      width: 200,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {(params.row.certifications || []).map((cert, i) => (
-            <Chip key={i} label={cert} color="warning" variant="outlined" size="small" sx={{ mb: 0.5 }} />
-          ))}
-        </Box>
-      )
-    },
-    {
-      field: 'medicamentsSupplied',
-      headerName: 'Medicaments',
-      width: 250,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          {(params.row.medicamentsSupplied || []).map((med, i) => (
-            <Chip key={i} label={`${med.name} (${med.batchNumber})`} color="success" variant="outlined" size="small" sx={{ mb: 0.5 }} />
-          ))}
-        </Box>
-      )
-    },
-    {
       field: 'contractStartDate',
-      headerName: 'Start Date',
+      headerName: t('manufacture.contract_start'),
       width: 120,
       valueGetter: (params) => new Date(params.value).toLocaleDateString()
     },
     {
       field: 'contractEndDate',
-      headerName: 'End Date',
+      headerName: t('manufacture.contract_end'),
       width: 120,
       valueGetter: (params) => new Date(params.value).toLocaleDateString()
     },
     {
-      field: 'createdAt',
-      headerName: 'Created At',
-      width: 160,
-      valueGetter: (params) => new Date(params.value).toLocaleString()
-    },
-    {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('manufacture.actions'),
       width: 120,
       renderCell: renderActionsMenu
     }
@@ -214,7 +193,7 @@ const MedicamentManufacture = () => {
     <div className="card">
       <div className="card-body">
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i> Medicaments Manufactures
+          <i className="menu-icon fa fa-bars"></i> {t('manufacture.title')}
         </Typography>
 
         <Button
@@ -225,7 +204,7 @@ const MedicamentManufacture = () => {
           color="primary"
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
         >
-          <i className="fas fa-plus"></i> Create
+          <i className="fas fa-plus"></i> {t('manufacture.create')}
         </Button>
         <Button
           type="button"
@@ -235,7 +214,7 @@ const MedicamentManufacture = () => {
           color="primary"
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
         >
-          <i className="fas fa-edit"></i> Edit
+          <i className="fas fa-edit"></i> {t('manufacture.edit')}
         </Button>
         <Button
           onClick={e => removeMedicamentManufactureAction(e, updatedItemIds)}
@@ -243,7 +222,7 @@ const MedicamentManufacture = () => {
           color="primary"
           sx={{ mr: 1, mb: 2, fontWeight: 600 }}
         >
-          <i className="fas fa-trash-alt"></i> Remove
+          <i className="fas fa-trash-alt"></i> {t('manufacture.remove')}
         </Button>
         <Button
           onClick={fetchData}
@@ -251,7 +230,7 @@ const MedicamentManufacture = () => {
           color="primary"
           sx={{ mb: 2, fontWeight: 600 }}
         >
-          <i className="fas fa-refresh"></i> Reload
+          <i className="fas fa-refresh"></i> {t('manufacture.reload')}
         </Button>
 
         <br /><br />
@@ -276,7 +255,7 @@ const MedicamentManufacture = () => {
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">New Manufacture</h5>
+                <h5 className="modal-title">{t('manufacture.new')}</h5>
                 <button type="button" className="close" data-dismiss="modal">
                   <span>&times;</span>
                 </button>
@@ -285,7 +264,7 @@ const MedicamentManufacture = () => {
                 <AddMedicamentManufacture closeModal={closeModalAdd} />
               </div>
               <div className="modal-footer">
-                <button type="button" ref={closeButtonAdd} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" ref={closeButtonAdd} className="btn btn-secondary" data-dismiss="modal">{t('manufacture.close')}</button>
               </div>
             </div>
           </div>
@@ -296,16 +275,19 @@ const MedicamentManufacture = () => {
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Manufacture</h5>
+                <h5 className="modal-title">{t('manufacture.edit')}</h5>
                 <button type="button" className="close" data-dismiss="modal">
                   <span>&times;</span>
                 </button>
               </div>
               <div className="modal-body">
-                <EditMedicamentManufacture medicamentManufacture={updatedItem} closeModal={closeModalEdit} />
+                <EditMedicamentManufacture
+                  medicamentManufacture={updatedItem}
+                  closeModal={closeModalEdit}
+                />
               </div>
               <div className="modal-footer">
-                <button type="button" ref={closeButtonEdit} className="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" ref={closeButtonEdit} className="btn btn-secondary" data-dismiss="modal">{t('manufacture.close')}</button>
               </div>
             </div>
           </div>
@@ -316,7 +298,7 @@ const MedicamentManufacture = () => {
           <DialogTitle>
             <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <i className="fas fa-industry" style={{ color: '#1976d2', fontSize: 22 }} />
-              Manufacture Details
+              {t('manufacture.details')}
             </span>
           </DialogTitle>
           <DialogContent>
@@ -325,7 +307,6 @@ const MedicamentManufacture = () => {
                 sx={{
                   bgcolor: '#fafdff',
                   borderRadius: 2,
-                  boxShadow: 1,
                   p: { xs: 2, sm: 3 },
                   minWidth: 320,
                   minHeight: 200,
@@ -334,25 +315,25 @@ const MedicamentManufacture = () => {
               >
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
                   <Chip
-                    label={viewItem.status}
+                    label={t(`manufacture.status_${viewItem.status?.toLowerCase()}`)}
                     color={viewItem.status === 'Active' ? 'success' : viewItem.status === 'Inactive' ? 'default' : 'warning'}
                     icon={<i className="fas fa-check-circle"></i>}
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`License: ${viewItem.licenseNumber || '-'}`}
+                    label={`${t('manufacture.license')}: ${viewItem.licenseNumber || '-'}`}
                     color="info"
                     icon={<i className="fas fa-id-card"></i>}
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Phone: ${viewItem.phone || '-'}`}
+                    label={`${t('manufacture.phone')}: ${viewItem.phone || '-'}`}
                     color="primary"
                     icon={<i className="fas fa-phone"></i>}
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Email: ${viewItem.email || '-'}`}
+                    label={`${t('manufacture.email')}: ${viewItem.email || '-'}`}
                     color="primary"
                     icon={<i className="fas fa-envelope"></i>}
                     sx={{ fontWeight: 600, fontSize: 15 }}
@@ -360,16 +341,16 @@ const MedicamentManufacture = () => {
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                  General Info:
+                  {t('manufacture.general_info')}
                 </Typography>
                 <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
                   <Chip
-                    label={`Name: ${viewItem.name || '-'}`}
+                    label={`${t('manufacture.name')}: ${viewItem.name || '-'}`}
                     color="default"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Website: ${viewItem.website || '-'}`}
+                    label={`${t('manufacture.website')}: ${viewItem.website || '-'}`}
                     color="info"
                     icon={<i className="fas fa-globe"></i>}
                     sx={{ fontWeight: 600, fontSize: 15 }}
@@ -380,7 +361,7 @@ const MedicamentManufacture = () => {
                   />
                 </Stack>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Contact Person:
+                  {t('manufacture.contact_person')}
                 </Typography>
                 <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
                   <Chip
@@ -404,7 +385,7 @@ const MedicamentManufacture = () => {
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Address:
+                  {t('manufacture.address')}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 2 }}>
                   {viewItem.address
@@ -413,20 +394,11 @@ const MedicamentManufacture = () => {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Certifications:
+                  {t('manufacture.certifications')}
                 </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
-                  {(viewItem.certifications || []).length > 0 ? (
-                    viewItem.certifications.map((cert, i) => (
-                      <Chip key={i} label={cert} color="warning" variant="outlined" sx={{ mb: 1 }} />
-                    ))
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">No certifications listed.</Typography>
-                  )}
-                </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Medicaments Supplied:
+                  {t('manufacture.medicaments_supplied')}
                 </Typography>
                 <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
                   {(viewItem.medicamentsSupplied || []).length > 0 ? (
@@ -434,35 +406,35 @@ const MedicamentManufacture = () => {
                       <Chip key={i} label={`${med.name} (${med.batchNumber})`} color="success" variant="outlined" sx={{ mb: 1 }} />
                     ))
                   ) : (
-                    <Typography variant="body2" color="text.secondary">No medicaments listed.</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('manufacture.no_medicaments')}</Typography>
                   )}
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
                   <Chip
-                    label={`Contract Start: ${viewItem.contractStartDate ? new Date(viewItem.contractStartDate).toLocaleDateString() : '-'}`}
+                    label={`${t('manufacture.contract_start')}: ${viewItem.contractStartDate ? new Date(viewItem.contractStartDate).toLocaleDateString() : '-'}`}
                     color="info"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Contract End: ${viewItem.contractEndDate ? new Date(viewItem.contractEndDate).toLocaleDateString() : '-'}`}
+                    label={`${t('manufacture.contract_end')}: ${viewItem.contractEndDate ? new Date(viewItem.contractEndDate).toLocaleDateString() : '-'}`}
                     color="warning"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                   <Chip
-                    label={`Created: ${viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleString() : '-'}`}
+                    label={`${t('manufacture.created_at')}: ${viewItem.createdAt ? new Date(viewItem.createdAt).toLocaleString() : '-'}`}
                     color="default"
                     sx={{ fontWeight: 600, fontSize: 15 }}
                   />
                 </Stack>
               </Box>
             ) : (
-              <Typography>No manufacture selected.</Typography>
+              <Typography>{t('manufacture.no_selected')}</Typography>
             )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setViewOpen(false)} color="secondary" variant="outlined">
-              Close
+              {t('manufacture.close')}
             </Button>
           </DialogActions>
         </Dialog>

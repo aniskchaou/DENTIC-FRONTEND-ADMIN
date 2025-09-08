@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, TextField, MenuItem, Stack, Typography, IconButton } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import medicamentManufactureHTTPService from '../../main/services/medicamentManufactureHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import CurrentUser from '../../main/config/user';
 import BASE_URL from '../../main/urls/urls';
 
 const statusOptions = ['Available', 'Unavailable', 'Expired'];
+const prescriptionOptions = ['Yes', 'No'];
+const certificationOptions = ['GMP', 'ISO', 'Other'];
+const manufactureStatusOptions = ['Active', 'Inactive'];
 
 const AddMedicament = ({ closeModal, onCreate }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     genericName: '',
@@ -46,7 +51,6 @@ const AddMedicament = ({ closeModal, onCreate }) => {
     website: '',
     licenseNumber: '',
     certifications: [],
-    medicamentsSupplied: [],
     contractStartDate: '',
     contractEndDate: '',
     manufactureStatus: 'Active' // renamed to avoid conflict with medicament status
@@ -66,7 +70,26 @@ const AddMedicament = ({ closeModal, onCreate }) => {
   // Handlers for main fields
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
+    if (name.startsWith('contactPerson.')) {
+      const field = name.split('.')[1];
+      setForm(f => ({
+        ...f,
+        contactPerson: { ...f.contactPerson, [field]: value }
+      }));
+    } else if (name.startsWith('address.')) {
+      const field = name.split('.')[1];
+      setForm(f => ({
+        ...f,
+        address: { ...f.address, [field]: value }
+      }));
+    } else if (name === 'certifications') {
+      setForm(f => ({
+        ...f,
+        certifications: typeof value === 'string' ? value.split(',') : value
+      }));
+    } else {
+      setForm(f => ({ ...f, [name]: value }));
+    }
   };
 
   // Active Ingredients
@@ -119,29 +142,6 @@ const AddMedicament = ({ closeModal, onCreate }) => {
     setLoading(true);
     const now = new Date().toISOString();
 
-    // Validation for required fields
-    if (
-      !form.name ||
-      !form.genericName ||
-      !form.category ||
-      !form.description ||
-      !form.dosageForm ||
-      !form.strength ||
-      !form.manufacturerId ||
-      !form.usageInstructions ||
-      !form.stockQuantity ||
-      !form.pricePerUnit ||
-      !form.expirationDate ||
-      !form.storageConditions ||
-      !form.barcode ||
-      !form.batchNumber ||
-      !form.status
-    ) {
-      showMessage('Error', 'Please fill all required fields.', 'warning');
-      setLoading(false);
-      return;
-    }
-
     const data = {
       name: form.name,
       genericName: form.genericName,
@@ -157,7 +157,7 @@ const AddMedicament = ({ closeModal, onCreate }) => {
       usageInstructions: form.usageInstructions,
       stockQuantity: Number(form.stockQuantity),
       pricePerUnit: Number(form.pricePerUnit),
-      expirationDate: new Date(form.expirationDate).toISOString(),
+      expirationDate: form.expirationDate ? new Date(form.expirationDate).toISOString() : '',
       storageConditions: form.storageConditions,
       barcode: form.barcode,
       batchNumber: form.batchNumber,
@@ -169,7 +169,6 @@ const AddMedicament = ({ closeModal, onCreate }) => {
       website: form.website,
       licenseNumber: form.licenseNumber,
       certifications: form.certifications,
-      medicamentsSupplied: form.medicamentsSupplied,
       contractStartDate: form.contractStartDate ? new Date(form.contractStartDate).toISOString() : '',
       contractEndDate: form.contractEndDate ? new Date(form.contractEndDate).toISOString() : '',
       manufactureStatus: form.manufactureStatus,
@@ -192,185 +191,97 @@ const AddMedicament = ({ closeModal, onCreate }) => {
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, minWidth: 400 }}>
       <Stack spacing={2}>
-        <TextField label="Name" name="name" value={form.name} onChange={handleChange} required fullWidth />
-        <TextField label="Generic Name" name="genericName" value={form.genericName} onChange={handleChange} required fullWidth />
-        <TextField
-          select
-          label="Category"
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          required
-          fullWidth
-        >
-          {categories.map(cat => (
-            <MenuItem key={cat.id || cat._id || cat.name} value={cat.name}>
-              {cat.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField label="Description" name="description" value={form.description} onChange={handleChange} required fullWidth />
-
-        <Typography variant="subtitle2">Active Ingredients</Typography>
-        {form.activeIngredients.map((ai, idx) => (
-          <Stack direction="row" spacing={1} alignItems="center" key={idx}>
-            <TextField
-              label="Ingredient"
-              value={ai.ingredient}
-              onChange={e => handleIngredientChange(idx, 'ingredient', e.target.value)}
-              fullWidth
-              size="small"
-              required
-            />
-            <TextField
-              label="Concentration"
-              value={ai.concentration}
-              onChange={e => handleIngredientChange(idx, 'concentration', e.target.value)}
-              fullWidth
-              size="small"
-              required
-            />
-            <IconButton color="error" onClick={() => removeIngredient(idx)} disabled={form.activeIngredients.length === 1}>
-              <span className="fa fa-minus" />
-            </IconButton>
-            {idx === form.activeIngredients.length - 1 && (
-              <IconButton color="success" onClick={addIngredient}>
-                <span className="fa fa-plus" />
-              </IconButton>
-            )}
-          </Stack>
-        ))}
-
-        <TextField label="Dosage Form" name="dosageForm" value={form.dosageForm} onChange={handleChange} required fullWidth />
-        <TextField label="Strength" name="strength" value={form.strength} onChange={handleChange} required fullWidth />
-        <TextField label="Manufacturer ID" name="manufacturerId" value={form.manufacturerId} onChange={handleChange} required fullWidth />
-        <TextField
-          select
-          label="Requires Prescription"
-          name="requiresPrescription"
-          value={form.requiresPrescription}
-          onChange={handleChange}
-          required
-          fullWidth
-        >
-          <MenuItem value="Yes">Yes</MenuItem>
-          <MenuItem value="No">No</MenuItem>
-        </TextField>
-
-        <Typography variant="subtitle2">Side Effects</Typography>
-        {form.sideEffects.map((side, idx) => (
-          <Stack direction="row" spacing={1} alignItems="center" key={idx}>
-            <TextField
-              value={side}
-              onChange={e => handleSideEffectChange(idx, e.target.value)}
-              fullWidth
-              size="small"
-              required
-            />
-            <IconButton color="error" onClick={() => removeSideEffect(idx)} disabled={form.sideEffects.length === 1}>
-              <span className="fa fa-minus" />
-            </IconButton>
-            {idx === form.sideEffects.length - 1 && (
-              <IconButton color="success" onClick={addSideEffect}>
-                <span className="fa fa-plus" />
-              </IconButton>
-            )}
-          </Stack>
-        ))}
-
-        <Typography variant="subtitle2">Contraindications</Typography>
-        {form.contraindications.map((contra, idx) => (
-          <Stack direction="row" spacing={1} alignItems="center" key={idx}>
-            <TextField
-              value={contra}
-              onChange={e => handleContraindicationChange(idx, e.target.value)}
-              fullWidth
-              size="small"
-              required
-            />
-            <IconButton color="error" onClick={() => removeContraindication(idx)} disabled={form.contraindications.length === 1}>
-              <span className="fa fa-minus" />
-            </IconButton>
-            {idx === form.contraindications.length - 1 && (
-              <IconButton color="success" onClick={addContraindication}>
-                <span className="fa fa-plus" />
-              </IconButton>
-            )}
-          </Stack>
-        ))}
-
-        <TextField label="Usage Instructions" name="usageInstructions" value={form.usageInstructions} onChange={handleChange} required fullWidth />
-        <TextField label="Stock Quantity" name="stockQuantity" type="number" value={form.stockQuantity} onChange={handleChange} required fullWidth />
-        <TextField label="Price Per Unit" name="pricePerUnit" type="number" value={form.pricePerUnit} onChange={handleChange} required fullWidth />
-        <TextField
-          label="Expiration Date"
-          name="expirationDate"
-          type="date"
-          value={form.expirationDate}
-          onChange={handleChange}
-          InputLabelProps={{ shrink: true }}
-          required
-          fullWidth
-        />
-        <TextField label="Storage Conditions" name="storageConditions" value={form.storageConditions} onChange={handleChange} required fullWidth />
-        <TextField label="Barcode" name="barcode" value={form.barcode} onChange={handleChange} required fullWidth />
-        <TextField label="Batch Number" name="batchNumber" value={form.batchNumber} onChange={handleChange} required fullWidth />
-        <TextField
-          select
-          label="Status"
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          required
-          fullWidth
-        >
-          {statusOptions.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-          ))}
-        </TextField>
-
+                
         {/* Manufacturer Details Section */}
-        <Typography variant="h6" sx={{ mt: 3 }}>Manufacturer Details</Typography>
-        <TextField label="Contact Person" name="contactPerson.fullName" value={form.contactPerson.fullName} onChange={handleChange} required fullWidth />
-        <TextField label="Phone" name="contactPerson.phone" value={form.contactPerson.phone} onChange={handleChange} required fullWidth />
-        <TextField label="Email" name="contactPerson.email" value={form.contactPerson.email} onChange={handleChange} required fullWidth />
-        <TextField label="Street" name="address.street" value={form.address.street} onChange={handleChange} required fullWidth />
-        <TextField label="City" name="address.city" value={form.address.city} onChange={handleChange} required fullWidth />
-        <TextField label="State" name="address.state" value={form.address.state} onChange={handleChange} required fullWidth />
-        <TextField label="Postal Code" name="address.postalCode" value={form.address.postalCode} onChange={handleChange} required fullWidth />
-        <TextField label="Country" name="address.country" value={form.address.country} onChange={handleChange} required fullWidth />
-        <TextField label="Phone" name="phone" value={form.phone} onChange={handleChange} required fullWidth />
-        <TextField label="Email" name="email" value={form.email} onChange={handleChange} required fullWidth />
-        <TextField label="Website" name="website" value={form.website} onChange={handleChange} required fullWidth />
-        <TextField label="License Number" name="licenseNumber" value={form.licenseNumber} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.name')} name="name" value={form.name} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.contact_person')} name="contactPerson.fullName" value={form.contactPerson.fullName} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.email')} name="contactPerson.email" value={form.contactPerson.email} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.phone')} name="contactPerson.phone" value={form.contactPerson.phone} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.street')} name="address.street" value={form.address.street} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.city')} name="address.city" value={form.address.city} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.state')} name="address.state" value={form.address.state} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.postal_code')} name="address.postalCode" value={form.address.postalCode} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.country')} name="address.country" value={form.address.country} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.phone')} name="phone" value={form.phone} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.email')} name="email" value={form.email} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.website')} name="website" value={form.website} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.license_number')} name="licenseNumber" value={form.licenseNumber} onChange={handleChange} required fullWidth />
+
+        {/* Certifications */}
         <TextField
           select
-          label="Certifications"
+          label={t('medicament.certifications')}
           name="certifications"
           value={form.certifications}
           onChange={handleChange}
           required
           fullWidth
+          SelectProps={{ multiple: true }}
         >
-          <MenuItem value="GMP">GMP</MenuItem>
-          <MenuItem value="ISO">ISO</MenuItem>
-          <MenuItem value="Other">Other</MenuItem>
+          {certificationOptions.map(opt => (
+            <MenuItem key={opt} value={opt}>{t(`medicament.certification_${opt.toLowerCase()}`)}</MenuItem>
+          ))}
         </TextField>
-        <TextField
-          select
-          label="Medicaments Supplied"
-          name="medicamentsSupplied"
-          value={form.medicamentsSupplied}
-          onChange={handleChange}
-          required
-          fullWidth
+
+        {/* Medicaments Supplied */}
+        <Typography variant="subtitle2" sx={{ mt: 2 }}>{t('medicament.medicaments_supplied')}</Typography>
+        {Array.isArray(form.medicamentsSupplied) && form.medicamentsSupplied.map((med, idx) => (
+          <Stack direction="row" spacing={2} key={idx} sx={{ mb: 1 }}>
+            <TextField
+              label={t('medicament.medicament_name')}
+              name={`medicamentsSupplied.${idx}.name`}
+              value={med.name}
+              onChange={e => {
+                const newArr = [...form.medicamentsSupplied];
+                newArr[idx].name = e.target.value;
+                setForm(f => ({ ...f, medicamentsSupplied: newArr }));
+              }}
+              fullWidth
+            />
+            <TextField
+              label={t('medicament.batch_number')}
+              name={`medicamentsSupplied.${idx}.batchNumber`}
+              value={med.batchNumber}
+              onChange={e => {
+                const newArr = [...form.medicamentsSupplied];
+                newArr[idx].batchNumber = e.target.value;
+                setForm(f => ({ ...f, medicamentsSupplied: newArr }));
+              }}
+              fullWidth
+            />
+            <IconButton
+              color="error"
+              onClick={() => {
+                setForm(f => ({
+                  ...f,
+                  medicamentsSupplied: f.medicamentsSupplied.filter((_, i) => i !== idx)
+                }));
+              }}
+              disabled={form.medicamentsSupplied.length === 1}
+            >
+              <i className="fas fa-trash" />
+            </IconButton>
+          </Stack>
+        ))}
+        <Button
+          variant="outlined"
+          onClick={() =>
+            setForm(f => ({
+              ...f,
+              medicamentsSupplied: [
+                ...(f.medicamentsSupplied || []),
+                { name: '', batchNumber: '' }
+              ]
+            }))
+          }
+          sx={{ mb: 2 }}
         >
-          <MenuItem value="Medicament A">Medicament A</MenuItem>
-          <MenuItem value="Medicament B">Medicament B</MenuItem>
-          <MenuItem value="Medicament C">Medicament C</MenuItem>
-        </TextField>
+          {t('medicament.add_medicament_supplied')}
+        </Button>
+
+        {/* Contract Dates and Status */}
         <TextField
-          label="Contract Start Date"
+          label={t('medicament.contract_start_date')}
           name="contractStartDate"
           type="date"
           value={form.contractStartDate}
@@ -380,7 +291,7 @@ const AddMedicament = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Contract End Date"
+          label={t('medicament.contract_end_date')}
           name="contractEndDate"
           type="date"
           value={form.contractEndDate}
@@ -391,23 +302,24 @@ const AddMedicament = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Manufacture Status"
+          label={t('medicament.manufacture_status')}
           name="manufactureStatus"
           value={form.manufactureStatus}
           onChange={handleChange}
           required
           fullWidth
         >
-          <MenuItem value="Active">Active</MenuItem>
-          <MenuItem value="Inactive">Inactive</MenuItem>
+          {manufactureStatusOptions.map(opt => (
+            <MenuItem key={opt} value={opt}>{t(`medicament.manufacture_status_${opt.toLowerCase()}`)}</MenuItem>
+          ))}
         </TextField>
 
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Medicament'}
+            {loading ? t('medicament.saving') : t('medicament.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('medicament.cancel')}
           </Button>
         </Stack>
       </Stack>

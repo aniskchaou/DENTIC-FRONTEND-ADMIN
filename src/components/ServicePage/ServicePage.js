@@ -3,8 +3,10 @@ import './ServicePage.css';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
 import { Button, Typography, TextField, Paper, Stack, Alert } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const ServicePage = () => {
+  const { t } = useTranslation();
   const [services, setServices] = useState([]);
   const [textarea, setTextarea] = useState('');
   const [loading, setLoading] = useState(true);
@@ -69,20 +71,20 @@ const ServicePage = () => {
   return (
     <Paper sx={{ maxWidth: 700, mx: 'auto', mt: 6, p: 4 }}>
       <Typography variant="h4" gutterBottom>
-        <i className="menu-icon fa fa-bars"></i> Services
+        <i className="menu-icon fa fa-bars"></i> {t('service.title')}
       </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{t('service.load_error')}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{t('service.update_success')}</Alert>}
       <Stack spacing={2}>
         <TextField
-          label="Services List"
+          label={t('service.list')}
           multiline
           minRows={8}
           value={textarea}
           onChange={handleChange}
           fullWidth
           disabled={!editMode || loading}
-          helperText="One service per line"
+          helperText={t('service.list_helper')}
         />
         {!editMode ? (
           <Button
@@ -92,7 +94,7 @@ const ServicePage = () => {
             disabled={loading}
             sx={{ width: 120 }}
           >
-            Edit
+            {t('service.edit')}
           </Button>
         ) : (
           <Stack direction="row" spacing={2}>
@@ -102,7 +104,7 @@ const ServicePage = () => {
               onClick={handleSave}
               disabled={loading}
             >
-              Save
+              {t('service.save')}
             </Button>
             <Button
               variant="outlined"
@@ -110,7 +112,7 @@ const ServicePage = () => {
               onClick={handleCancel}
               disabled={loading}
             >
-              Cancel
+              {t('service.cancel')}
             </Button>
           </Stack>
         )}

@@ -1,0 +1,285 @@
+[
+  {
+    "id": 1,
+    "fullName": "John Doe",
+    "medicalRecordNumber": "MRN100015",
+    "insuranceId": 1,
+    "bloodType": "A+",
+    "allergies": [
+      "Penicillin"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Type 2",
+        "condition": "Diabetes",
+        "diagnosedAt": "2018-01-15"
+      }
+    ],
+    "currentMedications": [
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily",
+        "prescribedBy": "1a2b3c4d-0000-4000-b000-000000000001"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Alice Johnson",
+      "phone": "+11123456701",
+      "relationship": "Sister"
+    },
+    "createdAt": "2025-08-04T19:22:40.875Z",
+    "updatedAt": "2025-08-04T19:22:40.875Z"
+  },
+  {
+    "id": 2,
+    "fullName": "Jane Smith",
+    "medicalRecordNumber": "MRN100025",
+    "insuranceId": null,
+    "bloodType": "B-",
+    "allergies": [],
+    "medicalHistory": [],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Bob Lee",
+      "phone": "+11123456702",
+      "relationship": "Father"
+    },
+    "createdAt": "2025-08-04T19:22:40.875Z",
+    "updatedAt": "2025-08-04T19:22:40.875Z"
+  },
+  {
+    "id": 3,
+    "fullName": "Michael Brown",
+    "medicalRecordNumber": "MRN100035",
+    "insuranceId": 3,
+    "bloodType": "O+",
+    "allergies": [
+      "Shellfish",
+      "Dust"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Stable",
+        "condition": "Hypertension",
+        "diagnosedAt": "2020-06-01"
+      }
+    ],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Karen Smith",
+      "phone": "+11123456703",
+      "relationship": "Mother"
+    },
+    "createdAt": "2025-08-04T19:22:40.875Z",
+    "updatedAt": "2025-08-04T19:22:40.875Z"
+  },
+  {
+    "id": 4,
+    "fullName": "Emily Clark",
+    "medicalRecordNumber": "MRN100045",
+    "insuranceId": null,
+    "bloodType": "AB+",
+    "allergies": [
+      "Pollen"
+    ],
+    "medicalHistory": [],
+    "currentMedications": [
+      {
+        "name": "Claritin",
+        "dosage": "10mg",
+        "frequency": "Once daily",
+        "prescribedBy": "1a2b3c4d-0000-4000-b000-000000000002"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Tom Blake",
+      "phone": "+11123456704",
+      "relationship": "Friend"
+    },
+    "createdAt": "2025-08-04T19:22:40.875Z",
+    "updatedAt": "2025-08-04T19:22:40.875Z"
+  },
+  {
+    "id": 5,
+    "fullName": "Olivia White",
+    "medicalRecordNumber": "MRN100055",
+    "insuranceId": 5,
+    "bloodType": "O-",
+    "allergies": [
+      "Latex"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Mild flare-ups",
+        "condition": "Eczema",
+        "diagnosedAt": "2019-09-12"
+      }
+    ],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Lena Duke",
+      "phone": "+11123456705",
+      "relationship": "Spouse"
+    },
+    "createdAt": "2025-08-04T19:22:40.875Z",
+    "updatedAt": "2025-08-04T19:22:40.875Z"
+  },
+  {
+    "id": 6,
+    "fullName": "zerzer",
+    "medicalRecordNumber": "sdfsdfsdf",
+    "insuranceId": 123,
+    "bloodType": "B+",
+    "allergies": [
+      "sdf"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "sdfsd",
+        "condition": "dfs",
+        "diagnosedAt": "2025-08-05"
+      }
+    ],
+    "currentMedications": [
+      {
+        "name": "sdf",
+        "dosage": "223",
+        "frequency": "23",
+        "prescribedBy": "23"
+      }
+    ],
+    "emergencyContact": {
+      "name": "2323",
+      "phone": "23",
+      "relationship": "23"
+    },
+    "createdAt": "2025-08-04T19:22:45.374Z",
+    "updatedAt": "2025-08-04T19:22:45.374Z"
+  },
+  {
+    "id": 7,
+    "fullName": "John Doe",
+    "medicalRecordNumber": "MRN100015",
+    "insuranceId": 1,
+    "bloodType": "A+",
+    "allergies": [
+      "Penicillin"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Type 2",
+        "condition": "Diabetes",
+        "diagnosedAt": "2018-01-15"
+      }
+    ],
+    "currentMedications": [
+      {
+        "name": "Metformin",
+        "dosage": "500mg",
+        "frequency": "Twice daily",
+        "prescribedBy": "1a2b3c4d-0000-4000-b000-000000000001"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Alice Johnson",
+      "phone": "+11123456701",
+      "relationship": "Sister"
+    },
+    "createdAt": "2025-08-05T07:57:13.665Z",
+    "updatedAt": "2025-08-05T07:57:13.665Z"
+  },
+  {
+    "id": 8,
+    "fullName": "Jane Smith",
+    "medicalRecordNumber": "MRN100025",
+    "insuranceId": null,
+    "bloodType": "B-",
+    "allergies": [],
+    "medicalHistory": [],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Bob Lee",
+      "phone": "+11123456702",
+      "relationship": "Father"
+    },
+    "createdAt": "2025-08-05T07:57:13.665Z",
+    "updatedAt": "2025-08-05T07:57:13.665Z"
+  },
+  {
+    "id": 9,
+    "fullName": "Michael Brown",
+    "medicalRecordNumber": "MRN100035",
+    "insuranceId": 3,
+    "bloodType": "O+",
+    "allergies": [
+      "Shellfish",
+      "Dust"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Stable",
+        "condition": "Hypertension",
+        "diagnosedAt": "2020-06-01"
+      }
+    ],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Karen Smith",
+      "phone": "+11123456703",
+      "relationship": "Mother"
+    },
+    "createdAt": "2025-08-05T07:57:13.665Z",
+    "updatedAt": "2025-08-05T07:57:13.665Z"
+  },
+  {
+    "id": 10,
+    "fullName": "Emily Clark",
+    "medicalRecordNumber": "MRN100045",
+    "insuranceId": null,
+    "bloodType": "AB+",
+    "allergies": [
+      "Pollen"
+    ],
+    "medicalHistory": [],
+    "currentMedications": [
+      {
+        "name": "Claritin",
+        "dosage": "10mg",
+        "frequency": "Once daily",
+        "prescribedBy": "1a2b3c4d-0000-4000-b000-000000000002"
+      }
+    ],
+    "emergencyContact": {
+      "name": "Tom Blake",
+      "phone": "+11123456704",
+      "relationship": "Friend"
+    },
+    "createdAt": "2025-08-05T07:57:13.665Z",
+    "updatedAt": "2025-08-05T07:57:13.665Z"
+  },
+  {
+    "id": 11,
+    "fullName": "Olivia White",
+    "medicalRecordNumber": "MRN100055",
+    "insuranceId": 5,
+    "bloodType": "O-",
+    "allergies": [
+      "Latex"
+    ],
+    "medicalHistory": [
+      {
+        "notes": "Mild flare-ups",
+        "condition": "Eczema",
+        "diagnosedAt": "2019-09-12"
+      }
+    ],
+    "currentMedications": [],
+    "emergencyContact": {
+      "name": "Lena Duke",
+      "phone": "+11123456705",
+      "relationship": "Spouse"
+    },
+    "createdAt": "2025-08-05T07:57:13.665Z",
+    "updatedAt": "2025-08-05T07:57:13.665Z"
+  }]

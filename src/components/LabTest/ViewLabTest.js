@@ -3,6 +3,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
   Grid, Typography, Chip, Divider, Box, Paper, Stack, Tooltip
 } from '@mui/material';
+import { marked } from 'marked';
 
 const ViewLabTest = ({
   open,
@@ -188,20 +189,21 @@ const ViewLabTest = ({
             <Typography variant="body2" sx={{ mb: 1 }}>
               <strong>Result:</strong>
             </Typography>
-            <Box sx={{
-              background: '#f1f8e9',
-              borderRadius: 1,
-              p: 1,
-              fontFamily: 'monospace',
-              fontSize: 14,
-              color: '#388e3c',
-              mb: 2,
-              minHeight: 32
-            }}>
-              {testLab.result && Object.keys(testLab.result).length > 0
-                ? <pre style={{ margin: 0, background: 'none', fontFamily: 'inherit' }}>{JSON.stringify(testLab.result, null, 2)}</pre>
-                : 'No result yet'}
-            </Box>
+            <Box
+              sx={{
+                background: '#f1f8e9',
+                borderRadius: 1,
+                p: 1,
+                fontFamily: 'monospace',
+                fontSize: 14,
+                color: '#388e3c',
+                mb: 2,
+                minHeight: 32
+              }}
+              dangerouslySetInnerHTML={{
+                __html: testLab.result ? marked(testLab.result) : 'No result yet'
+              }}
+            />
           </Grid>
         </Grid>
         <Divider sx={{ my: 2 }} />

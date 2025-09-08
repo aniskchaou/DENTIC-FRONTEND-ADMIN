@@ -1,0 +1,5 @@
+Dentic is a comprehensive dental clinic management application designed to streamline and centralize all aspects of clinic operations. The platform provides an intuitive interface for managing patient records, scheduling appointments, handling billing and payments, and maintaining inventory and equipment. Dentic supports both local and remote installations, making it suitable for clinics of all sizes, from single-location practices to multi-site organizations.
+
+One of the standout features of Dentic is its modular approach, allowing clinics to enable only the modules they need, such as patient management, doctor and staff profiles, appointment scheduling, odontogram charting, laboratory test management, telemedicine integration, and equipment maintenance. The application also offers robust reporting and analytics tools, helping administrators monitor clinic performance, track key metrics, and make informed decisions.
+
+Whether you are a clinic administrator, dentist, or IT professional, Dentic provides the tools and flexibility needed to efficiently manage clinical workflows, enhance patient care.

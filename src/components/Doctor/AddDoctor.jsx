@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, MenuItem, Stack, Chip } from '@mui/material';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const specializations = [
@@ -9,6 +10,7 @@ const specializations = [
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const AddDoctor = ({ closeModal, onCreate }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     fullName: '',
     licenseNumber: '',
@@ -21,6 +23,27 @@ const AddDoctor = ({ closeModal, onCreate }) => {
   });
   const [loading, setLoading] = useState(false);
   const [timeSlot, setTimeSlot] = useState({ startTime: '', endTime: '' });
+
+    // Generate a random license number
+      // Generate license number like DENT-2025001, ORTHO-2025002, etc.
+      const specializationPrefixes = {
+        'General Dentist': 'DENT',
+        'Orthodontist': 'ORTHO',
+        'Periodontist': 'PERIO',
+        'Endodontist': 'ENDO',
+        'Prosthodontist': 'PROSTHO',
+        'Oral Surgeon': 'SURG',
+        'Pediatric Dentist': 'PED',
+        'Other': 'SPEC'
+      };
+      const handleGenerateLicenseNumber = () => {
+        const prefix = specializationPrefixes[form.specialization] || 'DENT';
+        const year = new Date().getFullYear();
+        // Random 3-digit number for uniqueness
+        const number = Math.floor(1 + Math.random() * 999).toString().padStart(3, '0');
+        const license = `${prefix}-${year}${number}`;
+        setForm(f => ({ ...f, licenseNumber: license }));
+      };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -70,24 +93,29 @@ const AddDoctor = ({ closeModal, onCreate }) => {
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
       <Stack spacing={2}>
         <TextField
-          label="Full Name"
+          label={t('doctor.full_name')}
           name="fullName"
           value={form.fullName}
           onChange={handleChange}
           required
           fullWidth
         />
-        <TextField
-          label="License Number"
-          name="licenseNumber"
-          value={form.licenseNumber}
-          onChange={handleChange}
-          required
-          fullWidth
-        />
+          <Stack direction="row" spacing={2} alignItems="center">
+            <TextField
+              label={t('doctor.license_number')}
+              name="licenseNumber"
+              value={form.licenseNumber}
+              onChange={handleChange}
+              required
+              fullWidth
+            />
+            <Button variant="outlined" onClick={handleGenerateLicenseNumber} sx={{ height: '56px' }}>
+              {t('doctor.generate_license_number') || 'Generate License Number'}
+            </Button>
+          </Stack>
         <TextField
           select
-          label="Specialization"
+          label={t('doctor.specialization')}
           name="specialization"
           value={form.specialization}
           onChange={handleChange}
@@ -95,11 +123,11 @@ const AddDoctor = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {specializations.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`doctor.specialization_${opt.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Experience (years)"
+          label={t('doctor.experience_years')}
           name="experienceYears"
           type="number"
           value={form.experienceYears}
@@ -108,7 +136,7 @@ const AddDoctor = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Consultation Fee ($)"
+          label={t('doctor.consultation_fee')}
           name="consultationFee"
           type="number"
           value={form.consultationFee}
@@ -118,7 +146,7 @@ const AddDoctor = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Available Days"
+          label={t('doctor.available_days')}
           name="availableDays"
           value={form.availableDays}
           onChange={handleDaysChange}
@@ -127,13 +155,13 @@ const AddDoctor = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {daysOfWeek.map(day => (
-            <MenuItem key={day} value={day}>{day}</MenuItem>
+            <MenuItem key={day} value={day}>{t(`doctor.day_${day.toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <Box>
           <Stack direction="row" spacing={2} alignItems="center">
             <TextField
-              label="Start Time"
+              label={t('doctor.start_time')}
               name="startTime"
               type="time"
               value={timeSlot.startTime}
@@ -142,7 +170,7 @@ const AddDoctor = ({ closeModal, onCreate }) => {
               sx={{ width: 140 }}
             />
             <TextField
-              label="End Time"
+              label={t('doctor.end_time')}
               name="endTime"
               type="time"
               value={timeSlot.endTime}
@@ -156,7 +184,7 @@ const AddDoctor = ({ closeModal, onCreate }) => {
               onClick={handleAddTimeSlot}
               disabled={!timeSlot.startTime || !timeSlot.endTime}
             >
-              Add Slot
+              {t('doctor.add_slot')}
             </Button>
           </Stack>
           <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -172,7 +200,7 @@ const AddDoctor = ({ closeModal, onCreate }) => {
           </Box>
         </Box>
         <TextField
-          label="Rating"
+          label={t('doctor.rating')}
           name="rating"
           type="number"
           inputProps={{ min: 0, max: 5, step: 0.1 }}
@@ -183,10 +211,10 @@ const AddDoctor = ({ closeModal, onCreate }) => {
         />
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Doctor'}
+            {loading ? t('doctor.saving') : t('doctor.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('doctor.cancel')}
           </Button>
         </Stack>
       </Stack>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, MenuItem, Chip, Stack, Box } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const plans = ['Basic', 'Standard', 'Premium'];
@@ -13,9 +14,8 @@ const defaultBenefits = [
   "Emergency Support"
 ];
 
- // Adjust as needed
-
 const CreateMembership = ({ onSuccess, onCancel }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     patientId: '', // Add patientId to form state
     membershipPlan: 'Basic',
@@ -87,23 +87,23 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
     <form onSubmit={handleSubmit} autoComplete="off">
       <TextField
         select
-        label="Membership Plan"
+        label={t('membership.plan')}
         name="membershipPlan"
         value={form.membershipPlan}
         onChange={handleChange}
         fullWidth
         margin="normal"
       >
-        {plans.map(plan => (
-          <MenuItem key={plan} value={plan}>{plan}</MenuItem>
-        ))}
+          {plans.map(plan => (
+            <MenuItem key={plan} value={plan}>{plan}</MenuItem>
+          ))}
       </TextField>
       <Box sx={{ my: 2 }}>
         <Stack direction="row" spacing={1} flexWrap="wrap">
           {form.benefits.map(b => (
             <Chip
               key={b}
-              label={b}
+              label={t(`membership.benefit_${b.replace(/\s+/g, '_').toLowerCase()}`, b)}
               onDelete={() => handleRemoveBenefit(b)}
               sx={{ mb: 1 }}
             />
@@ -111,25 +111,25 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
           <TextField
-            label="Add Benefit"
+            label={'Add Benefit'}
             value={benefitInput}
             onChange={e => setBenefitInput(e.target.value)}
             size="small"
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddBenefit(); } }}
           />
-          <Button variant="outlined" onClick={handleAddBenefit} size="small">Add</Button>
+          <Button variant="outlined" onClick={handleAddBenefit} size="small">{'Add'}</Button>
           <Button
             variant="text"
             size="small"
             onClick={() => setForm(f => ({ ...f, benefits: [...f.benefits, ...defaultBenefits.filter(db => !f.benefits.includes(db)) ] }))}
           >
-            Add Defaults
+            {'Add Defaults'}
           </Button>
         </Stack>
       </Box>
       <Stack direction="row" spacing={2}>
         <TextField
-          label="Start Date"
+          label={t('membership.start_date')}
           name="validityPeriod.startDate"
           type="date"
           value={form.validityPeriod.startDate}
@@ -139,7 +139,7 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
           required
         />
         <TextField
-          label="End Date"
+          label={t('membership.end_date')}
           name="validityPeriod.endDate"
           type="date"
           value={form.validityPeriod.endDate}
@@ -151,19 +151,19 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
       </Stack>
       <TextField
         select
-        label="Payment Status"
+        label={t('membership.payment_status')}
         name="paymentStatus"
         value={form.paymentStatus}
         onChange={handleChange}
         fullWidth
         margin="normal"
       >
-        {statuses.map(status => (
-          <MenuItem key={status} value={status}>{status}</MenuItem>
-        ))}
+          {statuses.map(status => (
+            <MenuItem key={status} value={status}>{status}</MenuItem>
+          ))}
       </TextField>
       <TextField
-        label="Renewal Date"
+        label={t('membership.renewal_date')}
         name="renewalDate"
         type="date"
         value={form.renewalDate}
@@ -173,7 +173,7 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
         fullWidth
       />
       <TextField
-        label="Last Payment Amount"
+        label={t('membership.last_payment_amount')}
         name="lastPaymentAmount"
         type="number"
         value={form.lastPaymentAmount}
@@ -182,7 +182,7 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
         fullWidth
       />
       <TextField
-        label="Last Payment Date"
+        label={t('membership.last_payment_date')}
         name="lastPaymentDate"
         type="date"
         value={form.lastPaymentDate}
@@ -193,11 +193,11 @@ const CreateMembership = ({ onSuccess, onCancel }) => {
       />
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button type="submit" variant="contained" color="primary" disabled={loading}>
-          {loading ? 'Saving...' : 'Create'}
+          {loading ? t('membership.saving') : t('membership.create')}
         </Button>
         {onCancel && (
           <Button variant="outlined" onClick={onCancel} disabled={loading}>
-            Cancel
+            {t('membership.cancel')}
           </Button>
         )}
       </Stack>

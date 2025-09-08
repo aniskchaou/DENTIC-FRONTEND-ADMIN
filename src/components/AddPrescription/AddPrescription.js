@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Button, TextField, MenuItem, Stack, Typography, IconButton } from '@mui/material';
+import SignaturePad from '../Certificates/SignaturePad';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const refillOptions = ['Yes', 'No'];
 const statusOptions = ['Active', 'Expired', 'Completed', 'Pending'];
 
 const AddPrescription = ({ closeModal, onSuccess }) => {
+  // Delete a medication line
+  const handleDeleteMedication = (idx) => {
+    setForm(f => ({
+      ...f,
+      medications: f.medications.filter((_, i) => i !== idx)
+    }));
+  };
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     patientId: '',
     doctorId: '',
@@ -24,8 +34,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
     validUntil: '',
     refillAllowed: 'Yes',
     refillCount: 1,
-    pharmacyId: '',
-    digitalSignature: '',
+    digitalSignature: '', // Will store base64 image data
     status: 'Active'
   });
   const [loading, setLoading] = useState(false);
@@ -34,11 +43,13 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [clinics, setClinics] = useState([]);
+  const [medicaments, setMedicaments] = useState([]); // Medications from backend
 
   useEffect(() => {
-    axios.get(BASE_URL+'/patients').then(res => setPatients(res.data)).catch(() => setPatients([]));
-    axios.get(BASE_URL+'/doctors').then(res => setDoctors(res.data)).catch(() => setDoctors([]));
-    axios.get(BASE_URL+'/clinics').then(res => setClinics(res.data)).catch(() => setClinics([]));
+  axios.get(BASE_URL+'/patients').then(res => setPatients(res.data)).catch(() => setPatients([]));
+  axios.get(BASE_URL+'/doctors').then(res => setDoctors(res.data)).catch(() => setDoctors([]));
+  axios.get(BASE_URL+'/clinics').then(res => setClinics(res.data)).catch(() => setClinics([]));
+  axios.get(BASE_URL+'/medicaments').then(res => setMedicaments(res.data)).catch(() => setMedicaments([]));
   }, []);
 
   // Add more medications
@@ -57,7 +68,13 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
     const { name, value } = e.target;
     setForm(f => {
       const meds = [...f.medications];
-      meds[idx][name] = value;
+      // Always store medicationId as string
+      meds[idx][name] = name === 'medicationId' ? String(value) : value;
+      // If medicationId is changed, update medicationName from medicaments
+      if (name === 'medicationId') {
+        const selectedMed = medicaments.find(m => String(m.id) === String(value));
+        meds[idx].medicationName = selectedMed ? selectedMed.name : '';
+      }
       return { ...f, medications: meds };
     });
   };
@@ -91,7 +108,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
     <form onSubmit={handleSubmit} autoComplete="off">
       <TextField
         select
-        label="Patient"
+        label={t('prescription.patient')}
         name="patientId"
         value={form.patientId}
         onChange={handleChange}
@@ -107,7 +124,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
       </TextField>
       <TextField
         select
-        label="Doctor"
+        label={t('prescription.doctor')}
         name="doctorId"
         value={form.doctorId}
         onChange={handleChange}
@@ -123,7 +140,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
       </TextField>
       <TextField
         select
-        label="Clinic"
+        label={t('prescription.clinic')}
         name="clinicId"
         value={form.clinicId}
         onChange={handleChange}
@@ -137,58 +154,68 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
           </MenuItem>
         ))}
       </TextField>
-      <Typography variant="subtitle1" sx={{ mt: 2 }}>Medications</Typography>
+      <Typography variant="subtitle1" sx={{ mt: 2 }}>{t('prescription.medications')}</Typography>
       {form.medications.map((med, idx) => (
-        <Stack key={idx} direction="row" spacing={1} sx={{ mb: 1 }}>
+        <Stack key={idx} direction="row" spacing={2} sx={{ mb: 2 }}>
           <TextField
-            label="Medication Name"
-            name="medicationName"
-            value={med.medicationName}
-            onChange={e => handleMedicationChange(idx, e)}
-            required
-          />
-          <TextField
-            label="Medication ID"
+            select
+            label={t('prescription.medication')}
             name="medicationId"
             value={med.medicationId}
             onChange={e => handleMedicationChange(idx, e)}
+            fullWidth
             required
-          />
+          >
+            <MenuItem value="">{t('prescription.select_medication')}</MenuItem>
+            {medicaments.map(m => (
+              <MenuItem key={m.id} value={String(m.id)}>{m.name}</MenuItem>
+            ))}
+          </TextField>
           <TextField
-            label="Dosage"
+            label={t('prescription.dosage')}
             name="dosage"
             value={med.dosage}
             onChange={e => handleMedicationChange(idx, e)}
+            fullWidth
             required
           />
           <TextField
-            label="Duration (days)"
+            label={t('prescription.duration')}
             name="duration"
-            type="number"
             value={med.duration}
             onChange={e => handleMedicationChange(idx, e)}
+            fullWidth
             required
           />
           <TextField
-            label="Frequency"
+            label={t('prescription.frequency')}
             name="frequency"
             value={med.frequency}
             onChange={e => handleMedicationChange(idx, e)}
+            fullWidth
             required
           />
           <TextField
-            label="Instructions"
+            label={t('prescription.instructions')}
             name="instructions"
             value={med.instructions}
             onChange={e => handleMedicationChange(idx, e)}
+            fullWidth
           />
+          <IconButton onClick={handleAddMedication} color="primary" sx={{ alignSelf: 'center' }}>
+            <AddIcon />
+          </IconButton>
+          <IconButton onClick={() => handleDeleteMedication(idx)} color="error" sx={{ alignSelf: 'center' }}>
+            {/* You can use a delete icon from MUI, e.g. DeleteIcon */}
+            <span style={{ fontWeight: 'bold', fontSize: 18 }}>-</span>
+          </IconButton>
         </Stack>
       ))}
       <IconButton color="primary" onClick={handleAddMedication} sx={{ mb: 2 }}>
         <AddIcon />
       </IconButton>
       <TextField
-        label="Prescription Date"
+        label={t('prescription.prescription_date')}
         name="prescriptionDate"
         type="datetime-local"
         value={form.prescriptionDate}
@@ -199,7 +226,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
         required
       />
       <TextField
-        label="Valid Until"
+        label={t('prescription.valid_until')}
         name="validUntil"
         type="datetime-local"
         value={form.validUntil}
@@ -211,7 +238,7 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
       />
       <TextField
         select
-        label="Refill Allowed"
+        label={t('prescription.refill_allowed')}
         name="refillAllowed"
         value={form.refillAllowed}
         onChange={handleChange}
@@ -219,11 +246,11 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
         margin="normal"
       >
         {refillOptions.map(opt => (
-          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+          <MenuItem key={opt} value={opt}>{t(`prescription.refill_${opt.toLowerCase()}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
-        label="Refill Count"
+        label={t('prescription.refill_count')}
         name="refillCount"
         type="number"
         value={form.refillCount}
@@ -231,25 +258,18 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
         fullWidth
         margin="normal"
       />
-      <TextField
-        label="Pharmacy ID"
-        name="pharmacyId"
-        value={form.pharmacyId}
-        onChange={handleChange}
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="Digital Signature"
-        name="digitalSignature"
-        value={form.digitalSignature}
-        onChange={handleChange}
-        fullWidth
-        margin="normal"
-      />
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 8 }}>{t('prescription.digital_signature') || 'Doctor Signature'}</label>
+        <SignaturePad onChange={dataUrl => setForm(f => ({ ...f, digitalSignature: dataUrl }))} />
+        {form.digitalSignature && (
+          <div style={{ marginTop: 8 }}>
+            <img src={form.digitalSignature} alt="Signature preview" style={{ maxWidth: 300, maxHeight: 100, border: '1px solid #eee', borderRadius: 4 }} />
+          </div>
+        )}
+      </div>
       <TextField
         select
-        label="Status"
+        label={t('prescription.status')}
         name="status"
         value={form.status}
         onChange={handleChange}
@@ -257,15 +277,15 @@ const AddPrescription = ({ closeModal, onSuccess }) => {
         margin="normal"
       >
         {statusOptions.map(opt => (
-          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+          <MenuItem key={opt} value={opt}>{t(`prescription.status_${opt.toLowerCase()}`)}</MenuItem>
         ))}
       </TextField>
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button type="submit" variant="contained" color="success" disabled={loading}>
-          {loading ? 'Saving...' : 'Create Prescription'}
+          {loading ? t('prescription.saving') : t('prescription.create')}
         </Button>
         <Button variant="outlined" onClick={closeModal} disabled={loading}>
-          Cancel
+          {t('prescription.cancel')}
         </Button>
       </Stack>
     </form>

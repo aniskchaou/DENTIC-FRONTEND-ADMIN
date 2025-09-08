@@ -1,11 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { LinearProgress } from '@mui/material';
+import { LinearProgress, Chip, Button, Typography } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import BASE_URL from '../../main/urls/urls';
+import AddMarketingForm from './AddMarketingForm';
+import { useTranslation } from 'react-i18next';
 
-const BASE_URL = 'https://your-api-url.com'; // replace with your API base URL
+const parseCampaignRow = (row) => ({
+  ...row,
+  targetAudience: {
+    ageGroup: row.ageGroup ?? false,
+    lastVisitDate: row.lastVisitDate ?? false,
+    treatmentHistory: row.treatmentHistory ?? false
+  },
+  performanceMetrics: row.performanceMetrics
+    ? typeof row.performanceMetrics === "string"
+      ? JSON.parse(row.performanceMetrics)
+      : row.performanceMetrics
+    : {}
+});
 
 const Marketing = () => {
+  const { t } = useTranslation();
+
   const [campaigns, setCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
@@ -17,7 +34,12 @@ const Marketing = () => {
   const fetchCampaigns = () => {
     setLoading(true);
     axios.get(`${BASE_URL}/marketing`)
-      .then(res => setCampaigns(res.data))
+      .then(res => {
+        const parsed = Array.isArray(res.data)
+          ? res.data.map(parseCampaignRow)
+          : [];
+        setCampaigns(parsed);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -41,93 +63,95 @@ const Marketing = () => {
   };
 
   const handleDelete = () => {
-    if (selectedCampaignId && window.confirm('Are you sure you want to delete this campaign?')) {
+    if (selectedCampaignId && window.confirm(t('marketing.confirm_delete'))) {
       axios.delete(`${BASE_URL}/marketing/${selectedCampaignId}`)
         .then(() => refresh());
     }
   };
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'campaignName', headerName: 'Campaign Name', width: 200 },
-    { field: 'campaignType', headerName: 'Type', width: 130 },
+    { field: 'campaignName', headerName: t('marketing.campaign_name'), width: 200 },
+    { field: 'campaignType', headerName: t('marketing.type'), width: 130 },
     {
       field: 'targetAudience',
-      headerName: 'Target Audience',
+      headerName: t('marketing.target_audience'),
       width: 300,
       renderCell: (params) => {
         const ta = params.value || {};
-        return `Age: ${ta.ageGroup || '-'}, Last Visit: ${ta.lastVisitDate || '-'}, Treatment: ${ta.treatmentHistory || '-'}`;
+        return `${t('marketing.age')}: ${ta.ageGroup || '-'}, ${t('marketing.treatment')}: ${ta.treatmentHistory || '-'}`;
       }
     },
-    { field: 'messageTemplate', headerName: 'Message', width: 250 },
+    { field: 'messageTemplate', headerName: t('marketing.message'), width: 250 },
     {
       field: 'scheduleDate',
-      headerName: 'Scheduled Date',
+      headerName: t('marketing.scheduled_date'),
       width: 180,
       valueFormatter: (params) => new Date(params.value).toLocaleString()
     },
-    { field: 'status', headerName: 'Status', width: 130 },
     {
-      field: 'performanceMetrics',
-      headerName: 'Performance',
-      width: 300,
+      field: 'status',
+      headerName: t('marketing.status'),
+      width: 130,
       renderCell: (params) => {
-        const metrics = params.value || {};
-        return `Open Rate: ${metrics.openRate ?? '-'}, Click-Through: ${metrics.clickThroughRate ?? '-'}, Conversion: ${metrics.conversionRate ?? '-'}`;
+        const value = params.value;
+        let color = "default";
+        let label = value;
+        if (value === "Scheduled") { color = "info"; label = t('marketing.scheduled'); }
+        else if (value === "Active") { color = "success"; label = t('marketing.active'); }
+        else if (value === "Completed") { color = "primary"; label = t('marketing.completed'); }
+        else if (value === "Draft") { color = "warning"; label = t('marketing.draft'); }
+        else if (value === "Cancelled") { color = "error"; label = t('marketing.cancelled'); }
+        return <Chip label={label} color={color} size="small" />;
       }
-    },
-    {
-      field: 'createdAt',
-      headerName: 'Created At',
-      width: 180,
-      valueFormatter: (params) => new Date(params.value).toLocaleString()
-    },
-    {
-      field: 'updatedAt',
-      headerName: 'Updated At',
-      width: 180,
-      valueFormatter: (params) => new Date(params.value).toLocaleString()
     }
   ];
 
   return (
     <div className="card">
       <div className="card-header">
-        <h4><i className="fas fa-bullhorn"></i> Marketing Campaigns</h4>
+        <Typography variant="h4" fontWeight={700} color="primary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <i className="fas fa-bullhorn" style={{ marginRight: 10 }} />
+          {t('marketing.campaigns')}
+        </Typography>
       </div>
 
       <div className="card-body">
-        <button
-          type="button"
-          className="btn btn-success btn-sm"
+        <Button
+          variant="outlined"
+          color="success"
+          size="small"
           data-toggle="modal"
           data-target="#addCampaignModal"
+          startIcon={<i className="far fa-plus-square"></i>}
+          sx={{ mr: 1 }}
         >
-          <i className="far fa-plus-square"></i> Create Campaign
-        </button>
+          {t('marketing.create')}
+        </Button>
 
-        <button
-          type="button"
-          className="btn btn-warning btn-sm"
-          data-toggle="modal"
-          data-target="#editCampaignModal"
-          disabled={!selectedCampaign}
-        >
-          <i className="fas fa-edit"></i> Edit
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-danger btn-sm"
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
           onClick={handleDelete}
           disabled={!selectedCampaignId}
+          startIcon={<i className="fas fa-trash-alt"></i>}
+          sx={{ mr: 1 }}
         >
-          <i className="fas fa-trash-alt"></i> Delete
-        </button>
+          {t('marketing.delete')}
+        </Button>
+
+        <Button
+          variant="outlined"
+          color="info"
+          size="small"
+          onClick={refresh}
+          startIcon={<i className="fas fa-sync-alt"></i>}
+        >
+          {t('marketing.refresh')}
+        </Button>
 
         {loading ? (
-          <LinearProgress />
+          <LinearProgress sx={{ mt: 2 }} />
         ) : (
           <div style={{ height: 480, width: '100%', marginTop: '10px' }}>
             <DataGrid
@@ -147,12 +171,12 @@ const Marketing = () => {
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Create New Campaign</h5>
+                <h5 className="modal-title">{t('marketing.create_new_campaign')}</h5>
                 <button
                   type="button"
                   className="close"
                   data-dismiss="modal"
-                  aria-label="Close"
+                  aria-label={t('marketing.close')}
                   onClick={refresh}
                   ref={closeButtonAdd}
                 >
@@ -160,8 +184,7 @@ const Marketing = () => {
                 </button>
               </div>
               <div className="modal-body">
-                {/* AddMarketingForm component here */}
-                {/* <AddMarketingForm closeModal={() => closeButtonAdd.current.click()} /> */}
+                <AddMarketingForm closeModal={() => closeButtonAdd.current.click()} />
               </div>
               <div className="modal-footer">
                 <button
@@ -171,7 +194,7 @@ const Marketing = () => {
                   onClick={refresh}
                   ref={closeButtonAdd}
                 >
-                  Close
+                  {t('marketing.close')}
                 </button>
               </div>
             </div>
@@ -183,12 +206,12 @@ const Marketing = () => {
           <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Campaign</h5>
+                <h5 className="modal-title">{t('marketing.edit_campaign')}</h5>
                 <button
                   type="button"
                   className="close"
                   data-dismiss="modal"
-                  aria-label="Close"
+                  aria-label={t('marketing.close')}
                 >
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -205,7 +228,7 @@ const Marketing = () => {
                   onClick={refresh}
                   ref={closeButtonEdit}
                 >
-                  Close
+                  {t('marketing.close')}
                 </button>
               </div>
             </div>

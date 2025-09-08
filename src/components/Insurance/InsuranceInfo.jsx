@@ -8,13 +8,16 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement } from 'chart.js';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 import AddInsurance from './AddInsurance';
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
 const InsuranceInfo = () => {
+  const { t } = useTranslation();
   const [insuranceData, setInsuranceData] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
@@ -29,7 +32,17 @@ const InsuranceInfo = () => {
     axios.get(`${BASE_URL}/insurances`)
       .then((res) => setInsuranceData(res.data))
       .finally(() => setLoading(false));
+    // Fetch patients from backend
+    axios.get(`${BASE_URL}/patients`)
+      .then(res => setPatients(res.data))
+      .catch(() => setPatients([]));
   }, []);
+
+  // Helper to get patient name by id
+  const getPatientName = (id) => {
+    const patient = patients.find(p => p.id === id);
+    return patient ? patient.fullName || patient.name : t('insurance.na');
+  };
 
   // Feature: Verify Coverage
   const verifyCoverage = async (insuranceId, serviceType) => {
@@ -153,27 +166,33 @@ const InsuranceInfo = () => {
   };
 
   const columns = [
-    { field: 'providerName', headerName: 'Provider', width: 160 },
-    { field: 'policyNumber', headerName: 'Policy No.', width: 180 },
+    { field: 'providerName', headerName: t('insurance.provider'), width: 160 },
+    { field: 'policyNumber', headerName: t('insurance.policy_number'), width: 180 },
+    {
+      field: 'patientId',
+      headerName: t('insurance.patient'),
+      width: 180,
+      valueGetter: (params) => getPatientName(params.row.patientId)
+    },
     {
       field: 'validFrom',
-      headerName: 'Valid From',
+      headerName: t('insurance.valid_from'),
       width: 120,
       valueFormatter: ({ value }) => new Date(value).toLocaleDateString()
     },
     {
       field: 'validUntil',
-      headerName: 'Valid Until',
+      headerName: t('insurance.valid_until'),
       width: 120,
       valueFormatter: ({ value }) => new Date(value).toLocaleDateString()
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('insurance.status'),
       width: 120,
       renderCell: ({ value }) => (
         <Chip
-          label={value}
+          label={t(`insurance.status_${value.toLowerCase()}`)}
           color={value === 'Active' ? 'success' : 'default'}
           size="small"
         />
@@ -181,10 +200,10 @@ const InsuranceInfo = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('insurance.actions'),
       width: 100,
       renderCell: (params) => (
-        <Tooltip title="Actions">
+        <Tooltip title={t('insurance.actions')}>
           <IconButton
             size="small"
             onClick={e => handleActionClick(e, params.row)}
@@ -204,32 +223,30 @@ const InsuranceInfo = () => {
         <Box sx={{ p: 3, textAlign: 'center' }}>
           <Typography color="error" fontWeight={600} sx={{ mb: 2 }}>
             <i className="fas fa-exclamation-circle" style={{ marginRight: 8 }} />
-            No coverage details available.
+            {t('insurance.no_coverage_details')}
           </Typography>
         </Box>
       );
     }
 
-    // Prepare main coverage chips
     const mainChips = [
       {
-        label: `Consultation: ${coverageDetails.consultationCoverage ?? 'N/A'}%`,
+        label: `${t('insurance.consultation')}: ${coverageDetails.consultationCoverage ?? t('insurance.na')}%`,
         color: 'primary',
         icon: <i className="fas fa-user-md" />
       },
       {
-        label: `Treatment: ${coverageDetails.treatmentCoverage ?? 'N/A'}%`,
+        label: `${t('insurance.treatment')}: ${coverageDetails.treatmentCoverage ?? t('insurance.na')}%`,
         color: 'success',
         icon: <i className="fas fa-stethoscope" />
       },
       {
-        label: `Medication: ${coverageDetails.medicationCoverage ?? 'N/A'}%`,
+        label: `${t('insurance.medication')}: ${coverageDetails.medicationCoverage ?? t('insurance.na')}%`,
         color: 'info',
         icon: <i className="fas fa-pills" />
       }
     ];
 
-    // Prepare additional info
     const additional = Object.entries(coverageDetails).filter(
       ([key]) => !['consultationCoverage', 'treatmentCoverage', 'medicationCoverage'].includes(key)
     );
@@ -244,22 +261,22 @@ const InsuranceInfo = () => {
       }}>
         <Typography variant="h5" color="primary" fontWeight={700} gutterBottom sx={{ mb: 2 }}>
           <i className="fas fa-eye" style={{ marginRight: 10 }} />
-          Coverage Details
+          {t('insurance.coverage_details')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
-          <Chip label={`Provider: ${insurance?.providerName || 'N/A'}`} color="primary" sx={{ fontWeight: 600, fontSize: 15 }} />
-          <Chip label={`Policy No: ${insurance?.policyNumber || 'N/A'}`} color="info" sx={{ fontWeight: 600, fontSize: 15 }} />
-          <Chip label={`Patient: ${insurance?.patientFullName || 'N/A'}`} color="success" sx={{ fontWeight: 600, fontSize: 15 }} />
-          <Chip label={`Status: ${insurance?.status || 'N/A'}`} color={insurance?.status === 'Active' ? 'success' : 'default'} sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.provider')}: ${insurance?.providerName || t('insurance.na')}`} color="primary" sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.policy_number')}: ${insurance?.policyNumber || t('insurance.na')}`} color="info" sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.patient')}: ${insurance?.patientFullName || t('insurance.na')}`} color="success" sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.status')}: ${insurance?.status ? t(`insurance.status_${insurance.status.toLowerCase()}`) : t('insurance.na')}`} color={insurance?.status === 'Active' ? 'success' : 'default'} sx={{ fontWeight: 600, fontSize: 15 }} />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
-          <Chip label={`Valid From: ${insurance?.validFrom ? new Date(insurance.validFrom).toLocaleDateString() : 'N/A'}`} color="default" sx={{ fontWeight: 600, fontSize: 15 }} />
-          <Chip label={`Valid Until: ${insurance?.validUntil ? new Date(insurance.validUntil).toLocaleDateString() : 'N/A'}`} color="default" sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.valid_from')}: ${insurance?.validFrom ? new Date(insurance.validFrom).toLocaleDateString() : t('insurance.na')}`} color="default" sx={{ fontWeight: 600, fontSize: 15 }} />
+          <Chip label={`${t('insurance.valid_until')}: ${insurance?.validUntil ? new Date(insurance.validUntil).toLocaleDateString() : t('insurance.na')}`} color="default" sx={{ fontWeight: 600, fontSize: 15 }} />
         </Stack>
         <Divider sx={{ mb: 2 }} />
         <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-          Coverage Percentages:
+          {t('insurance.coverage_percentages')}
         </Typography>
         <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: 'wrap' }}>
           {mainChips.map((chip) => (
@@ -276,7 +293,7 @@ const InsuranceInfo = () => {
           <>
             <Divider sx={{ mb: 2 }} />
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Additional Info:
+              {t('insurance.additional_info')}
             </Typography>
             <Stack spacing={1} direction="row" flexWrap="wrap">
               {additional.map(([key, value]) => (
@@ -299,20 +316,20 @@ const InsuranceInfo = () => {
     <Paper elevation={4} sx={{ p: 3, bgcolor: '#f5f7fa', minHeight: '100vh' }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" color="primary" fontWeight={700} gutterBottom>
-          <i className="fas fa-shield-alt" style={{ marginRight: 10 }} /> Insurance Records
+          <i className="fas fa-shield-alt" style={{ marginRight: 10 }} /> {t('insurance.title')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
           <Paper sx={{ flex: 1, bgcolor: '#e3f2fd', p: 2, borderRadius: 2, textAlign: 'center' }} elevation={2}>
-            <Typography variant="subtitle2" color="primary">Total Policies</Typography>
+            <Typography variant="subtitle2" color="primary">{t('insurance.total_policies')}</Typography>
             <Typography variant="h6">{totalInsurances}</Typography>
           </Paper>
           <Paper sx={{ flex: 1, bgcolor: '#e8f5e9', p: 2, borderRadius: 2, textAlign: 'center' }} elevation={2}>
-            <Typography variant="subtitle2" color="success.main">Active</Typography>
+            <Typography variant="subtitle2" color="success.main">{t('insurance.active')}</Typography>
             <Typography variant="h6">{activeInsurances}</Typography>
           </Paper>
           <Paper sx={{ flex: 1, bgcolor: '#ffebee', p: 2, borderRadius: 2, textAlign: 'center' }} elevation={2}>
-            <Typography variant="subtitle2" color="error.main">Expired</Typography>
+            <Typography variant="subtitle2" color="error.main">{t('insurance.expired')}</Typography>
             <Typography variant="h6">{expiredInsurances}</Typography>
           </Paper>
         </Stack>
@@ -320,15 +337,15 @@ const InsuranceInfo = () => {
 
       <Box sx={{ display: 'flex', gap: 4, mb: 4, mt: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
         <Paper sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }} elevation={1}>
-          <Typography variant="subtitle1" align="center" fontWeight={600}>Policies by Provider</Typography>
+          <Typography variant="subtitle1" align="center" fontWeight={600}>{t('insurance.policies_by_provider')}</Typography>
           <Doughnut data={doughnutData} />
         </Paper>
         <Paper sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }} elevation={1}>
-          <Typography variant="subtitle1" align="center" fontWeight={600}>Policies per Provider</Typography>
+          <Typography variant="subtitle1" align="center" fontWeight={600}>{t('insurance.policies_per_provider')}</Typography>
           <Bar data={barData} />
         </Paper>
         <Paper sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }} elevation={1}>
-          <Typography variant="subtitle1" align="center" fontWeight={600}>Status Trends by Provider</Typography>
+          <Typography variant="subtitle1" align="center" fontWeight={600}>{t('insurance.status_trends_by_provider')}</Typography>
           <Line data={lineData} />
         </Paper>
       </Box>
@@ -341,7 +358,7 @@ const InsuranceInfo = () => {
           onClick={() => setAddDialogOpen(true)}
           startIcon={<i className="fas fa-plus"></i>}
         >
-          Create Insurance
+          {t('insurance.create')}
         </Button>
 
         {loading ? (
@@ -373,48 +390,27 @@ const InsuranceInfo = () => {
                 handleActionClose();
               }}>
                 <i className="fas fa-eye" style={{ marginRight: 8, color: '#ffa000' }} />
-                View Coverage
+                {t('insurance.view_coverage')}
               </MenuItem>
               <MenuItem onClick={() => {
                 setCoverageModalData({
-                  title: 'Policy Details',
-                  content: `Policy Number: ${actionRow.policyNumber}`
+                  title: t('insurance.policy_details'),
+                  content: `${t('insurance.policy_number')}: ${actionRow.policyNumber}`
                 });
                 setCoverageModalOpen(true);
                 handleActionClose();
               }}>
                 <i className="fas fa-id-card" style={{ marginRight: 8, color: '#8e24aa' }} />
-                View Policy Details
+                {t('insurance.view_policy_details')}
               </MenuItem>
-              <MenuItem onClick={() => {
-                setCoverageModalData({
-                  title: 'Download',
-                  content: `Download for policy ${actionRow.policyNumber} started.`
-                });
-                setCoverageModalOpen(true);
-                handleActionClose();
-              }}>
-                <i className="fas fa-download" style={{ marginRight: 8, color: '#00bcd4' }} />
-                Download Policy PDF
-              </MenuItem>
-              <MenuItem onClick={() => {
-                setCoverageModalData({
-                  title: 'Renewal Reminder',
-                  content: `Send renewal reminder to ${actionRow.patientFullName}`
-                });
-                setCoverageModalOpen(true);
-                handleActionClose();
-              }}>
-                <i className="fas fa-bell" style={{ marginRight: 8, color: '#e53935' }} />
-                Send Renewal Reminder
-              </MenuItem>
+              
             </Menu>
           </Box>
         )}
         <Dialog open={coverageModalOpen} onClose={() => setCoverageModalOpen(false)} maxWidth="sm" fullWidth>
           <DialogTitle sx={{ fontWeight: 700 }}>{coverageModalData?.title}</DialogTitle>
           <DialogContent>
-            {coverageModalData?.title === 'Coverage Details' && actionRow ? (
+            {coverageModalData?.title === t('insurance.coverage_details') && actionRow ? (
               <CoverageModalContent coverageDetails={actionRow.coverageDetails} insurance={actionRow} />
             ) : (
               <Typography sx={{ fontSize: 16, color: '#1976d2', fontWeight: 600 }}>

@@ -18,6 +18,7 @@ import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
+import { useTranslation } from 'react-i18next';
 
 const localizer = momentLocalizer(moment);
 
@@ -66,22 +67,10 @@ function generateMeetCode() {
   return `${rand()}-${rand()}-${rand()}`;
 }
 
-// Add this to your component
-
-// Replace with your Google OAuth2 client ID
-const CLIENT_ID = "373581238151-l5fft2cc1mlm0o5nrvins188im9uj4m7.apps.googleusercontent.com";
-const SCOPES = "https://www.googleapis.com/auth/calendar.events";
-
-function loadScript(src) {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = resolve;
-    document.body.appendChild(script);
-  });
-}
+const SCOPES = "https://www.googleapis.com/auth/calendar.events"; // keep this constant
 
 const Telemedicine = () => {
+  const { t } = useTranslation();
   const [inCall, setInCall] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
@@ -111,10 +100,26 @@ const Telemedicine = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const [clientId, setClientId] = useState('');
 
   useEffect(() => {
+    const loadScript = src => {
+      if (!document.querySelector(`script[src="${src}"]`)) {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    };
     loadScript("https://accounts.google.com/gsi/client");
     loadScript("https://apis.google.com/js/api.js");
+    // Fetch Google Meet Client ID from backend
+    axios.get(`${BASE_URL}/clinicsettings`)
+      .then(res => {
+        const key = res.data?.telemedicine?.GOOGLE_MEET_KEY;
+        console.log('GOOGLE_MEET_KEY:', key);
+        if (key) setClientId(key);
+      });
     fetchAppointments();
     fetchPatients();
     fetchDoctors();
@@ -189,7 +194,7 @@ const Telemedicine = () => {
   const authenticate = async () => {
     return new Promise((resolve, reject) => {
       window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
+        client_id: clientId,
         scope: SCOPES,
         callback: (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
@@ -225,7 +230,8 @@ const Telemedicine = () => {
           resource: event,
           conferenceDataVersion: 1,
         });
-        resolve(response.result.hangoutLink);
+        console.error('Google Calendar API response:', response);
+        resolve(response.result.hangoutLink); // <-- Use this link only!
       });
     });
   };
@@ -261,10 +267,18 @@ const Telemedicine = () => {
     const start = new Date(newAppointment.start);
     const end = new Date(start.getTime() + (newAppointment.sessionDuration || 30) * 60000);
     let meetLink = '';
+    let errorMsg = '';
     try {
       meetLink = await createMeetEvent(start, end);
-    } catch {
-      meetLink = 'https://meet.google.com/' + Math.random().toString(36).substring(2, 12);
+      if (!meetLink) {
+        errorMsg = t('telemedicine.meet_link_failed') || 'Failed to generate Google Meet link. Please check your API credentials and permissions.';
+      }
+    } catch (err) {
+      errorMsg = t('telemedicine.meet_link_failed') || 'Failed to generate Google Meet link. Please check your API credentials and permissions.';
+    }
+    if (errorMsg) {
+      alert(errorMsg); // Or use a Snackbar/Modal for better UX
+      return;
     }
     const payload = {
       patientId: Number(newAppointment.patientId),
@@ -296,22 +310,21 @@ const Telemedicine = () => {
 
   return (
     <Box sx={{ maxWidth: 1100, mx: 'auto', mt: 4, p: 3 }}>
-     
       <Paper sx={{ p: 2, mb: 3 }}>
-         <Typography variant="h4" gutterBottom>
-        <VideocamIcon sx={{ mr: 1 }} /> Telemedicine Consultation
-      </Typography>
-      <Button
-        variant="outlined"
-        color="primary"
-        startIcon={<AddIcon />}
-        sx={{ mb: 2 }}
-        onClick={handleOpenModal}
-      >
-        New Appointment
-      </Button>
+        <Typography variant="h4" gutterBottom>
+          <VideocamIcon sx={{ mr: 1 }} /> {t('telemedicine.title')}
+        </Typography>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<AddIcon />}
+          sx={{ mb: 2 }}
+          onClick={handleOpenModal}
+        >
+          {t('telemedicine.new_appointment')}
+        </Button>
         <Typography variant="h6" gutterBottom>
-          Telemedicine Appointments Calendar
+          {t('telemedicine.calendar_title')}
         </Typography>
         <div style={{ height: 500 }}>
           <Calendar
@@ -337,11 +350,11 @@ const Telemedicine = () => {
 
       {/* New Appointment Modal */}
       <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>New Telemedicine Appointment</DialogTitle>
+        <DialogTitle>{t('telemedicine.new_appointment')}</DialogTitle>
         <DialogContent>
           <TextField
             select
-            label="Patient"
+            label={t('telemedicine.patient')}
             value={newAppointment.patientId}
             onChange={e => setNewAppointment(a => ({ ...a, patientId: e.target.value }))}
             fullWidth
@@ -353,7 +366,7 @@ const Telemedicine = () => {
           </TextField>
           <TextField
             select
-            label="Doctor"
+            label={t('telemedicine.doctor')}
             value={newAppointment.doctorId}
             onChange={e => setNewAppointment(a => ({ ...a, doctorId: e.target.value }))}
             fullWidth
@@ -364,7 +377,7 @@ const Telemedicine = () => {
             ))}
           </TextField>
           <TextField
-            label="Start Date & Time"
+            label={t('telemedicine.start_datetime')}
             type="datetime-local"
             value={newAppointment.start || ''}
             onChange={e => setNewAppointment(a => ({ ...a, start: e.target.value }))}
@@ -373,7 +386,7 @@ const Telemedicine = () => {
             InputLabelProps={{ shrink: true }}
           />
           <TextField
-            label="Session Duration (minutes)"
+            label={t('telemedicine.session_duration')}
             type="number"
             value={newAppointment.sessionDuration}
             onChange={e => setNewAppointment(a => ({ ...a, sessionDuration: Number(e.target.value) }))}
@@ -383,7 +396,7 @@ const Telemedicine = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>Cancel</Button>
+          <Button onClick={() => setOpenModal(false)}>{t('telemedicine.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleCreateAppointment}
@@ -393,7 +406,7 @@ const Telemedicine = () => {
               !newAppointment.start
             }
           >
-            Create & Generate Meet Link
+            {t('telemedicine.create_and_generate_link')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -401,32 +414,32 @@ const Telemedicine = () => {
       {/* Event Details Modal */}
       <Dialog open={showEventModal} onClose={() => setShowEventModal(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: '#1976d2', color: '#fff', fontWeight: 700 }}>
-          Telemedicine Appointment Details
+          {t('telemedicine.details_title')}
         </DialogTitle>
         <DialogContent sx={{ py: 3 }}>
           {selectedEvent && (
             <Box>
               <Typography variant="h6" sx={{ mb: 2, color: '#1976d2', fontWeight: 600 }}>
                 <VideocamIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Video Consultation
+                {t('telemedicine.video_consultation')}
               </Typography>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                  <b>Patient:</b> {patients.find(p => p.id === selectedEvent.id || p.id === selectedEvent.patientId)?.fullName || selectedEvent.patientId}
+                  <b>{t('telemedicine.patient')}:</b> {patients.find(p => p.id === selectedEvent.id || p.id === selectedEvent.patientId)?.fullName || selectedEvent.patientId}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                  <b>Doctor:</b> {doctors.find(d => d.id === selectedEvent.id || d.id === selectedEvent.doctorId)?.fullName || selectedEvent.doctorId}
+                  <b>{t('telemedicine.doctor')}:</b> {doctors.find(d => d.id === selectedEvent.id || d.id === selectedEvent.doctorId)?.fullName || selectedEvent.doctorId}
                 </Typography>
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  <b>Start:</b> {selectedEvent.start ? new Date(selectedEvent.start).toLocaleString() : '-'}
+                  <b>{t('telemedicine.start')}:</b> {selectedEvent.start ? new Date(selectedEvent.start).toLocaleString() : '-'}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  <b>Duration:</b> {selectedEvent.sessionDuration || 30} minutes
+                  <b>{t('telemedicine.duration')}:</b> {selectedEvent.sessionDuration || 30} {t('telemedicine.minutes')}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: 0.5 }}>
-                  <b>Status:</b> <span style={{
+                  <b>{t('telemedicine.status')}:</b> <span style={{
                     color: selectedEvent.status === 'Scheduled' ? '#1976d2' : '#43a047',
                     fontWeight: 600
                   }}>{selectedEvent.status}</span>
@@ -434,7 +447,7 @@ const Telemedicine = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <b>Meeting Link:</b>{' '}
+                  <b>{t('telemedicine.meeting_link')}:</b>{' '}
                   {selectedEvent.meetingLink ? (
                     <a href={selectedEvent.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', wordBreak: 'break-all' }}>
                       {selectedEvent.meetingLink}
@@ -454,7 +467,7 @@ const Telemedicine = () => {
             color="secondary"
             sx={{ minWidth: 120, fontWeight: 600, mr: 2 }}
           >
-            Close
+            {t('telemedicine.close')}
           </Button>
           {selectedEvent && selectedEvent.meetingLink && (
             <Button
@@ -473,7 +486,7 @@ const Telemedicine = () => {
               startIcon={<VideocamIcon sx={{ fontSize: 28 }} />}
               onClick={() => window.open(selectedEvent.meetingLink, '_blank')}
             >
-              Join Call
+              {t('telemedicine.join_call')}
             </Button>
           )}
         </DialogActions>
@@ -649,14 +662,6 @@ const Telemedicine = () => {
         </Box>
       )}
 
-      {!inCall && !showHistory && (
-        <Box sx={{ mt: 4, textAlign: 'center', color: 'text.secondary' }}>
-          <Typography variant="body1">
-            Select a patient and start a video or audio call.<br />
-            <span style={{ fontSize: 24 }}>📞</span>
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 };

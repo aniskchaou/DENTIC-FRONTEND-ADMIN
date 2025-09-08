@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "certificateNumber": "CERT-2025001",
+    "patientId": 1,
+    "doctorId": 1,
+    "clinicId": 1,
+    "certificateType": "Medical Fitness",
+    "issueDate": "2025-07-01T00:00:00.000Z",
+    "validUntil": "2025-12-31T00:00:00.000Z",
+    "diagnosis": "Fit for work",
+    "treatmentDetails": "Routine checkup, no issues found.",
+    "recommendations": "Maintain healthy lifestyle.",
+    "attachments": [
+      "https://example.com/fitness-report.pdf"
+    ],
+    "signature": "Dr. John Doe",
+    "status": "Issued",
+    "notes": "Issued for employment purposes.",
+    "createdAt": "2025-08-10T18:54:54.220Z",
+    "updatedAt": "2025-08-10T18:54:54.220Z"
+  },
+  {
+    "id": 2,
+    "certificateNumber": "CERT-2025002",
+    "patientId": 1,
+    "doctorId": 1,
+    "clinicId": 1,
+    "certificateType": "Sick Leave",
+    "issueDate": "2025-07-10T00:00:00.000Z",
+    "validUntil": "2025-07-15T00:00:00.000Z",
+    "diagnosis": "Acute dental infection",
+    "treatmentDetails": "Antibiotics prescribed, rest recommended.",
+    "recommendations": "Return for follow-up in 1 week.",
+    "attachments": [],
+    "signature": "Dr. Jane Smith",
+    "status": "Issued",
+    "notes": "Patient advised to avoid strenuous activity.",
+    "createdAt": "2025-08-10T18:54:54.221Z",
+    "updatedAt": "2025-08-10T18:54:54.221Z"
+  }
+]

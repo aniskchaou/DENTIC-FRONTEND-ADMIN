@@ -14,9 +14,12 @@ import QrCodeIcon from '@mui/icons-material/QrCode';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/Upload';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import BASE_URL from '../../main/urls/urls';
 import AddEquipmentMaintenance from './AddEquipmentMaintenance';
 import EditEquipmentMaintenance from './EditEquipmentMaintenance';
+import CurrentUser from '../../main/config/user';
+import { useTranslation } from 'react-i18next';
 
 const statusColors = {
   'In Service': 'success',
@@ -27,6 +30,7 @@ const statusColors = {
 };
 
 const EquipmentMaintenance = () => {
+  const { t } = useTranslation();
   const [maintenanceData, setMaintenanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
@@ -56,6 +60,7 @@ const EquipmentMaintenance = () => {
   const [maintenanceDate, setMaintenanceDate] = useState('');
   const [maintenanceType, setMaintenanceType] = useState('');
   const [maintenanceNotes, setMaintenanceNotes] = useState('');
+  const [technicians, setTechnicians] = useState([]);
   const isMobile = useMediaQuery('(max-width:600px)');
 
   useEffect(() => {
@@ -66,11 +71,35 @@ const EquipmentMaintenance = () => {
       .catch(() => setClinics([]));
   }, []);
 
+  // Fetch technicians with role TECHNICAL
+  useEffect(() => {
+    axios.get(`${BASE_URL}/users`)
+      .then(res => {
+        const technicalUsers = res.data.filter(u => u.role?.toUpperCase() === 'TECHNICAL');
+        setTechnicians(technicalUsers);
+      })
+      .catch(() => setTechnicians([]));
+  }, []);
+
   const fetchData = () => {
     setLoading(true);
-    axios.get(`${BASE_URL}/equipments`)
-      .then((res) => setMaintenanceData(res.data))
-      .finally(() => setLoading(false));
+
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/equipement.json')
+        .then(res => res.json())
+        .then(data => {
+          setMaintenanceData(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setMaintenanceData([]);
+          setLoading(false);
+        });
+    } else {
+      axios.get(`${BASE_URL}/equipment`)
+        .then((res) => setMaintenanceData(res.data))
+        .finally(() => setLoading(false));
+    }
   };
 
   const getClinicName = (id) => {
@@ -103,11 +132,11 @@ const EquipmentMaintenance = () => {
     }
     setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/equipments/${actionRow.id}`);
-      setNotification({ open: true, message: 'Equipment deleted successfully.', severity: 'success' });
+      await axios.delete(`${BASE_URL}/equipment/${actionRow.id}`);
+      setNotification({ open: true, message: t('equipment.deleted_success'), severity: 'success' });
       fetchData();
     } catch (err) {
-      setNotification({ open: true, message: 'Failed to delete equipment.', severity: 'error' });
+      setNotification({ open: true, message: t('equipment.delete_failed'), severity: 'error' });
     } finally {
       setLoading(false);
       handleActionClose();
@@ -160,6 +189,7 @@ const EquipmentMaintenance = () => {
   const handleBulkStatusUpdate = (status) => {
     setNotification({ open: true, message: `Updated status for ${bulkSelection.length} items`, severity: 'success' });
     // Implement backend call
+     handleAddMaintenance()
   };
 
   // --- Export/Import ---
@@ -237,45 +267,45 @@ const EquipmentMaintenance = () => {
   const columns = [
     {
       field: 'clinicId',
-      headerName: 'Clinic',
+      headerName: t('equipment.clinic'),
       width: isMobile ? 120 : 230,
       renderCell: (params) => getClinicName(params.value)
     },
-    { field: 'equipmentName', headerName: 'Equipment', width: isMobile ? 100 : 180 },
-    { field: 'modelNumber', headerName: 'Model #', width: isMobile ? 80 : 130 },
-    { field: 'manufacturer', headerName: 'Manufacturer', width: isMobile ? 90 : 150 },
+    { field: 'equipmentName', headerName: t('equipment.name'), width: isMobile ? 100 : 180 },
+    { field: 'modelNumber', headerName: t('equipment.model_number'), width: isMobile ? 80 : 130 },
+    { field: 'manufacturer', headerName: t('equipment.manufacturer'), width: isMobile ? 90 : 150 },
     {
       field: 'purchaseDate',
-      headerName: 'Purchased On',
+      headerName: t('equipment.purchase_date'),
       width: isMobile ? 90 : 140,
       renderCell: (params) => dateChip(params.value, 'info')
     },
     {
       field: 'lastServiceDate',
-      headerName: 'Last Serviced',
+      headerName: t('equipment.last_service_date'),
       width: isMobile ? 90 : 140,
       renderCell: (params) => dateChip(params.value, 'success')
     },
     {
       field: 'nextServiceDue',
-      headerName: 'Next Service Due',
+      headerName: t('equipment.next_service_due'),
       width: isMobile ? 100 : 150,
       renderCell: (params) => (
-        <Tooltip title={isOverdue(params.row) ? 'Overdue!' : ''}>
+        <Tooltip title={isOverdue(params.row) ? t('equipment.overdue') : ''}>
           <span>
             {dateChip(params.value, isOverdue(params.row) ? 'error' : 'warning')}
-            {isOverdue(params.row) && <Chip label="Overdue" color="error" size="small" sx={{ ml: 1 }} />}
+            {isOverdue(params.row) && <Chip label={t('equipment.overdue')} color="error" size="small" sx={{ ml: 1 }} />}
           </span>
         </Tooltip>
       )
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('equipment.status'),
       width: isMobile ? 90 : 140,
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`equipment.status_${params.value.replace(/\s/g, '_').toLowerCase()}`)}
           color={statusColors[params.value] || 'default'}
           size="small"
           variant={isOverdue(params.row) ? 'filled' : 'outlined'}
@@ -284,14 +314,14 @@ const EquipmentMaintenance = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('equipment.actions'),
       width: isMobile ? 60 : 120,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
         <>
           <IconButton
-            aria-label="more"
+            aria-label={t('equipment.more')}
             aria-controls="action-menu"
             aria-haspopup="true"
             onClick={(event) => handleActionClick(event, params.row)}
@@ -323,12 +353,12 @@ const EquipmentMaintenance = () => {
   return (
     <Box sx={containerSx}>
       <div className="card-header" style={{ marginBottom: 24 }}>
-        <h4><i className="fas fa-tools"></i> Equipment Maintenance</h4>
+        <h4><i className="fas fa-tools"></i> {t('equipment.title')}</h4>
       </div>
       <Box
         sx={{
           mb: 2,
-          mt: 2, // Add margin top between title and filters
+          mt: 2,
           display: 'flex',
           flexWrap: 'wrap',
           gap: 2,
@@ -336,33 +366,33 @@ const EquipmentMaintenance = () => {
         }}
       >
         <TextField
-          label="Search Equipment"
+          label={t('equipment.search')}
           size="small"
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{ minWidth: 180 }}
         />
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Status</InputLabel>
+          <InputLabel>{t('equipment.status')}</InputLabel>
           <Select
             value={filterStatus}
-            label="Status"
+            label={t('equipment.status')}
             onChange={e => setFilterStatus(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
+            <MenuItem value="">{t('equipment.all_status')}</MenuItem>
             {Object.keys(statusColors).map(s => (
-              <MenuItem key={s} value={s}>{s}</MenuItem>
+              <MenuItem key={s} value={s}>{t(`equipment.status_${s.replace(/\s/g, '_').toLowerCase()}`)}</MenuItem>
             ))}
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Technician</InputLabel>
+          <InputLabel>{t('equipment.technician')}</InputLabel>
           <Select
             value={filterTechnician}
-            label="Technician"
+            label={t('equipment.technician')}
             onChange={e => setFilterTechnician(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
+            <MenuItem value="">{t('equipment.all_technicians')}</MenuItem>
             {/* {technicians.map(t => (
               <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
             ))} */}
@@ -375,7 +405,7 @@ const EquipmentMaintenance = () => {
           sx={{ minWidth: 170, height: 40, fontWeight: 600 }}
           onClick={handleExport}
         >
-          Export
+          {t('equipment.export')}
         </Button>
         <Button
           variant="outlined"
@@ -384,16 +414,16 @@ const EquipmentMaintenance = () => {
           onClick={handleBulkDelete}
           disabled={bulkSelection.length === 0}
         >
-          Delete Selected
+          {t('equipment.delete_selected')}
         </Button>
         <Button
           variant="outlined"
           color="primary"
           sx={{ minWidth: 170, height: 40, fontWeight: 600 }}
-          onClick={() => handleBulkStatusUpdate('Under Maintenance')}
+          onClick={() => handleBulkStatusUpdate('In Maintenance')}
           disabled={bulkSelection.length === 0}
         >
-          Mark as In Maintenance
+          {t('equipment.mark_in_maintenance')}
         </Button>
         <Button
           variant="outlined"
@@ -401,7 +431,16 @@ const EquipmentMaintenance = () => {
           sx={{ minWidth: 170, height: 40, fontWeight: 600 }}
           onClick={() => setAddDialogOpen(true)}
         >
-          <i className="fas fa-plus" style={{ marginRight: 8 }}></i> Create Equipment
+          <i className="fas fa-plus" style={{ marginRight: 8 }}></i> {t('equipment.create')}
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<RefreshIcon />}
+          sx={{ minWidth: 120, height: 40, fontWeight: 600 }}
+          onClick={fetchData}
+        >
+          {t('equipment.reload')}
         </Button>
       </Box>
       <div className="card-body">
@@ -433,11 +472,13 @@ const EquipmentMaintenance = () => {
               open={Boolean(actionAnchorEl)}
               onClose={handleActionClose}
             >
-              <MenuItem onClick={handleEdit}>Edit</MenuItem>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
-              <MenuItem onClick={handleView}>View</MenuItem>
-              <MenuItem onClick={handleScheduleMaintenance}>Schedule Maintenance</MenuItem>
-              <MenuItem onClick={handleAddMaintenanceDialog}>Add Maintenance</MenuItem>
+              <MenuItem onClick={handleEdit}>{t('equipment.edit')}</MenuItem>
+              <MenuItem onClick={handleDelete}>{t('equipment.delete')}</MenuItem>
+              <MenuItem onClick={handleView}>{t('equipment.view')}</MenuItem>
+              <MenuItem onClick={handleScheduleMaintenance}>{t('equipment.schedule_maintenance')}</MenuItem>
+              <MenuItem onClick={() => handleBulkStatusUpdate('In Maintenance')}>
+                {t('equipment.mark_in_maintenance')}
+              </MenuItem>
             </Menu>
           </div>
         )}
@@ -445,37 +486,37 @@ const EquipmentMaintenance = () => {
 
       {/* Schedule Maintenance Dialog */}
       <Dialog open={scheduleDialogOpen} onClose={() => setScheduleDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Schedule Maintenance</DialogTitle>
+        <DialogTitle>{t('equipment.schedule_maintenance')}</DialogTitle>
         <DialogContent>
-          <TextField label="Date" type="date" fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
+          <TextField label={t('equipment.date')} type="date" fullWidth margin="normal" InputLabelProps={{ shrink: true }} />
           <FormControl fullWidth margin="normal">
-            <InputLabel>Technician</InputLabel>
-            <Select label="Technician">
-              {/* {technicians.map(t => (
-                <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
-              ))} */}
+            <InputLabel>{t('equipment.technician')}</InputLabel>
+            <Select label={t('equipment.technician')}>
+              {technicians.map(t => (
+                <MenuItem key={t.id} value={t.id}>{t.fullName}</MenuItem>
+              ))}
             </Select>
           </FormControl>
-          <TextField label="Notes" fullWidth margin="normal" multiline rows={2} />
+          <TextField label={t('equipment.notes')} fullWidth margin="normal" multiline rows={2} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setScheduleDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => { setScheduleDialogOpen(false); setNotification({ open: true, message: 'Maintenance scheduled', severity: 'success' }); }}>Schedule</Button>
+          <Button onClick={() => setScheduleDialogOpen(false)}>{t('common.cancel')}</Button>
+          <Button variant="contained" onClick={() => { setScheduleDialogOpen(false); setNotification({ open: true, message: t('equipment.maintenance_scheduled'), severity: 'success' }); }}>{t('equipment.schedule')}</Button>
         </DialogActions>
       </Dialog>
 
       {/* Maintenance History Drawer */}
       <Drawer anchor="right" open={historyDrawerOpen} onClose={() => setHistoryDrawerOpen(false)}>
         <Box sx={{ width: isMobile ? 280 : 400, p: 2 }}>
-          <Typography variant="h6" gutterBottom>Maintenance History</Typography>
+          <Typography variant="h6" gutterBottom>{t('equipment.maintenance_history')}</Typography>
           {selectedHistory.length === 0 ? (
-            <Typography>No history available.</Typography>
+            <Typography>{t('equipment.no_history')}</Typography>
           ) : (
             selectedHistory.map((h, idx) => (
               <Box key={idx} sx={{ mb: 2, p: 1, border: '1px solid #eee', borderRadius: 1 }}>
                 <Typography variant="subtitle2">{h.date ? new Date(h.date).toLocaleDateString() : '-'}</Typography>
-                <Typography variant="body2">Technician: {h.technician || '-'}</Typography>
-                <Typography variant="body2">Notes: {h.notes || '-'}</Typography>
+                <Typography variant="body2">{t('equipment.technician')}: {h.technician || '-'}</Typography>
+                <Typography variant="body2">{t('equipment.notes')}: {h.notes || '-'}</Typography>
               </Box>
             ))
           )}
@@ -484,11 +525,11 @@ const EquipmentMaintenance = () => {
 
       {/* Assign Technician Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Assign Technician</DialogTitle>
+        <DialogTitle>{t('equipment.assign_technician')}</DialogTitle>
         <DialogContent>
           <FormControl fullWidth margin="normal">
-            <InputLabel>Technician</InputLabel>
-            <Select label="Technician">
+            <InputLabel>{t('equipment.technician')}</InputLabel>
+            <Select label={t('equipment.technician')}>
               {/* {technicians.map(t => (
                 <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>
               ))} */}
@@ -496,37 +537,36 @@ const EquipmentMaintenance = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAssignDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => { setAssignDialogOpen(false); setNotification({ open: true, message: 'Technician assigned', severity: 'success' }); }}>Assign</Button>
+          <Button onClick={() => setAssignDialogOpen(false)}>{t('common.cancel')}</Button>
+          <Button variant="contained" onClick={() => { setAssignDialogOpen(false); setNotification({ open: true, message: t('equipment.technician_assigned'), severity: 'success' }); }}>{t('equipment.assign')}</Button>
         </DialogActions>
       </Dialog>
 
       {/* File Attachment Dialog */}
       <Dialog open={fileDialogOpen} onClose={() => setFileDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Attach File</DialogTitle>
+        <DialogTitle>{t('equipment.attach_file')}</DialogTitle>
         <DialogContent>
           <Button variant="contained" component="label" startIcon={<UploadFileIcon />}>
-            Upload File
+            {t('equipment.upload_file')}
             <input type="file" hidden />
           </Button>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFileDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setFileDialogOpen(false)}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>
 
       {/* QR Code Dialog */}
       <Dialog open={qrDialogOpen} onClose={() => setQrDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Equipment QR Code</DialogTitle>
+        <DialogTitle>{t('equipment.qr_code')}</DialogTitle>
         <DialogContent>
-          {/* Replace with real QR code */}
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
             <QrCodeIcon sx={{ fontSize: 80 }} />
           </Box>
-          <Typography align="center" variant="caption">Scan to identify equipment</Typography>
+          <Typography align="center" variant="caption">{t('equipment.scan_to_identify')}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setQrDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setQrDialogOpen(false)}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -535,7 +575,7 @@ const EquipmentMaintenance = () => {
         open={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
         technicians={[]}
-        clinics={[]} // Pass your clinics array here
+        clinics={[]}
         onSuccess={fetchData}
       />
 
@@ -545,7 +585,7 @@ const EquipmentMaintenance = () => {
         onClose={() => setEditDialogOpen(false)}
         equipment={editEquipment}
         technicians={[]}
-        clinics={[]} // Pass your clinics array here
+        clinics={[]}
         onSuccess={fetchData}
       />
 
@@ -554,45 +594,46 @@ const EquipmentMaintenance = () => {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <i className="fas fa-tools" style={{ color: '#1976d2', fontSize: 24 }} />
-            <span>Equipment Details</span>
+            <span>{t('equipment.details')}</span>
           </Box>
         </DialogTitle>
         <DialogContent>
           {viewEquipment ? (
-            <Box sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 4,
-              py: 2
-            }}>
-              {/* Left: Main Info */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: 4,
+                py: 2
+              }}
+            >
               <Box sx={{ flex: 1, minWidth: 260 }}>
                 <Typography variant="h6" sx={{ color: '#1976d2', mb: 2 }}>
                   {viewEquipment.equipmentName}
                 </Typography>
                 <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
                   <li>
-                    <b>Clinic:</b> {getClinicName(viewEquipment.clinicId)}
+                    <b>{t('equipment.clinic')}:</b> {getClinicName(viewEquipment.clinicId)}
                   </li>
                   <li>
-                    <b>Model Number:</b> {viewEquipment.modelNumber || <span style={{ color: '#888' }}>-</span>}
+                    <b>{t('equipment.model_number')}:</b> {viewEquipment.modelNumber || <span style={{ color: '#888' }}>-</span>}
                   </li>
                   <li>
-                    <b>Manufacturer:</b> {viewEquipment.manufacturer || <span style={{ color: '#888' }}>-</span>}
+                    <b>{t('equipment.manufacturer')}:</b> {viewEquipment.manufacturer || <span style={{ color: '#888' }}>-</span>}
                   </li>
                   <li>
-                    <b>Purchase Date:</b> {viewEquipment.purchaseDate ? new Date(viewEquipment.purchaseDate).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
+                    <b>{t('equipment.purchase_date')}:</b> {viewEquipment.purchaseDate ? new Date(viewEquipment.purchaseDate).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
                   </li>
                   <li>
-                    <b>Last Service Date:</b> {viewEquipment.lastServiceDate ? new Date(viewEquipment.lastServiceDate).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
+                    <b>{t('equipment.last_service_date')}:</b> {viewEquipment.lastServiceDate ? new Date(viewEquipment.lastServiceDate).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
                   </li>
                   <li>
-                    <b>Next Service Due:</b> {viewEquipment.nextServiceDue ? new Date(viewEquipment.nextServiceDue).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
+                    <b>{t('equipment.next_service_due')}:</b> {viewEquipment.nextServiceDue ? new Date(viewEquipment.nextServiceDue).toLocaleDateString() : <span style={{ color: '#888' }}>-</span>}
                   </li>
                   <li>
-                    <b>Status:</b>{' '}
+                    <b>{t('equipment.status')}:</b>{' '}
                     <Chip
-                      label={viewEquipment.status}
+                      label={t(`equipment.status_${viewEquipment.status.replace(/\s/g, '_').toLowerCase()}`)}
                       color={statusColors[viewEquipment.status] || 'default'}
                       size="small"
                       sx={{ fontWeight: 600 }}
@@ -600,7 +641,6 @@ const EquipmentMaintenance = () => {
                   </li>
                 </Box>
               </Box>
-              {/* Right: Visual/Extra Info */}
               <Box sx={{
                 flex: 1,
                 minWidth: 260,
@@ -613,36 +653,36 @@ const EquipmentMaintenance = () => {
                 boxShadow: 1
               }}>
                 <Typography variant="subtitle1" sx={{ color: '#1976d2', mb: 1 }}>
-                  Additional Info
+                  {t('equipment.additional_info')}
                 </Typography>
                 <Box>
-                  <b>Assigned Technician:</b> {viewEquipment.assignedTechnician || <span style={{ color: '#888' }}>-</span>}
+                  <b>{t('equipment.technician')}:</b> {viewEquipment.assignedTechnician || <span style={{ color: '#888' }}>-</span>}
                 </Box>
                 <Box>
-                  <b>Notes:</b>
+                  <b>{t('equipment.notes')}:</b>
                   <Typography variant="body2" sx={{ color: '#444', mt: 0.5 }}>
-                    {viewEquipment.maintenanceNotes || <span style={{ color: '#888' }}>No notes.</span>}
+                    {viewEquipment.maintenanceNotes || <span style={{ color: '#888' }}>{t('equipment.no_notes')}</span>}
                   </Typography>
                 </Box>
               </Box>
             </Box>
           ) : (
-            <Typography>No equipment selected.</Typography>
+            <Typography>{t('equipment.no_equipment_selected')}</Typography>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewDialogOpen(false)} color="secondary" variant="outlined">
-            Close
+            {t('common.close')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Add Maintenance Dialog */}
       <Dialog open={maintenanceDialogOpen} onClose={() => setMaintenanceDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Add Maintenance Record</DialogTitle>
+        <DialogTitle>{t('equipment.add_maintenance')}</DialogTitle>
         <DialogContent>
           <TextField
-            label="Date"
+            label={t('equipment.date')}
             type="date"
             value={maintenanceDate}
             onChange={e => setMaintenanceDate(e.target.value)}
@@ -651,19 +691,19 @@ const EquipmentMaintenance = () => {
             InputLabelProps={{ shrink: true }}
           />
           <FormControl fullWidth margin="normal">
-            <InputLabel>Type</InputLabel>
+            <InputLabel>{t('equipment.type')}</InputLabel>
             <Select
               value={maintenanceType}
-              label="Type"
+              label={t('equipment.type')}
               onChange={e => setMaintenanceType(e.target.value)}
             >
               {maintenanceTypes.map(type => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
+                <MenuItem key={type} value={type}>{t(`equipment.maintenance_type_${type.replace(/\s/g, '_').toLowerCase()}`)}</MenuItem>
               ))}
             </Select>
           </FormControl>
           <TextField
-            label="Notes"
+            label={t('equipment.notes')}
             value={maintenanceNotes}
             onChange={e => setMaintenanceNotes(e.target.value)}
             fullWidth
@@ -674,7 +714,7 @@ const EquipmentMaintenance = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setMaintenanceDialogOpen(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             variant="outlined"
@@ -683,7 +723,7 @@ const EquipmentMaintenance = () => {
             disabled={!maintenanceDate || !maintenanceType}
             sx={{ fontWeight: 600, minWidth: 100 }}
           >
-            Add
+            {t('equipment.add')}
           </Button>
         </DialogActions>
       </Dialog>

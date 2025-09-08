@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "patientId": "11111111-aaaa-bbbb-cccc-111111111111",
+    "providerName": "HealthSecure",
+    "policyNumber": "HS-2025-0001",
+    "coverageDetails": {
+      "maxAnnualCoverage": 5000,
+      "treatmentCoverage": 70,
+      "medicationCoverage": 60,
+      "consultationCoverage": 80
+    },
+    "validFrom": "2025-01-01",
+    "validUntil": "2025-12-31",
+    "status": "Active",
+    "createdAt": "2025-07-08T19:07:32.554Z",
+    "updatedAt": "2025-07-08T19:07:32.554Z"
+  },
+  {
+    "id": 2,
+    "patientId": "22222222-bbbb-cccc-dddd-222222222222",
+    "providerName": "DentalCare Plus",
+    "policyNumber": "DC-2025-0002",
+    "coverageDetails": {
+      "maxAnnualCoverage": 7000,
+      "treatmentCoverage": 75,
+      "medicationCoverage": 65,
+      "consultationCoverage": 90
+    },
+    "validFrom": "2025-03-15",
+    "validUntil": "2026-03-14",
+    "status": "Pending Verification",
+    "createdAt": "2025-07-08T19:07:32.557Z",
+    "updatedAt": "2025-07-08T19:07:32.557Z"
+  },
+  {
+    "id": 3,
+    "patientId": "33333333-cccc-dddd-eeee-333333333333",
+    "providerName": "Smile Insurance",
+    "policyNumber": "SI-2024-0003",
+    "coverageDetails": {
+      "maxAnnualCoverage": 6000,
+      "treatmentCoverage": 80,
+      "medicationCoverage": 70,
+      "consultationCoverage": 85
+    },
+    "validFrom": "2024-05-01",
+    "validUntil": "2025-04-30",
+    "status": "Expired",
+    "createdAt": "2025-07-08T19:07:32.557Z",
+    "updatedAt": "2025-07-08T19:07:32.557Z"
+  }]

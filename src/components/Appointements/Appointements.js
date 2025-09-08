@@ -1,40 +1,3 @@
-/**
- * Appointments Component
- * 
- * This component manages the appointments list and provides features such as:
- * - Viewing, editing, deleting, and archiving appointments.
- * - Searching and filtering appointments.
- * - Exporting appointments to a CSV file.
- * - Bulk actions like delete and archive.
- * - Dark mode toggle for better user experience.
- * - Dynamic menu actions for each appointment.
- * 
- * Props: None
- * State:
- * - appointmentsList: Array of appointments fetched from the server.
- * - updatedItem: The currently selected appointment for editing.
- * - loading: Boolean indicating whether data is being loaded.
- * - searchQuery: String for filtering appointments.
- * - isDarkMode: Boolean for toggling dark mode.
- * - anchorEl: DOM element for the menu anchor.
- * - selectedRow: The currently selected appointment row.
- * - updatedItemIds: Array of selected appointment IDs for bulk actions.
- * 
- * Functions:
- * - retrieveAppointments: Fetches the list of appointments from the server.
- * - handleSearch: Filters appointments based on the search query.
- * - handleExport: Exports the appointments list to a CSV file.
- * - handleBulkDelete: Deletes selected appointments.
- * - handleBulkArchive: Archives selected appointments.
- * - handleMenuAction: Handles actions like view, edit, delete, etc., from the menu.
- * - handleRowSelection: Tracks selected rows in the DataGrid.
- * 
- * Dependencies:
- * - Material-UI for UI components.
- * - Axios for HTTP requests.
- * - FileSaver for exporting CSV files.
- */
-
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import './Appointments.css';
@@ -52,12 +15,14 @@ import { Chart, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend, Cate
 import AddAppointment from './AddAppointment';
 import EditAppointment from './EditAppointment';
 import ViewAppointment from './ViewAppointment';
+import { useTranslation } from 'react-i18next';
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
 
 
 export const Appointments = () => {
+  const { t } = useTranslation();
   const [appointmentsList, setAppointments] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
   const forceUpdate = useForceUpdate();
@@ -78,6 +43,13 @@ export const Appointments = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewedItem, setViewedItem] = useState(null);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [noShowPrediction, setNoShowPrediction] = useState(null);
+  const [noShowDialogOpen, setNoShowDialogOpen] = useState(false);
+  const [smartRoutingResult, setSmartRoutingResult] = useState(null);
+  const [smartRoutingDialogOpen, setSmartRoutingDialogOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const retrieveAppointments = () => {
     setLoading(true);
@@ -270,10 +242,11 @@ export const Appointments = () => {
     });
   };
 
+  // Update columns with translation
   const columns = [
     {
       field: 'patientId',
-      headerName: 'Patient',
+      headerName: t('appointments.patient'),
       width: 200,
       renderCell: (params) => (
         <span>{getPatientName(params.value)}</span>
@@ -281,7 +254,7 @@ export const Appointments = () => {
     },
     {
       field: 'doctorId',
-      headerName: 'Doctor',
+      headerName: t('appointments.doctor'),
       width: 200,
       renderCell: (params) => (
         <span>{getDoctorName(params.value)}</span>
@@ -289,7 +262,7 @@ export const Appointments = () => {
     },
     {
       field: 'clinicLocationId',
-      headerName: 'Clinic',
+      headerName: t('appointments.clinic'),
       width: 200,
       renderCell: (params) => (
         <span>{getClinicName(params.value)}</span>
@@ -297,7 +270,7 @@ export const Appointments = () => {
     },
     {
       field: 'appointmentDate',
-      headerName: 'Date',
+      headerName: t('appointments.date'),
       width: 130,
       renderCell: (params) => (
         <Chip label={params.value} color="info" variant="outlined" />
@@ -305,7 +278,7 @@ export const Appointments = () => {
     },
     {
       field: 'startTime',
-      headerName: 'Start Time',
+      headerName: t('appointments.start_time'),
       width: 120,
       renderCell: (params) => (
         <Chip label={params.value} color="primary" variant="outlined" />
@@ -313,7 +286,7 @@ export const Appointments = () => {
     },
     {
       field: 'endTime',
-      headerName: 'End Time',
+      headerName: t('appointments.end_time'),
       width: 120,
       renderCell: (params) => (
         <Chip label={params.value} color="primary" variant="outlined" />
@@ -321,11 +294,11 @@ export const Appointments = () => {
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('appointments.status'),
       width: 150,
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`appointments.${params.value.toLowerCase()}`)}
           color={
             params.value === 'Completed'
               ? 'success'
@@ -345,8 +318,8 @@ export const Appointments = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
-      width: 220,
+      headerName: t('appointments.actions'),
+      width: 260,
       renderCell: (params) => (
         <div>
           <IconButton
@@ -363,11 +336,36 @@ export const Appointments = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            <MuiMenuItem onClick={() => handleMenuAction('view')}>View</MuiMenuItem>
-            <MuiMenuItem onClick={() => handleMenuAction('delete')}>Delete</MuiMenuItem>
-            <MuiMenuItem onClick={() => handleMenuAction('archive')}>Archive</MuiMenuItem>
-            <MuiMenuItem onClick={() => handleMenuAction('reschedule')}>Reschedule</MuiMenuItem>
-            <MuiMenuItem onClick={() => handleMenuAction('complete')}>Mark as Completed</MuiMenuItem>
+            <MuiMenuItem onClick={() => handleMenuAction('view')}>{t('appointments.view')}</MuiMenuItem>
+            <MuiMenuItem onClick={() => handleMenuAction('delete')}>{t('appointments.delete')}</MuiMenuItem>
+            <MuiMenuItem onClick={() => handleMenuAction('archive')}>{t('appointments.archive')}</MuiMenuItem>
+            <MuiMenuItem onClick={() => handleMenuAction('reschedule')}>{t('appointments.reschedule')}</MuiMenuItem>
+            <MuiMenuItem onClick={() => handleMenuAction('complete')}>{t('appointments.mark_completed')}</MuiMenuItem>
+            <MuiMenuItem
+              onClick={() => {
+                handleMenuClose();
+                suggestOptimalSlot(selectedRow.patientId, selectedRow.doctorId);
+              }}
+            >
+              {t('appointments.ai_suggest_slot')}
+            </MuiMenuItem>
+            <MuiMenuItem
+              onClick={() => {
+                handleMenuClose();
+                predictNoShowAI(selectedRow.patientId);
+              }}
+            >
+              {t('appointments.ai_no_show_prediction')}
+            </MuiMenuItem>
+            <MuiMenuItem
+              onClick={() => {
+                handleMenuClose();
+                const specialtyNeeded = selectedRow.appointmentType || 'General';
+                smartRoutingAI(selectedRow.patientId, specialtyNeeded);
+              }}
+            >
+              {t('appointments.ai_doctor_assignment')}
+            </MuiMenuItem>
           </Menu>
         </div>
       )
@@ -385,29 +383,38 @@ export const Appointments = () => {
                 {getPatientName(appt.patientId)}
               </Typography>
               <Typography variant="body2">
-                <strong>Doctor:</strong> {getDoctorName(appt.doctorId)}
+                <strong>{t('appointments.doctor')}:</strong> {getDoctorName(appt.doctorId)}
               </Typography>
               <Typography variant="body2">
-                <strong>Clinic:</strong> {getClinicName(appt.clinicLocationId)}
+                <strong>{t('appointments.clinic')}:</strong> {getClinicName(appt.clinicLocationId)}
               </Typography>
               <Typography variant="body2">
-                <strong>Date:</strong> {appt.appointmentDate}
+                <strong>{t('appointments.date')}:</strong> {appt.appointmentDate}
               </Typography>
               <Typography variant="body2">
-                <strong>Time:</strong> {appt.startTime} - {appt.endTime}
+                <strong>{t('appointments.time')}:</strong> {appt.startTime} - {appt.endTime}
               </Typography>
               <Typography variant="body2">
-                <strong>Status:</strong> {appt.status}
+                <strong>{t('appointments.status')}:</strong> {appt.status}
               </Typography>
               <Typography variant="body2">
-                <strong>Type:</strong> {appt.appointmentType}
+                <strong>{t('appointments.type')}:</strong> {appt.appointmentType}
               </Typography>
               <Typography variant="body2">
-                <strong>Reason:</strong> {appt.reasonForVisit}
+                <strong>{t('appointments.reason')}:</strong> {appt.reasonForVisit}
               </Typography>
               <Typography variant="body2">
-                <strong>Notes:</strong> {appt.notes}
+                <strong>{t('appointments.notes')}:</strong> {appt.notes}
               </Typography>
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                style={{ marginTop: 8 }}
+                onClick={() => suggestOptimalSlot(appt.patientId, appt.doctorId)}
+              >
+                {t('appointments.ai_suggest_slot')}
+              </Button>
             </CardContent>
           </Card>
         </Grid>
@@ -428,7 +435,7 @@ export const Appointments = () => {
 
     return (
       <div style={{ marginTop: 24 }}>
-        <Typography variant="h5" gutterBottom>Calendar View</Typography>
+        <Typography variant="h5" gutterBottom>{t('appointments.calendar_view')}</Typography>
         <Grid container spacing={2}>
           {dates.map(date => (
             <Grid item xs={12} sm={6} md={4} key={date}>
@@ -465,7 +472,7 @@ export const Appointments = () => {
   // List view for appointments
   const renderListView = () => (
     <Box sx={{ marginTop: 2 }}>
-      <Typography variant="h5" gutterBottom>List View</Typography>
+      <Typography variant="h5" gutterBottom>{t('appointments.list_view')}</Typography>
       <List>
         {appointmentsList.map((appt, idx) => (
           <React.Fragment key={appt.id}>
@@ -474,10 +481,10 @@ export const Appointments = () => {
                 primary={`${getPatientName(appt.patientId)} with ${getDoctorName(appt.doctorId)}`}
                 secondary={
                   <>
-                    <span><strong>Date:</strong> {appt.appointmentDate}</span><br />
-                    <span><strong>Time:</strong> {appt.startTime} - {appt.endTime}</span><br />
-                    <span><strong>Status:</strong> {appt.status}</span><br />
-                    <span><strong>Clinic:</strong> {getClinicName(appt.clinicLocationId)}</span>
+                    <span><strong>{t('appointments.date')}:</strong> {appt.appointmentDate}</span><br />
+                    <span><strong>{t('appointments.time')}:</strong> {appt.startTime} - {appt.endTime}</span><br />
+                    <span><strong>{t('appointments.status')}:</strong> {appt.status}</span><br />
+                    <span><strong>{t('appointments.clinic')}:</strong> {getClinicName(appt.clinicLocationId)}</span>
                   </>
                 }
               />
@@ -500,7 +507,7 @@ export const Appointments = () => {
 
     return (
       <Box sx={{ marginTop: 2 }}>
-        <Typography variant="h5" gutterBottom>Timeline View</Typography>
+        <Typography variant="h5" gutterBottom>{t('appointments.timeline_view')}</Typography>
         <div style={{ borderLeft: '2px solid #1976d2', paddingLeft: 24 }}>
           {sortedAppointments.map(appt => (
             <div key={appt.id} style={{ marginBottom: 32, position: 'relative' }}>
@@ -544,7 +551,12 @@ export const Appointments = () => {
 
   // Prepare chart data
   const doughnutData = {
-    labels: ['Completed', 'Pending', 'Confirmed', 'No-show'],
+    labels: [
+      t('appointments.completed'),
+      t('appointments.pending'),
+      t('appointments.confirmed'),
+      t('appointments.no_show')
+    ],
     datasets: [{
       data: [completed, pending, confirmed, noShow],
       backgroundColor: ['#43a047', '#ffa000', '#1976d2', '#e53935'],
@@ -560,7 +572,7 @@ export const Appointments = () => {
       }, {})
     ),
     datasets: [{
-      label: 'Appointments per Day',
+      label: t('appointments.appointments_per_day'),
       data: Object.values(
         appointmentsList.reduce((acc, appt) => {
           acc[appt.appointmentDate] = acc[appt.appointmentDate] || 0;
@@ -582,7 +594,7 @@ export const Appointments = () => {
     ),
     datasets: [
       {
-        label: 'Completed',
+        label: t('appointments.completed'),
         data: Object.keys(
           appointmentsList.reduce((acc, appt) => {
             acc[appt.appointmentDate] = acc[appt.appointmentDate] || 0;
@@ -593,7 +605,7 @@ export const Appointments = () => {
         fill: false,
       },
       {
-        label: 'Pending',
+        label: t('appointments.pending'),
         data: Object.keys(
           appointmentsList.reduce((acc, appt) => {
             acc[appt.appointmentDate] = acc[appt.appointmentDate] || 0;
@@ -604,7 +616,7 @@ export const Appointments = () => {
         fill: false,
       },
       {
-        label: 'Confirmed',
+        label: t('appointments.confirmed'),
         data: Object.keys(
           appointmentsList.reduce((acc, appt) => {
             acc[appt.appointmentDate] = acc[appt.appointmentDate] || 0;
@@ -615,7 +627,7 @@ export const Appointments = () => {
         fill: false,
       },
       {
-        label: 'No-show',
+        label: t('appointments.no_show'),
         data: Object.keys(
           appointmentsList.reduce((acc, appt) => {
             acc[appt.appointmentDate] = acc[appt.appointmentDate] || 0;
@@ -645,32 +657,123 @@ export const Appointments = () => {
     );
   });
 
+  // Add AI Scheduling Assistant function
+  const suggestOptimalSlot = async (patientId, doctorId) => {
+    const doctorAppointments = appointmentsList.filter(a => a.doctorId === doctorId);
+    const patientAppointments = appointmentsList.filter(a => a.patientId === patientId);
+
+    const doctorAvailability = Array.from(
+      new Set(
+        doctorAppointments.map(a => `${a.appointmentDate} ${a.startTime}`)
+      )
+    );
+
+    const preferredTimes = patientAppointments.map(a => `${a.appointmentDate} ${a.startTime}`);
+    const lastVisit = patientAppointments.length > 0
+      ? patientAppointments[patientAppointments.length - 1].appointmentDate
+      : null;
+
+    const payload = {
+      patientId,
+      doctorAvailability,
+      patientHistory: {
+        preferredTimes,
+        lastVisit
+      }
+    };
+
+    try {
+      const aiRes = await axios.post(`${BASE_URL}/ai/scheduling-assistant`, payload);
+      // Expecting response: { slots: [...] }
+      if (aiRes.data && Array.isArray(aiRes.data.slots) && aiRes.data.slots.length > 0) {
+        setAiSuggestion(aiRes.data.slots[0]);
+      } else {
+        setAiSuggestion(null);
+      }
+    } catch (e) {
+      setAiSuggestion(null);
+    }
+    setAiDialogOpen(true);
+  };
+
+  // No-show Prediction AI function
+  const predictNoShowAI = async (patientId) => {
+    // Build appointmentHistory for this patient
+    const appointmentHistory = appointmentsList
+      .filter(a => a.patientId === patientId)
+      .map(a => ({
+        date: a.appointmentDate,
+        status: a.status
+      }));
+
+    const payload = {
+      patientId,
+      appointmentHistory
+    };
+
+    try {
+      const aiRes = await axios.post(`${BASE_URL}/ai/no-show-prediction`, payload);
+      setNoShowPrediction(aiRes.data);
+    } catch (e) {
+      setNoShowPrediction(null);
+    }
+    setNoShowDialogOpen(true);
+  };
+
+  // Smart Routing AI function
+  const smartRoutingAI = async (patientId, specialtyNeeded) => {
+    // Build doctorList from loaded doctors
+    const doctorList = doctors.map(doc => ({
+      id: doc.id,
+      name: doc.fullName,
+      specialty: doc.specialty || 'General',
+      available: true, // You can add logic to check availability
+      workload: appointmentsList.filter(a => a.doctorId === doc.id && a.status !== 'Completed').length
+    }));
+
+    const payload = {
+      patientId,
+      specialtyNeeded,
+      doctorList
+    };
+
+    try {
+      const aiRes = await axios.post(`${BASE_URL}/ai/smart-routing`, payload);
+      setSmartRoutingResult(aiRes.data);
+    } catch (e) {
+      setSmartRoutingResult(null);
+    }
+    setSmartRoutingDialogOpen(true);
+  };
+
   return (
     <div className={`card ${isDarkMode ? 'dark-mode' : ''}`}>
       <div className="card-header">
-        <h4><i className="menu-icon fas fa-calendar-check"></i> Appointments</h4>
+        <h4>
+          <i className="menu-icon fas fa-calendar-check"></i> {t('appointments.title')}
+        </h4>
       </div>
 
       {/* Widget summary */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 2 }}>
         <Box sx={{ flex: 1, bgcolor: '#e3f2fd', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="primary">Total</Typography>
+          <Typography variant="subtitle2" color="primary">{t('appointments.total')}</Typography>
           <Typography variant="h6">{totalAppointments}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#e8f5e9', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="success.main">Completed</Typography>
+          <Typography variant="subtitle2" color="success.main">{t('appointments.completed')}</Typography>
           <Typography variant="h6">{completed}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#fffde7', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="warning.main">Pending</Typography>
+          <Typography variant="subtitle2" color="warning.main">{t('appointments.pending')}</Typography>
           <Typography variant="h6">{pending}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#f3e5f5', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="primary">Confirmed</Typography>
+          <Typography variant="subtitle2" color="primary">{t('appointments.confirmed')}</Typography>
           <Typography variant="h6">{confirmed}</Typography>
         </Box>
         <Box sx={{ flex: 1, bgcolor: '#ffebee', p: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="subtitle2" color="error.main">No-show</Typography>
+          <Typography variant="subtitle2" color="error.main">{t('appointments.no_show')}</Typography>
           <Typography variant="h6">{noShow}</Typography>
         </Box>
       </Box>
@@ -678,15 +781,15 @@ export const Appointments = () => {
       {/* Charts */}
       <Box sx={{ display: 'flex', gap: 4, mb: 4, mt: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Appointments by Status</Typography>
+          <Typography variant="subtitle1" align="center">{t('appointments.appointments_by_status')}</Typography>
           <Doughnut data={doughnutData} />
         </Box>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Appointments per Day</Typography>
+          <Typography variant="subtitle1" align="center">{t('appointments.appointments_per_day')}</Typography>
           <Bar data={barData} />
         </Box>
         <Box sx={{ minWidth: 320, flex: 1, bgcolor: '#fafafa', p: 2, borderRadius: 2 }}>
-          <Typography variant="subtitle1" align="center">Status Trends Over Time</Typography>
+          <Typography variant="subtitle1" align="center">{t('appointments.status_trends_over_time')}</Typography>
           <Line data={lineData} />
         </Box>
       </Box>
@@ -697,11 +800,10 @@ export const Appointments = () => {
             variant="outlined"
             color="primary"
             startIcon={<i className="fas fa-plus"></i>}
-            data-toggle="modal"
-            data-target="#addAppointment"
+            onClick={() => setAddModalOpen(true)}
             style={{ minWidth: 150 }}
           >
-            Add Appointment
+            {t('appointments.add_appointment')}
           </Button>
           <Button
             onClick={handleExport}
@@ -709,7 +811,7 @@ export const Appointments = () => {
             color="primary"
             style={{ minWidth: 120 }}
           >
-            Export
+            {t('appointments.export')}
           </Button>
           <Button
             onClick={handleBulkArchive}
@@ -717,7 +819,7 @@ export const Appointments = () => {
             color="primary"
             style={{ minWidth: 160 }}
           >
-            Archive Selected
+            {t('appointments.archive_selected')}
           </Button>
           <Button
             onClick={resfresh}
@@ -726,7 +828,7 @@ export const Appointments = () => {
             style={{ minWidth: 120 }}
             startIcon={<i className="fas fa-sync-alt"></i>}
           >
-            Reload
+            {t('appointments.reload')}
           </Button>
         </Box>
 
@@ -738,7 +840,7 @@ export const Appointments = () => {
             onClick={() => setViewMode('table')}
             size="small"
           >
-            Table View
+            {t('appointments.table_view')}
           </Button>
           <Button
             variant={viewMode === 'cards' ? 'contained' : 'outlined'}
@@ -746,7 +848,7 @@ export const Appointments = () => {
             onClick={() => setViewMode('cards')}
             size="small"
           >
-            Card View
+            {t('appointments.card_view')}
           </Button>
           <Button
             variant={viewMode === 'calendar' ? 'contained' : 'outlined'}
@@ -754,7 +856,7 @@ export const Appointments = () => {
             onClick={() => setViewMode('calendar')}
             size="small"
           >
-            Calendar View
+            {t('appointments.calendar_view')}
           </Button>
           <Button
             variant={viewMode === 'list' ? 'contained' : 'outlined'}
@@ -762,7 +864,7 @@ export const Appointments = () => {
             onClick={() => setViewMode('list')}
             size="small"
           >
-            List View
+            {t('appointments.list_view')}
           </Button>
           <Button
             variant={viewMode === 'timeline' ? 'contained' : 'outlined'}
@@ -770,12 +872,12 @@ export const Appointments = () => {
             onClick={() => setViewMode('timeline')}
             size="small"
           >
-            Timeline View
+            {t('appointments.timeline_view')}
           </Button>
         </Box>
 
         <TextField
-          label="Search"
+          label={t('appointments.search')}
           variant="outlined"
           fullWidth
           margin="normal"
@@ -811,28 +913,44 @@ export const Appointments = () => {
         )}
 
         {/* Add Appointment Modal */}
-        <div className="modal fade" id="addAppointment" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">New Appointment</h5>
-                <button onClick={resfresh} type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-               <AddAppointment closeModal={closeModalAdd} doctors={doctors} patients={patients} clinics={clinics} onSuccess={resfresh} />
-              </div>
-              <div className="modal-footer">
-                <button onClick={resfresh} ref={closeButtonAdd} type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)} maxWidth="lg" fullWidth>
+          <DialogTitle>
+            {t('appointments.new_appointment')}
+            <IconButton
+              aria-label="close"
+              onClick={() => setAddModalOpen(false)}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <span aria-hidden="true">&times;</span>
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <AddAppointment
+              closeModal={() => setAddModalOpen(false)}
+              doctors={doctors}
+              patients={patients}
+              clinics={clinics}
+              onSuccess={() => {
+                resfresh();
+                setAddModalOpen(false);
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAddModalOpen(false)} color="secondary">
+              {t('appointments.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* Edit Appointment Modal */}
         <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)} maxWidth="lg" fullWidth>
-          <DialogTitle>Edit Appointment</DialogTitle>
+          <DialogTitle>{t('appointments.edit_appointment')}</DialogTitle>
           <DialogContent>
             <EditAppointment
               appointment={updatedItem}
@@ -860,6 +978,62 @@ export const Appointments = () => {
           getDoctorName={getDoctorName}
           getClinicName={getClinicName}
         />
+
+        {/* AI Suggestion Dialog */}
+        <Dialog open={aiDialogOpen} onClose={() => setAiDialogOpen(false)}>
+          <DialogTitle>{t('appointments.ai_suggest_slot')}</DialogTitle>
+          <DialogContent>
+            {aiSuggestion ? (
+              <Typography>
+                {t('appointments.suggested_optimal_slot')}: <strong>{aiSuggestion}</strong>
+              </Typography>
+            ) : (
+              <Typography>{t('appointments.no_suggestion_available')}</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAiDialogOpen(false)} color="primary">{t('appointments.close')}</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* AI No-show Prediction Dialog */}
+        <Dialog open={noShowDialogOpen} onClose={() => setNoShowDialogOpen(false)}>
+          <DialogTitle>{t('appointments.ai_no_show_prediction')}</DialogTitle>
+          <DialogContent>
+            {noShowPrediction ? (
+              <>
+                <Typography>
+                  {t('appointments.likely_to_no_show')}: <strong>{noShowPrediction.likelyToNoShow ? t('appointments.yes') : t('appointments.no')}</strong>
+                </Typography>
+                <Typography sx={{ mt: 2 }}>
+                  {noShowPrediction.reminderMessage}
+                </Typography>
+              </>
+            ) : (
+              <Typography>{t('appointments.no_prediction_available')}</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setNoShowDialogOpen(false)} color="primary">{t('appointments.close')}</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* AI Smart Routing Dialog */}
+        <Dialog open={smartRoutingDialogOpen} onClose={() => setSmartRoutingDialogOpen(false)}>
+          <DialogTitle>{t('appointments.ai_doctor_assignment')}</DialogTitle>
+          <DialogContent>
+            {smartRoutingResult ? (
+              <Typography>
+                {t('appointments.assigned_doctor')}: <strong>{smartRoutingResult.doctorName}</strong> (ID: {smartRoutingResult.doctorId})
+              </Typography>
+            ) : (
+              <Typography>{t('appointments.no_routing_suggestion_available')}</Typography>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSmartRoutingDialogOpen(false)} color="primary">{t('appointments.close')}</Button>
+          </DialogActions>
+        </Dialog>
 
       </div>
     </div>

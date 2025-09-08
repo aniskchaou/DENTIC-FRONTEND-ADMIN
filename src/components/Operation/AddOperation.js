@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, MenuItem, Stack } from '@mui/material';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
 const operationTypes = ['Surgical', 'Non-Surgical', 'Diagnostic', 'Other'];
@@ -9,6 +10,7 @@ const followUpOptions = ['Yes', 'No'];
 const statusOptions = ['Scheduled', 'Completed', 'Cancelled'];
 
 const AddOperation = ({ closeModal, onCreate }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     operationType: '',
     procedureName: '',
@@ -60,7 +62,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
       <Stack spacing={2}>
         <TextField
           select
-          label="Operation Type"
+          label={t('operation.operation_type')}
           name="operationType"
           value={form.operationType}
           onChange={handleChange}
@@ -68,11 +70,11 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {operationTypes.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`operation.type_${opt.replace('-', '_').replace(' ', '_').toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Procedure Name"
+          label={t('operation.procedure_name')}
           name="procedureName"
           value={form.procedureName}
           onChange={handleChange}
@@ -80,7 +82,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Operation Date & Time"
+          label={t('operation.operation_date')}
           name="operationDate"
           type="datetime-local"
           value={form.operationDate}
@@ -90,7 +92,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         />
         <TextField
-          label="Duration (minutes)"
+          label={t('operation.duration')}
           name="duration"
           type="number"
           value={form.duration}
@@ -100,7 +102,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Anesthesia Type"
+          label={t('operation.anesthesia_type')}
           name="anesthesiaType"
           value={form.anesthesiaType}
           onChange={handleChange}
@@ -108,18 +110,18 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {anesthesiaTypes.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`operation.anesthesia_${opt.replace('-', '_').replace(' ', '_').toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <TextField
-          label="Complications"
+          label={t('operation.complications')}
           name="complications"
           value={form.complications}
           onChange={handleChange}
           fullWidth
         />
         <TextField
-          label="Post-Operation Instructions"
+          label={t('operation.post_operation_instructions')}
           name="postOperationInstructions"
           value={form.postOperationInstructions}
           onChange={handleChange}
@@ -129,7 +131,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
-          label="Follow-Up Required"
+          label={t('operation.follow_up_required')}
           name="followUpRequired"
           value={form.followUpRequired}
           onChange={handleChange}
@@ -137,12 +139,12 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {followUpOptions.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`operation.follow_up_${opt.toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         {form.followUpRequired === 'Yes' && (
           <TextField
-            label="Follow-Up Date & Time"
+            label={t('operation.follow_up_date')}
             name="followUpDate"
             type="datetime-local"
             value={form.followUpDate}
@@ -154,7 +156,7 @@ const AddOperation = ({ closeModal, onCreate }) => {
         )}
         <TextField
           select
-          label="Status"
+          label={t('operation.status')}
           name="status"
           value={form.status}
           onChange={handleChange}
@@ -162,15 +164,15 @@ const AddOperation = ({ closeModal, onCreate }) => {
           fullWidth
         >
           {statusOptions.map(opt => (
-            <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+            <MenuItem key={opt} value={opt}>{t(`operation.status_${opt.toLowerCase()}`)}</MenuItem>
           ))}
         </TextField>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Operation'}
+            {loading ? t('operation.saving') : t('operation.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('operation.cancel')}
           </Button>
         </Stack>
       </Stack>

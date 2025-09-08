@@ -11,6 +11,7 @@ import AddInventoryItem from './AddInventoryItem'; // Import at the top
 import EditInventoryItem from './EditInventoryItem'; // Import EditInventoryItem
 import CurrentUser from '../../main/config/user'; // Import DEMO_MODE
 import BASE_URL from '../../main/urls/urls';
+import { useTranslation } from 'react-i18next';
 
 // Example demo data
 const DEMO_ITEMS = [
@@ -38,6 +39,7 @@ const DEMO_CLINICS = [
 ];
 
 const InventoryItem = () => {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [clinics, setClinics] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -130,11 +132,11 @@ const InventoryItem = () => {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Name', width: 180 },
-    { field: 'category', headerName: 'Category', width: 140 },
+    { field: 'name', headerName: t('inventory.name'), width: 180 },
+    { field: 'category', headerName: t('inventory.category'), width: 140 },
     {
       field: 'quantity',
-      headerName: 'Quantity',
+      headerName: t('inventory.quantity'),
       width: 100,
       renderCell: (params) => (
         <Chip
@@ -144,11 +146,11 @@ const InventoryItem = () => {
         />
       ),
     },
-    { field: 'unit', headerName: 'Unit', width: 90 },
-    { field: 'reorderLevel', headerName: 'Reorder Level', width: 120 },
+    { field: 'unit', headerName: t('inventory.unit'), width: 90 },
+    { field: 'reorderLevel', headerName: t('inventory.reorder_level'), width: 120 },
     {
       field: 'expiryDate',
-      headerName: 'Expiry Date',
+      headerName: t('inventory.expiry_date'),
       width: 130,
       renderCell: (params) => (
         <Chip
@@ -160,11 +162,11 @@ const InventoryItem = () => {
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: t('inventory.status'),
       width: 110,
       renderCell: (params) => (
         <Chip
-          label={params.value}
+          label={t(`inventory.status_${params.value.replace(/\s/g, '_').toLowerCase()}`)}
           color={
             params.value === 'In Stock'
               ? 'success'
@@ -182,7 +184,7 @@ const InventoryItem = () => {
     },
     {
       field: 'clinicId',
-      headerName: 'Clinic',
+      headerName: t('inventory.clinic'),
       width: 220,
       valueGetter: (params) => {
         const clinic = clinics.find(c => c.id === params.value);
@@ -191,14 +193,14 @@ const InventoryItem = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('inventory.actions'),
       width: 90,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
         <>
           <IconButton
-            aria-label="more"
+            aria-label={t('inventory.more')}
             aria-controls="action-menu"
             aria-haspopup="true"
             onClick={(event) => handleActionClick(event, params.row)}
@@ -216,7 +218,7 @@ const InventoryItem = () => {
       <Paper sx={{ p: 2 }}>
         <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center', fontWeight: 600 }}>
           <Inventory2OutlinedIcon sx={{ mr: 1 }} />
-          Inventory Items
+          {t('inventory.title')}
         </Typography>
         <Button
           variant="outlined"
@@ -224,7 +226,7 @@ const InventoryItem = () => {
           onClick={() => setAddModalOpen(true)}
           sx={{ mb: 2 }}
         >
-          <i className="fas fa-plus"></i> Create Inventory Item
+          <i className="fas fa-plus"></i> {t('inventory.create')}
         </Button>
         <Button
           variant="outlined"
@@ -252,7 +254,7 @@ const InventoryItem = () => {
             }
           }}
         >
-          Refresh
+          {t('inventory.refresh')}
         </Button>
         {loading ? (
           <LinearProgress />
@@ -274,20 +276,20 @@ const InventoryItem = () => {
             >
               <MenuItem onClick={handleView}>
                 <VisibilityIcon fontSize="small" sx={{ mr: 1 }} />
-                View
+                {t('inventory.view')}
               </MenuItem>
               <MenuItem onClick={handleEdit}>
                 <EditIcon fontSize="small" sx={{ mr: 1 }} />
-                Edit
+                {t('inventory.edit')}
               </MenuItem>
               <MenuItem onClick={handleDelete}>
                 <DeleteIcon fontSize="small" sx={{ mr: 1, color: 'error.main' }} />
-                Delete
+                {t('inventory.delete')}
               </MenuItem>
             </Menu>
             {/* Add Inventory Item Modal */}
             <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)} maxWidth="sm" fullWidth>
-              <DialogTitle>Create Inventory Item</DialogTitle>
+              <DialogTitle>{t('inventory.create')}</DialogTitle>
               <DialogContent>
                 <AddInventoryItem
                   closeModal={() => setAddModalOpen(false)}
@@ -297,11 +299,11 @@ const InventoryItem = () => {
             </Dialog>
             {/* Edit Inventory Item Modal */}
             <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)} maxWidth="sm" fullWidth>
-              <DialogTitle>Edit Inventory Item</DialogTitle>
+              <DialogTitle>{t('inventory.edit')}</DialogTitle>
               <DialogContent>
                 <EditInventoryItem
                   closeModal={() => setEditModalOpen(false)}
-                  item={editItem} // <-- Pass selected object here!
+                  item={editItem}
                   clinics={clinics}
                   onSuccess={handleEditSuccess}
                 />
@@ -311,7 +313,7 @@ const InventoryItem = () => {
             <Dialog open={viewModalOpen} onClose={() => setViewModalOpen(false)} maxWidth="sm" fullWidth>
               <DialogTitle>
                 <Inventory2OutlinedIcon sx={{ mr: 1, color: "#1976d2" }} />
-                <span style={{ color: "#1976d2", fontWeight: 700 }}>Inventory Item Details</span>
+                <span style={{ color: "#1976d2", fontWeight: 700 }}>{t('inventory.details')}</span>
               </DialogTitle>
               <DialogContent>
                 {viewItem && (
@@ -329,10 +331,10 @@ const InventoryItem = () => {
                       {viewItem.name}
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-                      <Chip label={`ID: ${viewItem.id}`} color="primary" />
-                      <Chip label={`Category: ${viewItem.category}`} color="info" />
-                      <Chip label={`Unit: ${viewItem.unit}`} color="default" />
-                      <Chip label={`Status: ${viewItem.status}`} color={
+                      <Chip label={`${t('inventory.id')}: ${viewItem.id}`} color="primary" />
+                      <Chip label={`${t('inventory.category')}: ${viewItem.category}`} color="info" />
+                      <Chip label={`${t('inventory.unit')}: ${viewItem.unit}`} color="default" />
+                      <Chip label={`${t('inventory.status')}: ${t(`inventory.status_${viewItem.status.replace(/\s/g, '_').toLowerCase()}`)}`} color={
                         viewItem.status === 'In Stock'
                           ? 'success'
                           : viewItem.status === 'Low Stock'
@@ -345,13 +347,13 @@ const InventoryItem = () => {
                       } />
                     </Box>
                     <Box sx={{ mt: 2 }}>
-                      <Typography><strong>Quantity:</strong> {viewItem.quantity}</Typography>
-                      <Typography><strong>Reorder Level:</strong> {viewItem.reorderLevel}</Typography>
+                      <Typography><strong>{t('inventory.quantity')}:</strong> {viewItem.quantity}</Typography>
+                      <Typography><strong>{t('inventory.reorder_level')}:</strong> {viewItem.reorderLevel}</Typography>
                       <Typography>
-                        <strong>Expiry Date:</strong> {viewItem.expiryDate ? new Date(viewItem.expiryDate).toLocaleDateString() : '-'}
+                        <strong>{t('inventory.expiry_date')}:</strong> {viewItem.expiryDate ? new Date(viewItem.expiryDate).toLocaleDateString() : '-'}
                       </Typography>
                       <Typography>
-                        <strong>Clinic:</strong> {
+                        <strong>{t('inventory.clinic')}:</strong> {
                           (() => {
                             const clinic = clinics.find(c => c.id === viewItem.clinicId);
                             return clinic ? clinic.name : viewItem.clinicId;
@@ -359,7 +361,7 @@ const InventoryItem = () => {
                         }
                       </Typography>
                       <Typography sx={{ mt: 1 }}>
-                        <strong>Notes:</strong> {viewItem.notes || <span style={{ color: "#aaa" }}>No notes</span>}
+                        <strong>{t('inventory.notes')}:</strong> {viewItem.notes || <span style={{ color: "#aaa" }}>{t('inventory.no_notes')}</span>}
                       </Typography>
                     </Box>
                   </Box>

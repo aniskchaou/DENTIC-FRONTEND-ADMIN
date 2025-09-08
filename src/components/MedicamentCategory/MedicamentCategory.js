@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, LinearProgress, Typography, IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, LinearProgress, Typography, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Bar } from 'react-chartjs-2';
 import useForceUpdate from 'use-force-update';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 import './MedicamentCategory.css';
 import { LoadJSFiles } from '../init';
@@ -20,6 +21,7 @@ import { chartBarOption } from '../../main/config/chart.bar';
 
 
 const MedicamentCategory = () => {
+  const { t } = useTranslation();
   const [medicamentsCategories, setMedicamentsCategories] = useState([]);
   const [updatedItem, setUpdatedItem] = useState({});
   const [updatedItemId, setUpdatedItemId] = useState(0);
@@ -29,6 +31,8 @@ const MedicamentCategory = () => {
   const [showChart, setShowChart] = useState(false);
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [actionRow, setActionRow] = useState(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const forceUpdate = useForceUpdate();
   const closeButtonEdit = useRef(null);
@@ -41,19 +45,37 @@ const MedicamentCategory = () => {
 
   const getAllIncomes = () => {
     setLoading(true);
-    medicamentCategoryHTTPService.getAllMedicamentCayegory()
-      .then(response => {
-        const formatted = response.data.map((item, index) => ({
-          ...item,
-          id: item.id || index + 1,
-        }));
-        setMedicamentsCategories(formatted);
-        setLoading(false);
-      })
-      .catch(() => {
-        showMessage('Error', CurrentUser.ERR_MSG, 'warning');
-        setLoading(false);
-      });
+
+    if (CurrentUser.DEMO_MODE) {
+      fetch('/demo/medicaments-categories.json')
+        .then(res => res.json())
+        .then(data => {
+          const formatted = data.map((item, index) => ({
+            ...item,
+            id: item.id || index + 1,
+          }));
+          setMedicamentsCategories(formatted);
+          setLoading(false);
+        })
+        .catch(() => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    } else {
+      medicamentCategoryHTTPService.getAllMedicamentCayegory()
+        .then(response => {
+          const formatted = response.data.map((item, index) => ({
+            ...item,
+            id: item.id || index + 1,
+          }));
+          setMedicamentsCategories(formatted);
+          setLoading(false);
+        })
+        .catch(() => {
+          showMessage('Error', CurrentUser.ERR_MSG, 'warning');
+          setLoading(false);
+        });
+    }
   };
 
   const resfreshComponent = () => {
@@ -106,10 +128,11 @@ const MedicamentCategory = () => {
     setActionRow(null);
   };
 
+  // Replace handleEdit to open React modal
   const handleEdit = () => {
     setUpdatedItem(actionRow);
     setUpdatedItemId(actionRow.id);
-    document.querySelector('[data-target="#editPatient"]').click();
+    setEditModalOpen(true);
     handleActionClose();
   };
 
@@ -119,16 +142,15 @@ const MedicamentCategory = () => {
   };
 
   const columns = [
-    { field: 'id', headerName: '#', width: 70 },
-    { field: 'name', headerName: 'Category', width: 150 },
+    { field: 'name', headerName: t('medicament_category.category'), width: 150 },
     {
       field: 'description',
-      headerName: 'Description',
+      headerName: t('medicament_category.description'),
       width: 250
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('medicament_category.actions'),
       width: 90,
       sortable: false,
       filterable: false,
@@ -154,7 +176,7 @@ const MedicamentCategory = () => {
         {showChart && (
           <div className="card">
             <div className="card-body">
-              <h4>Chart</h4>
+              <h4>{t('medicament_category.chart')}</h4>
 
             </div>
           </div>
@@ -170,20 +192,20 @@ const MedicamentCategory = () => {
         )}
 
         <Typography variant="h4" gutterBottom>
-          <i className="menu-icon fa fa-bars"></i> Medicaments Categories
+          <i className="menu-icon fa fa-bars"></i> {t('medicament_category.title')}
         </Typography>
 
-        <Button data-toggle="modal" data-target="#addPayment">
-          <i className="fas fa-plus"></i> Create
+        <Button onClick={() => setAddModalOpen(true)}>
+          <i className="fas fa-plus"></i> {t('medicament_category.create')}
         </Button>
         <Button onClick={(e) => updateMedicamentCategoryAction(e, updatedItemId)} data-toggle="modal" data-target="#editPatient">
-          <i className="fas fa-edit"></i> Edit
+          <i className="fas fa-edit"></i> {t('medicament_category.edit')}
         </Button>
         <Button onClick={(e) => removeMedicamentCategoryAction(e, updatedItemIds)}>
-          <i className="fas fa-trash-alt"></i> Remove
+          <i className="fas fa-trash-alt"></i> {t('medicament_category.remove')}
         </Button>
         <Button onClick={getAllIncomes}>
-          <i className="fas fa-refresh"></i> Reload
+          <i className="fas fa-refresh"></i> {t('medicament_category.reload')}
         </Button>
 
         <br /><br />
@@ -206,55 +228,41 @@ const MedicamentCategory = () => {
               open={Boolean(actionAnchorEl)}
               onClose={handleActionClose}
             >
-              <MenuItem onClick={handleEdit}>Edit</MenuItem>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
+              <MenuItem onClick={handleEdit}>{t('medicament_category.edit')}</MenuItem>
+              <MenuItem onClick={handleDelete}>{t('medicament_category.delete')}</MenuItem>
             </Menu>
           </div>
         )}
 
         {/* Add Modal */}
-        <div className="modal fade" id="addPayment" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Nouveau</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <AddMedicamentCategory closeModal={closeModalAdd} />
-              </div>
-              <div className="modal-footer">
-                <button type="button" onClick={resfreshComponent} ref={closeButtonAdd} className="btn btn-secondary" data-dismiss="modal">
-                  Fermer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>{t('medicament_category.new')}</DialogTitle>
+          <DialogContent>
+            <AddMedicamentCategory closeModal={() => setAddModalOpen(false)} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAddModalOpen(false)} color="secondary">
+              {t('medicament_category.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-        {/* Edit Modal */}
-        <div className="modal fade" id="editPatient" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <EditMedicamentCategory closeModal={closeModalEdit} medicamentCategory={updatedItem} />
-              </div>
-              <div className="modal-footer">
-                <button type="button" onClick={resfreshComponent} ref={closeButtonEdit} className="btn btn-secondary" data-dismiss="modal">
-                  Fermer
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Edit Modal (React Dialog) */}
+        <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>{t('medicament_category.edit')}</DialogTitle>
+          <DialogContent>
+            <EditMedicamentCategory
+              closeModal={() => setEditModalOpen(false)}
+              medicamentCategory={updatedItem}
+              onSuccess={resfreshComponent}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setEditModalOpen(false)} color="secondary">
+              {t('medicament_category.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </div>
     </div>

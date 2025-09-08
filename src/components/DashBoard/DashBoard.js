@@ -28,9 +28,15 @@ import appointementHTTPService from '../../main/services/appointementHTTPService
 import certificateHTTPService from '../../main/services/certificateHTTPService';
 import medicamentHTTPService from '../../main/services/medicamentHTTPService';
 import { Link } from 'react-router-dom';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+// import Calendar from 'react-calendar';
+// import 'react-calendar/dist/Calendar.css';
 import BASE_URL from '../../main/urls/urls';
+import CurrentUser from '../../main/config/user'; // Make sure this import exists or adjust as needed
+import { useTranslation } from 'react-i18next';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { Skeleton } from '@mui/material';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -168,12 +174,38 @@ const chartList = [
 ];
 
 const DashBoard = () => {
+  const { t } = useTranslation();
+
+  // Update chartList to use translation keys for titles
+  const chartList = [
+    { type: Bar, data: chartData.bar, title: t('dashboard.chart_patients_by_month') },
+    { type: Pie, data: chartData.pie, title: t('dashboard.chart_patients_by_gender') },
+    { type: Doughnut, data: chartData.doughnut, title: t('dashboard.chart_medicaments_by_category') },
+    { type: Line, data: chartData.line, title: t('dashboard.chart_medicaments_added_over_time') },
+    { type: PolarArea, data: chartData.polar, title: t('dashboard.chart_appointments_by_status') },
+    { type: Radar, data: chartData.radar, title: t('dashboard.chart_testlab_results_distribution') },
+    { type: Scatter, data: chartData.scatter, title: t('dashboard.chart_expenses_amount_vs_date') },
+    { type: Bubble, data: chartData.bubble, title: t('dashboard.chart_doctors_by_specialty') },
+    { type: Bar, data: chartData.bar2, title: t('dashboard.chart_staff_by_department') },
+    { type: Pie, data: chartData.pie2, title: t('dashboard.chart_clinics_by_city') },
+    { type: Doughnut, data: chartData.doughnut2, title: t('dashboard.chart_membership_types') },
+    { type: Line, data: chartData.line2, title: t('dashboard.chart_insurance_claims_over_time') },
+    { type: PolarArea, data: chartData.polar2, title: t('dashboard.chart_expenses_by_category') },
+    { type: Radar, data: chartData.radar2, title: t('dashboard.chart_doctor_ratings') },
+    { type: Scatter, data: chartData.scatter2, title: t('dashboard.chart_appointments_duration_vs_satisfaction') },
+    { type: Bubble, data: chartData.bubble2, title: t('dashboard.chart_staff_attendance') },
+    { type: Bar, data: chartData.bar3, title: t('dashboard.chart_clinic_revenue') },
+    { type: Pie, data: chartData.pie3, title: t('dashboard.chart_insurance_types') },
+    { type: Doughnut, data: chartData.doughnut3, title: t('dashboard.chart_testlab_types') },
+    { type: Line, data: chartData.line3, title: t('dashboard.chart_membership_growth') },
+  ];
+
   const [expenseChart, setExpenseChart] = useState(intialChartBarData);
   const [incomeChart, setIncomeChart] = useState(data2);
   const [memberLine, setmemberLine] = useState(data2);
   const [activityPie, setActivityPie] = useState(data);
   const [attendance, setAttendance] = useState([])
-
+  const [loading, setLoading] = useState(true);
 
   const [certificateCountCount, setcertificateCount] = useState(0);
   const [appointementCount, setAppointementsCount] = useState(0);
@@ -187,6 +219,26 @@ const DashBoard = () => {
   const [topMedicaments, setTopMedicaments] = useState([]);
 
   useEffect(() => {
+    // Simulate loading for demo, or set loading to false after all data is fetched
+    Promise.all([
+      appointementHTTPService.getAllAppointement(),
+      fetch(BASE_URL+'/doctors?sort=appointments&limit=5'),
+      fetch(BASE_URL+'/patients?sort=visits&limit=5'),
+      fetch(BASE_URL+'/medicaments?sort=sales&limit=5')
+    ])
+      .then(async ([appointmentsRes, doctorsRes, patientsRes, medicamentsRes]) => {
+        setAppointements(await appointmentsRes.data);
+        setTopDoctors(await doctorsRes.json());
+        setTopPatients(await patientsRes.json());
+        setTopMedicaments(await medicamentsRes.json());
+      })
+      .catch(() => {
+        setTopDoctors([]);
+        setTopPatients([]);
+        setTopMedicaments([]);
+      })
+      .finally(() => setLoading(false));
+
     const aar = []
     // Runs ONCE after initial rendering
     getExpenseChartData()
@@ -199,42 +251,6 @@ const DashBoard = () => {
     getMedicamentCount()
     getCertificateCount()
     getDashboardSettings()
-    appointementHTTPService.getAllAppointement()
-      .then(response => {
-        setAppointements(response.data);
-        console.log(response.data)
-        //setLoading(false);
-        for (const item of response.data) {
-          console.log(item)
-          appointementsCalendar.push({ title: item.patient, date: item.createdAt })
-        }
-
-
-        // console.log(aar)
-        setAppointements(appointementsCalendar)
-        console.log(appointements)
-      })
-      .catch(e => {
-        showMessage('Confirmation', e, 'info')
-      });
-
-    // Fetch Top 5 Doctors by Appointments
-    fetch(BASE_URL+'/doctors?sort=appointments&limit=5')
-      .then(res => res.json())
-      .then(data => setTopDoctors(data))
-      .catch(() => setTopDoctors([]));
-
-    // Fetch Top 5 Patients by Visits
-    fetch(BASE_URL+'/patients?sort=visits&limit=5')
-      .then(res => res.json())
-      .then(data => setTopPatients(data))
-      .catch(() => setTopPatients([]));
-
-    // Fetch Top 5 Medicaments by Sales
-    fetch(BASE_URL+'/medicaments?sort=sales&limit=5')
-      .then(res => res.json())
-      .then(data => setTopMedicaments(data))
-      .catch(() => setTopMedicaments([]));
   }, []);
 
   const getPatientCount = () => {
@@ -244,9 +260,20 @@ const DashBoard = () => {
   }
 
   const getAppointementCount = () => {
-    appointementHTTPService.getCount().then(data => {
-      setAppointementsCount(data.data.appointement)
-    })
+    if (CurrentUser.DEMO_MODE) {
+      setAppointementsCount(12); // demo value
+    } else {
+      appointementHTTPService.getCount()
+        .then(data => {
+          setAppointementsCount(data.data.appointement);
+        })
+        .catch(e => {
+          // Log error for debugging
+          console.warn('Could not load appointment count:', e);
+          // Show fallback value, keep UI clean
+          setAppointementsCount(0);
+        });
+    }
   }
 
   const getMedicamentCount = () => {
@@ -256,9 +283,18 @@ const DashBoard = () => {
   }
 
   const getCertificateCount = () => {
-    certificateHTTPService.getCount().then(data => {
-      setcertificateCount(data.data.certificate)
-    })
+    if (CurrentUser.DEMO_MODE) {
+      setcertificateCount(5); // demo value
+    } else {
+      certificateHTTPService.getCount()
+        .then(data => {
+          setcertificateCount(data.data.certificate);
+        })
+        .catch(e => {
+          console.warn('Could not load certificate count:', e);
+          setcertificateCount(0);
+        });
+    }
   }
 
   const getAttendencesCalendar = () => {
@@ -272,7 +308,6 @@ const DashBoard = () => {
          showMessage('Confirmation', e, 'info')
        }); */
   };
-
 
   const getExpenseChartData = () => {
 
@@ -345,19 +380,19 @@ const DashBoard = () => {
   { bg: "#5d4037", color: "#fff" },
 ];
 
-const widgetData = [
-  { icon: "fas fa-user-injured", label: "Patients", value: patientCount },
-  { icon: "fas fa-capsules", label: "Medicaments", value: medicamentCount },
-  { icon: "fas fa-calendar-check", label: "Appointements", value: appointementCount },
-  { icon: "fas fa-certificate", label: "Certificates", value: certificateCountCount },
-  { icon: "fas fa-flask", label: "TestLabs", value: 12 },
-  { icon: "fas fa-money-bill-wave", label: "Expenses", value: 8 },
-  { icon: "fas fa-user-md", label: "Doctors", value: 5 },
-  { icon: "fas fa-users", label: "Staff", value: 20 },
-  { icon: "fas fa-hospital", label: "Clinics", value: 3 },
-  { icon: "fas fa-id-card", label: "Memberships", value: 15 },
-  { icon: "fas fa-shield-alt", label: "Insurance", value: 7 },
-];
+  const widgetData = [
+    { icon: "fas fa-user-injured", label: t('dashboard.patients'), value: patientCount },
+    { icon: "fas fa-capsules", label: t('dashboard.medicaments'), value: medicamentCount },
+    { icon: "fas fa-calendar-check", label: t('dashboard.appointments'), value: appointementCount },
+    { icon: "fas fa-certificate", label: t('dashboard.certificates'), value: certificateCountCount },
+    { icon: "fas fa-flask", label: t('dashboard.laboratory_tests'), value: 12 },
+    { icon: "fas fa-money-bill-wave", label: t('dashboard.expenses'), value: 8 },
+    { icon: "fas fa-user-md", label: t('dashboard.doctors'), value: 5 },
+    { icon: "fas fa-users", label: t('dashboard.staff'), value: 20 },
+    { icon: "fas fa-hospital", label: t('dashboard.clinics'), value: 3 },
+    { icon: "fas fa-id-card", label: t('dashboard.memberships'), value: 15 },
+    { icon: "fas fa-shield-alt", label: t('dashboard.insurance'), value: 7 },
+  ];
 
   // Prepare appointment dates for calendar (using appointmentDate)
   const appointmentDates = appointements
@@ -401,64 +436,99 @@ const widgetData = [
 
   return (
     <div className="content">
-      {/* Statistics Cards - Improved UI/UX */}
+      {CurrentUser.DEMO_MODE && (
+        <div style={{
+          background: '#e3f2fd',
+          color: '#1565c0',
+          border: '1px solid #90caf9',
+          borderRadius: 8,
+          padding: '14px 20px',
+          marginBottom: 24,
+          fontWeight: 500,
+          fontSize: 15,
+          textAlign: 'center'
+        }}>
+          <i className="fas fa-info-circle" style={{ marginRight: 8 }}></i>
+          <span>
+            <strong>Demo Mode:</strong> The application is running in presentation mode. Some features are limited or unavailable.
+          </span>
+        </div>
+      )}
+
+      {/* Skeleton loading for statistics cards */}
       <div className="row" style={{ marginBottom: 8 }}>
         <div className="col-md-12">
           <div className="row" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {widgetData.map((w, idx) => (
-              <div
-                key={w.label}
-                className="col-lg-3 col-md-6"
-                style={{
-                  flex: '1 1 220px',
-                  minWidth: 220,
-                  maxWidth: 260,
-                  marginBottom: 8,
-                }}
-              >
-                <div
-                  className="card"
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    borderRadius: 16,
-                    background: widgetColors[idx % widgetColors.length].bg,
-                    color: widgetColors[idx % widgetColors.length].color,
-                    boxShadow: '0 4px 24px rgba(25, 118, 210, 0.10)',
-                    transition: 'transform 0.2s',
-                    cursor: 'pointer',
-                  }}
-                  onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)'}
-                  onMouseOut={e => e.currentTarget.style.transform = 'none'}
-                >
-                  <div className="card-body" style={{ padding: 24 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                      <div style={{
-                        fontSize: 36,
-                        background: 'rgba(255,255,255,0.12)',
-                        borderRadius: '50%',
-                        width: 56,
-                        height: 56,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <i className={w.icon}></i>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
-                          {w.value}
+            {loading
+              ? Array.from({ length: 4 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="col-lg-3 col-md-6"
+                    style={{
+                      flex: '1 1 220px',
+                      minWidth: 220,
+                      maxWidth: 260,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+                  </div>
+                ))
+              : widgetData.map((w, idx) => (
+                  <div
+                    key={w.label}
+                    className="col-lg-3 col-md-6"
+                    style={{
+                      flex: '1 1 220px',
+                      minWidth: 220,
+                      maxWidth: 260,
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div
+                      className="card"
+                      style={{
+                        width: '100%',
+                        border: 'none',
+                        borderRadius: 16,
+                        background: widgetColors[idx % widgetColors.length].bg,
+                        color: widgetColors[idx % widgetColors.length].color,
+                        boxShadow: '0 4px 24px rgba(25, 118, 210, 0.10)',
+                        transition: 'transform 0.2s',
+                        cursor: 'pointer',
+                      }}
+                      onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)'}
+                      onMouseOut={e => e.currentTarget.style.transform = 'none'}
+                    >
+                      <div className="card-body" style={{ padding: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <div style={{
+                            fontSize: 36,
+                            background: 'rgba(255,255,255,0.12)',
+                            borderRadius: '50%',
+                            width: 56,
+                            height: 56,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <i className={w.icon}></i>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1 }}>
+                              {w.value}
+                            </div>
+                            <div style={{ fontSize: 16, opacity: 0.85 }}>{w.label}</div>
+                          </div>
                         </div>
-                        <div style={{ fontSize: 16, opacity: 0.85 }}>{w.label}</div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))}
           </div>
         </div>
       </div>
+
       {/* Charts Section */}
       <div
         style={{
@@ -476,15 +546,23 @@ const widgetData = [
             gap: '30px'
           }}
         >
-          {chartList.map((chart, idx) => (
-            <div key={idx}>
-              <h5>{chart.title}</h5>
-              <chart.type data={chart.data} options={chartBarOption} />
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx}>
+                  <Skeleton variant="rectangular" height={180} sx={{ borderRadius: 2, mb: 2 }} />
+                  <Skeleton variant="text" width={120} />
+                </div>
+              ))
+            : chartList.map((chart, idx) => (
+                <div key={idx}>
+                  <h5>{chart.title}</h5>
+                  <chart.type data={chart.data} options={chartBarOption} />
+                </div>
+              ))}
         </div>
       </div>
-      {/* Top 5 Lists */}
+
+      {/* Skeleton loading for Top 5 Lists */}
       <div
         style={{
           background: '#fff',
@@ -494,95 +572,113 @@ const widgetData = [
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
         }}
       >
-        <h5 style={{ marginBottom: 24 }}>Top 5 Lists</h5>
+        <h5 style={{ marginBottom: 24 }}>{t('dashboard.top_performers')}</h5>
         <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
-          {/* Top 5 Doctors */}
-          <div style={{
-            flex: 1,
-            minWidth: 220,
-            background: '#f8fafc',
-            borderRadius: 10,
-            padding: 16,
-            boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
-          }}>
-            <strong style={{ fontSize: 16, color: '#1976d2' }}>Top 5 Doctors by Appointments</strong>
-            <ol style={{ marginTop: 12, paddingLeft: 20 }}>
-              {topDoctors.length === 0 && <li style={{ color: '#888' }}>No data</li>}
-              {topDoctors.slice(0, 5).map((doc, idx) => (
-                <li key={doc.id || idx} style={{ marginBottom: 8 }}>
-                  <span style={{ fontWeight: 600 }}>{doc.name || doc.fullName || doc.doctorName}</span>
-                  <span style={{
-                    marginLeft: 8,
-                    color: '#388e3c',
-                    fontSize: 13,
-                    background: '#e8f5e9',
-                    borderRadius: 6,
-                    padding: '2px 8px'
-                  }}>
-                    {doc.appointmentCount || doc.visits || 0} appts
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          {/* Top 5 Patients */}
-          <div style={{
-            flex: 1,
-            minWidth: 220,
-            background: '#f8fafc',
-            borderRadius: 10,
-            padding: 16,
-            boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
-          }}>
-            <strong style={{ fontSize: 16, color: '#388e3c' }}>Top 5 Patients by Visits</strong>
-            <ol style={{ marginTop: 12, paddingLeft: 20 }}>
-              {topPatients.length === 0 && <li style={{ color: '#888' }}>No data</li>}
-              {topPatients.slice(0, 5).map((pat, idx) => (
-                <li key={pat.id || idx} style={{ marginBottom: 8 }}>
-                  <span style={{ fontWeight: 600 }}>{pat.name || pat.fullName || pat.patientName}</span>
-                  <span style={{
-                    marginLeft: 8,
-                    color: '#1976d2',
-                    fontSize: 13,
-                    background: '#e3f2fd',
-                    borderRadius: 6,
-                    padding: '2px 8px'
-                  }}>
-                    {pat.visitCount || pat.visits || 0} visits
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          {/* Top 5 Medicaments */}
-          <div style={{
-            flex: 1,
-            minWidth: 220,
-            background: '#f8fafc',
-            borderRadius: 10,
-            padding: 16,
-            boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
-          }}>
-            <strong style={{ fontSize: 16, color: '#d32f2f' }}>Top 5 Selling Medicaments</strong>
-            <ol style={{ marginTop: 12, paddingLeft: 20 }}>
-              {topMedicaments.length === 0 && <li style={{ color: '#888' }}>No data</li>}
-              {topMedicaments.slice(0, 5).map((med, idx) => (
-                <li key={med.id || idx} style={{ marginBottom: 8 }}>
-                  <span style={{ fontWeight: 600 }}>{med.name || med.medicamentName}</span>
-                  <span style={{
-                    marginLeft: 8,
-                    color: '#d32f2f',
-                    fontSize: 13,
-                    background: '#ffebee',
-                    borderRadius: 6,
-                    padding: '2px 8px'
-                  }}>
-                    {med.salesCount || med.sold || 0} sold
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
+          {loading
+            ? Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} style={{
+                  flex: 1,
+                  minWidth: 220,
+                  background: '#f8fafc',
+                  borderRadius: 10,
+                  padding: 16,
+                  boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
+                }}>
+                  <Skeleton variant="text" width={180} sx={{ mb: 2 }} />
+                  <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                </div>
+              ))
+            : (
+              <>
+                {/* Top 5 Doctors */}
+                <div style={{
+                  flex: 1,
+                  minWidth: 220,
+                  background: '#f8fafc',
+                  borderRadius: 10,
+                  padding: 16,
+                  boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
+                }}>
+                  <strong style={{ fontSize: 16, color: '#1976d2' }}>{t('dashboard.top_doctors_by_appointments')}</strong>
+                  <ol style={{ marginTop: 12, paddingLeft: 20 }}>
+                    {topDoctors.length === 0 && <li style={{ color: '#888' }}>{t('dashboard.no_data')}</li>}
+                    {topDoctors.slice(0, 5).map((doc, idx) => (
+                      <li key={doc.id || idx} style={{ marginBottom: 8 }}>
+                        <span style={{ fontWeight: 600 }}>{doc.name || doc.fullName || doc.doctorName}</span>
+                        <span style={{
+                          marginLeft: 8,
+                          color: '#388e3c',
+                          fontSize: 13,
+                          background: '#e8f5e9',
+                          borderRadius: 6,
+                          padding: '2px 8px'
+                        }}>
+                          {doc.appointmentCount || doc.visits || 0} appts
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                {/* Top 5 Patients */}
+                <div style={{
+                  flex: 1,
+                  minWidth: 220,
+                  background: '#f8fafc',
+                  borderRadius: 10,
+                  padding: 16,
+                  boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
+                }}>
+                  <strong style={{ fontSize: 16, color: '#388e3c' }}>{t('dashboard.top_patients_by_visits')}</strong>
+                  <ol style={{ marginTop: 12, paddingLeft: 20 }}>
+                    {topPatients.length === 0 && <li style={{ color: '#888' }}>{t('dashboard.no_data')}</li>}
+                    {topPatients.slice(0, 5).map((pat, idx) => (
+                      <li key={pat.id || idx} style={{ marginBottom: 8 }}>
+                        <span style={{ fontWeight: 600 }}>{pat.name || pat.fullName || pat.patientName}</span>
+                        <span style={{
+                          marginLeft: 8,
+                          color: '#1976d2',
+                          fontSize: 13,
+                          background: '#e3f2fd',
+                          borderRadius: 6,
+                          padding: '2px 8px'
+                        }}>
+                          {pat.visitCount || pat.visits || 0} visits
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                {/* Top 5 Medicaments */}
+                <div style={{
+                  flex: 1,
+                  minWidth: 220,
+                  background: '#f8fafc',
+                  borderRadius: 10,
+                  padding: 16,
+                  boxShadow: '0 1px 4px rgba(25,118,210,0.06)'
+                }}>
+                  <strong style={{ fontSize: 16, color: '#d32f2f' }}>{t('dashboard.top_medicaments_by_sales')}</strong>
+                  <ol style={{ marginTop: 12, paddingLeft: 20 }}>
+                    {topMedicaments.length === 0 && <li style={{ color: '#888' }}>{t('dashboard.no_data')}</li>}
+                    {topMedicaments.slice(0, 5).map((med, idx) => (
+                      <li key={med.id || idx} style={{ marginBottom: 8 }}>
+                        <span style={{ fontWeight: 600 }}>{med.name || med.medicamentName}</span>
+                        <span style={{
+                          marginLeft: 8,
+                          color: '#d32f2f',
+                          fontSize: 13,
+                          background: '#ffebee',
+                          borderRadius: 6,
+                          padding: '2px 8px'
+                        }}>
+                          {med.salesCount || med.sold || 0} sold
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </>
+            )}
         </div>
       </div>
       {/* Calendar Widget */}
@@ -599,20 +695,63 @@ const widgetData = [
           <h5 style={{ margin: 0 }}>Appointments Calendar</h5>
           <Link to="/rendezvous" style={{ textDecoration: 'none' }}>
             <button className="btn btn-primary" style={{ fontSize: 14, padding: '4px 16px' }}>
-              View All Appointments
+              {t('dashboard.view_all_appointments')}
             </button>
           </Link>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 32 }}>
           <div style={{ minWidth: 320, flex: 1 }}>
-            <Calendar
-              value={selectedDate}
-              onClickDay={setSelectedDate}
-              tileContent={tileContent}
-              tileClassName={tileClassName}
-              calendarType="gregory"
-              locale="en-US"
-            />
+             <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label={t('dashboard.select_date')}
+                value={selectedDate}
+                onChange={setSelectedDate}
+                renderInput={({ inputRef, inputProps, InputProps }) => (
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      ref={inputRef}
+                      {...inputProps}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #1976d2',
+                        fontSize: '16px'
+                      }}
+                    />
+                    {InputProps?.endAdornment}
+                  </div>
+                )}
+              />
+            </LocalizationProvider> 
+            <div style={{ marginTop: 18 }}>
+              <strong>{t('dashboard.appointment_days')}</strong>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                {appointmentDates.slice(0, 10).map((dateStr, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    background: '#e3f2fd',
+                    borderRadius: 8,
+                    padding: '2px 8px',
+                    fontSize: 13
+                  }}>
+                    <span style={{
+                      display: 'inline-block',
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: '#1976d2'
+                    }}></span>
+                    {new Date(dateStr).toLocaleDateString()}
+                  </div>
+                ))}
+                {appointmentDates.length > 10 && (
+                  <span style={{ fontSize: 13, color: '#888' }}>+{appointmentDates.length - 10} more</span>
+                )}
+              </div>
+            </div>
           </div>
           <div style={{
             flex: 2,
@@ -668,32 +807,32 @@ const widgetData = [
                     </span>
                   </div>
                   <div>
-                    <span style={{ fontWeight: 500 }}>Time:</span>{' '}
+                    <span style={{ fontWeight: 500 }}>{t('dashboard.time')}:</span>{' '}
                     <span>{item.startTime} - {item.endTime}</span>
                   </div>
                   <div>
-                    <span style={{ fontWeight: 500 }}>Doctor:</span>{' '}
+                    <span style={{ fontWeight: 500 }}>{t('dashboard.doctor')}:</span>{' '}
                     <span>{item.doctor || item.doctorId}</span>
                   </div>
                   <div>
-                    <span style={{ fontWeight: 500 }}>Type:</span>{' '}
+                    <span style={{ fontWeight: 500 }}>{t('dashboard.type')}:</span>{' '}
                     <span>{item.appointmentType}</span>
                   </div>
                   {item.reasonForVisit && (
                     <div>
-                      <span style={{ fontWeight: 500 }}>Reason:</span>{' '}
+                      <span style={{ fontWeight: 500 }}>{t('dashboard.reason')}:</span>{' '}
                       <span>{item.reasonForVisit}</span>
                     </div>
                   )}
                   {item.notes && (
                     <div>
-                      <span style={{ fontWeight: 500 }}>Notes:</span>{' '}
+                      <span style={{ fontWeight: 500 }}>{t('dashboard.notes')}:</span>{' '}
                       <span>{item.notes}</span>
                     </div>
                   )}
                   <div style={{ marginTop: 4 }}>
                     <Link to={`/rendezvous/${item.id}`} style={{ color: '#1976d2', textDecoration: 'underline', fontSize: 13 }}>
-                      View Details
+                      {t('dashboard.view_details')}
                     </Link>
                   </div>
                 </li>
@@ -706,66 +845,88 @@ const widgetData = [
       <div
         style={{
           background: '#fff',
-          borderRadius: '12px',
-          padding: '24px',
-          margin: '24px 0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          borderRadius: '16px',
+          padding: '32px',
+          margin: '32px 0',
+          boxShadow: '0 4px 24px rgba(25,118,210,0.10)',
+          maxWidth: '100%',
+          width: '100%',
+          minWidth: 0
         }}
       >
-        <h5 style={{ marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <i className="fas fa-heartbeat" style={{ color: '#d32f2f', fontSize: 22 }}></i>
-          System Health / Status
+        <h5 style={{
+          marginBottom: 28,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          fontWeight: 700,
+          color: '#d32f2f',
+          fontSize: 22,
+          letterSpacing: 1
+        }}>
+          <i className="fas fa-heartbeat" style={{ color: '#d32f2f', fontSize: 28 }}></i>
+          {t('dashboard.system_health')}
         </h5>
-        <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 24,
+          flexWrap: 'wrap'
+        }}>
           <div style={{
             flex: 1,
-            minWidth: 180,
+            minWidth: 150,
             background: '#e8f5e9',
             borderRadius: 10,
-            padding: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 12
+            padding: '18px 20px',
+            margin: '0 8px',
+            boxShadow: '0 1px 4px rgba(56,142,60,0.08)',
+            textAlign: 'center'
           }}>
-            <i className="fas fa-server" style={{ color: '#388e3c', fontSize: 20 }}></i>
-            <div>
-              <div style={{ fontWeight: 600 }}>Backend</div>
-              <div style={{ color: '#388e3c', fontWeight: 500 }}>Online</div>
+            <div style={{ fontWeight: 600, fontSize: 16, color: '#388e3c', marginBottom: 6 }}>
+              <i className="fas fa-server" style={{ marginRight: 6 }}></i>
+              {t('dashboard.backend')}
+            </div>
+            <div style={{ color: '#388e3c', fontWeight: 500, fontSize: 15 }}>
+              <i className="fas fa-circle" style={{ color: '#43a047', fontSize: 10, marginRight: 6 }}></i>
+              {t('dashboard.online')}
             </div>
           </div>
           <div style={{
             flex: 1,
-            minWidth: 180,
+            minWidth: 150,
             background: '#e3f2fd',
             borderRadius: 10,
-            padding: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 12
+            padding: '18px 20px',
+            margin: '0 8px',
+            boxShadow: '0 1px 4px rgba(25,118,210,0.08)',
+            textAlign: 'center'
           }}>
-            <i className="fas fa-network-wired" style={{ color: '#1976d2', fontSize: 20 }}></i>
-            <div>
-              <div style={{ fontWeight: 600 }}>API</div>
-              <div style={{ color: '#1976d2', fontWeight: 500 }}>Healthy</div>
+            <div style={{ fontWeight: 600, fontSize: 16, color: '#1976d2', marginBottom: 6 }}>
+              <i className="fas fa-network-wired" style={{ marginRight: 6 }}></i>
+              {t('dashboard.api')}
+            </div>
+            <div style={{ color: '#1976d2', fontWeight: 500, fontSize: 15 }}>
+              <i className="fas fa-circle" style={{ color: '#1976d2', fontSize: 10, marginRight: 6 }}></i>
+              {t('dashboard.healthy')}
             </div>
           </div>
           <div style={{
             flex: 1,
-            minWidth: 180,
+            minWidth: 150,
             background: '#fffde7',
             borderRadius: 10,
-            padding: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginBottom: 12
+            padding: '18px 20px',
+            margin: '0 8px',
+            boxShadow: '0 1px 4px rgba(251,192,45,0.08)',
+            textAlign: 'center'
           }}>
-            <i className="fas fa-clock" style={{ color: '#fbc02d', fontSize: 20 }}></i>
-            <div>
-              <div style={{ fontWeight: 600 }}>Uptime</div>
-              <div style={{ color: '#fbc02d', fontWeight: 500 }}>99.9%</div>
+            <div style={{ fontWeight: 600, fontSize: 16, color: '#fbc02d', marginBottom: 6 }}>
+              <i className="fas fa-clock" style={{ marginRight: 6 }}></i>
+              {t('dashboard.uptime')}
+            </div>
+            <div style={{ color: '#fbc02d', fontWeight: 500, fontSize: 15 }}>
+              99.9%
             </div>
           </div>
         </div>

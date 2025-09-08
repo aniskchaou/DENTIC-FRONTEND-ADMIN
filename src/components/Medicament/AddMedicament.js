@@ -4,6 +4,9 @@ import medicamentHTTPService from '../../main/services/medicamentHTTPService';
 import showMessage from '../../libraries/messages/messages';
 import CurrentUser from '../../main/config/user';
 import medicamentManufactureHTTPService from '../../main/services/medicamentManufactureHTTPService';
+import axios from 'axios';
+import BASE_URL from '../../main/urls/urls';
+import { useTranslation } from 'react-i18next';
 
 const categories = [
   'Antibiotic',
@@ -26,7 +29,8 @@ const dosageForms = [
   "Spray"
 ];
 
-const AddMedicament = ({ closeModal, onCreate }) => {
+const AddMedicament = ({ closeModal, onCreate, initialData, isEdit }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     genericName: '',
@@ -49,6 +53,26 @@ const AddMedicament = ({ closeModal, onCreate }) => {
     status: 'Available'
   });
   const [loading, setLoading] = useState(false);
+  const [manufactures, setManufactures] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/medicament-manufactures`)
+      .then(res => setManufactures(res.data))
+      .catch(() => setManufactures([]));
+  }, []);
+
+  useEffect(() => {
+    if (isEdit && initialData) {
+      setForm({
+        ...form,
+        ...initialData,
+        activeIngredients: initialData.activeIngredients?.length > 0 ? initialData.activeIngredients : [{ ingredient: '', concentration: '' }],
+        sideEffects: initialData.sideEffects?.length > 0 ? initialData.sideEffects : [''],
+        contraindications: initialData.contraindications?.length > 0 ? initialData.contraindications : [''],
+        expirationDate: initialData.expirationDate ? initialData.expirationDate.split('T')[0] : '',
+      });
+    }
+  }, [isEdit, initialData]);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -105,7 +129,6 @@ const AddMedicament = ({ closeModal, onCreate }) => {
     setLoading(true);
     const now = new Date().toISOString();
     const data = {
-      id: Math.random().toString(36).substr(2, 9),
       name: form.name,
       genericName: form.genericName,
       category: form.category,
@@ -143,11 +166,12 @@ const AddMedicament = ({ closeModal, onCreate }) => {
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 2, minWidth: 350 }}>
       <Stack spacing={2}>
-        <TextField label="Name" name="name" value={form.name} onChange={handleChange} required fullWidth />
-        <TextField label="Generic Name" name="genericName" value={form.genericName} onChange={handleChange} required fullWidth />
+        <Typography variant="h4">{t('medicament.title')}</Typography>
+        <TextField label={t('medicament.name')} name="name" value={form.name} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.generic_name')} name="genericName" value={form.genericName} onChange={handleChange} required fullWidth />
         <TextField
           select
-          label="Category"
+          label={t('medicament.category')}
           name="category"
           value={form.category}
           onChange={handleChange}
@@ -160,13 +184,13 @@ const AddMedicament = ({ closeModal, onCreate }) => {
             </MenuItem>
           ))}
         </TextField>
-        <TextField label="Description" name="description" value={form.description} onChange={handleChange} multiline rows={3} required fullWidth />
+        <TextField label={t('medicament.description')} name="description" value={form.description} onChange={handleChange} multiline rows={3} required fullWidth />
 
-        <Typography variant="subtitle2">Active Ingredients</Typography>
+        <Typography variant="subtitle2">{t('medicament.active_ingredients')}</Typography>
         {form.activeIngredients.map((ai, idx) => (
           <Stack direction="row" spacing={1} alignItems="center" key={idx}>
             <TextField
-              label="Ingredient"
+              label={t('medicament.ingredient')}
               value={ai.ingredient}
               onChange={e => handleIngredientChange(idx, 'ingredient', e.target.value)}
               fullWidth
@@ -174,23 +198,40 @@ const AddMedicament = ({ closeModal, onCreate }) => {
               required
             />
             <TextField
-              label="Concentration"
+              label={t('medicament.concentration')}
               value={ai.concentration}
               onChange={e => handleIngredientChange(idx, 'concentration', e.target.value)}
               fullWidth
               size="small"
               required
             />
-            <Button color="error" onClick={() => removeIngredient(idx)} disabled={form.activeIngredients.length === 1}>-</Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+              onClick={() => removeIngredient(idx)}
+              disabled={form.activeIngredients.length === 1}
+            >
+              -
+            </Button>
             {idx === form.activeIngredients.length - 1 && (
-              <Button color="success" onClick={addIngredient}>+</Button>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+                onClick={addIngredient}
+              >
+                +
+              </Button>
             )}
           </Stack>
         ))}
 
         <TextField
           select
-          label="Dosage Form"
+          label={t('medicament.dosage_form')}
           name="dosageForm"
           value={form.dosageForm}
           onChange={handleChange}
@@ -203,22 +244,38 @@ const AddMedicament = ({ closeModal, onCreate }) => {
             </MenuItem>
           ))}
         </TextField>
-        <TextField label="Strength" name="strength" value={form.strength} onChange={handleChange} required fullWidth />
-        <TextField label="Manufacturer ID" name="manufacturerId" value={form.manufacturerId} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.strength')} name="strength" value={form.strength} onChange={handleChange} required fullWidth />
         <TextField
           select
-          label="Requires Prescription"
+          label={t('medicament.manufacturer')}
+          name="manufacturerId"
+          value={form.manufacturerId}
+          onChange={handleChange}
+          required
+          fullWidth
+        >
+          {manufactures.length === 0 ? (
+            <MenuItem value="" disabled>Loading...</MenuItem>
+          ) : (
+            manufactures.map(m => (
+              <MenuItem key={m.id} value={m.id}>{m.name}</MenuItem>
+            ))
+          )}
+        </TextField>
+        <TextField
+          select
+          label={t('medicament.requires_prescription')}
           name="requiresPrescription"
           value={form.requiresPrescription}
           onChange={handleChange}
           required
           fullWidth
         >
-          <MenuItem value="Yes">Yes</MenuItem>
-          <MenuItem value="No">No</MenuItem>
+          <MenuItem value="Yes">{t('yes')}</MenuItem>
+          <MenuItem value="No">{t('no')}</MenuItem>
         </TextField>
 
-        <Typography variant="subtitle2">Side Effects</Typography>
+        <Typography variant="subtitle2">{t('medicament.side_effects')}</Typography>
         {form.sideEffects.map((side, idx) => (
           <Stack direction="row" spacing={1} alignItems="center" key={idx}>
             <TextField
@@ -228,14 +285,31 @@ const AddMedicament = ({ closeModal, onCreate }) => {
               size="small"
               required
             />
-            <Button color="error" onClick={() => removeSideEffect(idx)} disabled={form.sideEffects.length === 1}>-</Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+              onClick={() => removeSideEffect(idx)}
+              disabled={form.sideEffects.length === 1}
+            >
+              -
+            </Button>
             {idx === form.sideEffects.length - 1 && (
-              <Button color="success" onClick={addSideEffect}>+</Button>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+                onClick={addSideEffect}
+              >
+                +
+              </Button>
             )}
           </Stack>
         ))}
 
-        <Typography variant="subtitle2">Contraindications</Typography>
+        <Typography variant="subtitle2">{t('medicament.contraindications')}</Typography>
         {form.contraindications.map((contra, idx) => (
           <Stack direction="row" spacing={1} alignItems="center" key={idx}>
             <TextField
@@ -245,18 +319,35 @@ const AddMedicament = ({ closeModal, onCreate }) => {
               size="small"
               required
             />
-            <Button color="error" onClick={() => removeContraindication(idx)} disabled={form.contraindications.length === 1}>-</Button>
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+              onClick={() => removeContraindication(idx)}
+              disabled={form.contraindications.length === 1}
+            >
+              -
+            </Button>
             {idx === form.contraindications.length - 1 && (
-              <Button color="success" onClick={addContraindication}>+</Button>
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                sx={{ minWidth: 32, borderRadius: 2, fontWeight: 700, px: 0 }}
+                onClick={addContraindication}
+              >
+                +
+              </Button>
             )}
           </Stack>
         ))}
 
-        <TextField label="Usage Instructions" name="usageInstructions" value={form.usageInstructions} onChange={handleChange} required fullWidth />
-        <TextField label="Stock Quantity" name="stockQuantity" type="number" value={form.stockQuantity} onChange={handleChange} required fullWidth />
-        <TextField label="Price Per Unit" name="pricePerUnit" type="number" value={form.pricePerUnit} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.usage_instructions')} name="usageInstructions" value={form.usageInstructions} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.stock_quantity')} name="stockQuantity" type="number" value={form.stockQuantity} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.price_per_unit')} name="pricePerUnit" type="number" value={form.pricePerUnit} onChange={handleChange} required fullWidth />
         <TextField
-          label="Expiration Date"
+          label={t('medicament.expiration_date')}
           name="expirationDate"
           type="date"
           value={form.expirationDate}
@@ -265,29 +356,29 @@ const AddMedicament = ({ closeModal, onCreate }) => {
           required
           fullWidth
         />
-        <TextField label="Storage Conditions" name="storageConditions" value={form.storageConditions} onChange={handleChange} required fullWidth />
-        <TextField label="Barcode" name="barcode" value={form.barcode} onChange={handleChange} required fullWidth />
-        <TextField label="Batch Number" name="batchNumber" value={form.batchNumber} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.storage_conditions')} name="storageConditions" value={form.storageConditions} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.barcode')} name="barcode" value={form.barcode} onChange={handleChange} required fullWidth />
+        <TextField label={t('medicament.batch_number')} name="batchNumber" value={form.batchNumber} onChange={handleChange} required fullWidth />
         <TextField
           select
-          label="Status"
+          label={t('medicament.status')}
           name="status"
           value={form.status}
           onChange={handleChange}
           required
           fullWidth
         >
-          <MenuItem value="Available">Available</MenuItem>
-          <MenuItem value="Unavailable">Unavailable</MenuItem>
-          <MenuItem value="Expired">Expired</MenuItem>
+          <MenuItem value="Available">{t('medicament.available')}</MenuItem>
+          <MenuItem value="Unavailable">{t('medicament.unavailable')}</MenuItem>
+          <MenuItem value="Expired">{t('medicament.expired')}</MenuItem>
         </TextField>
 
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
           <Button type="submit" variant="contained" color="success" disabled={loading}>
-            {loading ? 'Saving...' : 'Create Medicament'}
+            {loading ? t('medicament.saving') : t('medicament.create')}
           </Button>
           <Button variant="outlined" onClick={closeModal} disabled={loading}>
-            Cancel
+            {t('medicament.cancel')}
           </Button>
         </Stack>
       </Stack>

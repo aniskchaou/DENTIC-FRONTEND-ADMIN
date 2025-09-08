@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { LinearProgress, TextField, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Divider, IconButton, Menu, MenuItem, Box, Chip, Avatar } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -19,6 +20,7 @@ const initialForm = {
 };
 
 const Clinic = () => {
+  const { t } = useTranslation();
   const [clinics, setClinics] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
@@ -57,9 +59,18 @@ const Clinic = () => {
     }
   };
 
-  const handleDelete = () => {
-    if (selectedId && window.confirm('Are you sure you want to delete this clinic?')) {
-      axios.delete(`${BASE_URL}/clinics/${selectedId}`).then(() => refresh());
+  const handleDelete = async () => {
+    if (selectedId && window.confirm(t('clinic.confirm_delete'))) {
+      try {
+        await axios.delete(`${BASE_URL}/clinics/${selectedId}`);
+        refresh();
+        setSelectedClinic(null);
+        setSelectedId(null);
+        // Optionally show a success message (e.g., toast/snackbar)
+      } catch (error) {
+        // Optionally show an error message (e.g., toast/snackbar)
+        console.error('Failed to delete clinic:', error);
+      }
     }
   };
 
@@ -132,11 +143,11 @@ const Clinic = () => {
   };
 
   const columns = [
-    { field: 'name', headerName: 'Clinic Name', width: 220 },
-    { field: 'address', headerName: 'Address', width: 250 },
+    { field: 'name', headerName: t('clinic.name'), width: 220 },
+    { field: 'address', headerName: t('clinic.address'), width: 250 },
     {
       field: 'city',
-      headerName: 'City',
+      headerName: t('clinic.city'),
       width: 130,
       renderCell: (params) => (
         <Chip label={params.value} color="primary" size="small" sx={{ fontWeight: 600 }} />
@@ -144,7 +155,7 @@ const Clinic = () => {
     },
     {
       field: 'state',
-      headerName: 'State',
+      headerName: t('clinic.state'),
       width: 130,
       renderCell: (params) => (
         <Chip label={params.value} color="info" size="small" sx={{ fontWeight: 600 }} />
@@ -152,12 +163,12 @@ const Clinic = () => {
     },
     { 
       field: 'zipCode', 
-      headerName: 'Zip Code', 
+      headerName: t('clinic.zip_code'), 
       width: 110 
     },
     {
       field: 'country',
-      headerName: 'Country',
+      headerName: t('clinic.country'),
       width: 130,
       renderCell: (params) => (
         <Chip label={params.value} color="success" size="small" sx={{ fontWeight: 600 }} />
@@ -165,7 +176,7 @@ const Clinic = () => {
     },
     {
       field: 'contactNumber',
-      headerName: 'Contact Number',
+      headerName: t('clinic.contact_number'),
       width: 160,
       renderCell: (params) => (
         <Chip label={params.value} color="secondary" size="small" sx={{ fontWeight: 600 }} />
@@ -173,7 +184,7 @@ const Clinic = () => {
     },
     {
       field: 'email',
-      headerName: 'Email',
+      headerName: t('clinic.email'),
       width: 220,
       renderCell: (params) => (
         <Chip label={params.value} color="default" size="small" sx={{ fontWeight: 600 }} />
@@ -181,7 +192,7 @@ const Clinic = () => {
     },
     {
       field: 'workingHours',
-      headerName: 'Working Hours',
+      headerName: t('clinic.working_hours'),
       width: 400,
       renderCell: (params) => {
         const wh = params.value || {};
@@ -190,7 +201,7 @@ const Clinic = () => {
             {Object.entries(wh).map(([day, hours]) => (
               <Chip
                 key={day}
-                label={`${day.charAt(0).toUpperCase() + day.slice(1)}: ${hours}`}
+                label={`${t(`clinic.day_${day.toLowerCase()}`)}: ${hours}`}
                 color="primary"
                 size="small"
                 sx={{ mb: 0.5 }}
@@ -202,14 +213,14 @@ const Clinic = () => {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: t('clinic.actions'),
       width: 100,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
         <>
           <IconButton
-            aria-label="more"
+            aria-label={t('clinic.more')}
             aria-controls="clinic-row-menu"
             aria-haspopup="true"
             onClick={(e) => handleMenuOpen(e, params.row.id)}
@@ -224,7 +235,7 @@ const Clinic = () => {
   return (
     <div className="card">
       <div className="card-header">
-        <h4><i className="fas fa-clinic-medical"></i> Clinics</h4>
+        <h4><i className="fas fa-clinic-medical"></i> {t('clinic.title')}</h4>
       </div>
       <div className="card-body">
         <Button
@@ -235,10 +246,8 @@ const Clinic = () => {
           onClick={() => setAddOpen(true)}
           sx={{ mr: 1 }}
         >
-          Add Clinic
+          {t('clinic.create')}
         </Button>
-
-       
 
         {loading ? (
           <LinearProgress />
@@ -260,26 +269,26 @@ const Clinic = () => {
         {addOpen && (
           <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="md" fullWidth>
             <form onSubmit={handleAddClinic}>
-              <DialogTitle>Add Clinic</DialogTitle>
+              <DialogTitle>{t('clinic.create')}</DialogTitle>
               <DialogContent dividers>
                 <Stack spacing={2}>
-                  <TextField label="Clinic Name" name="name" value={form.name} onChange={handleFormChange} required fullWidth />
-                  <TextField label="Address" name="address" value={form.address} onChange={handleFormChange} required fullWidth />
-                  <TextField label="City" name="city" value={form.city} onChange={handleFormChange} required fullWidth />
-                  <TextField label="State" name="state" value={form.state} onChange={handleFormChange} required fullWidth />
-                  <TextField label="Zip Code" name="zipCode" value={form.zipCode} onChange={handleFormChange} required fullWidth />
-                  <TextField label="Country" name="country" value={form.country} onChange={handleFormChange} required fullWidth />
-                  <TextField label="Contact Number" name="contactNumber" value={form.contactNumber} onChange={handleFormChange} required fullWidth />
-                  <TextField label="Email" name="email" value={form.email} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.name')} name="name" value={form.name} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.address')} name="address" value={form.address} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.city')} name="city" value={form.city} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.state')} name="state" value={form.state} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.zip_code')} name="zipCode" value={form.zipCode} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.country')} name="country" value={form.country} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.contact_number')} name="contactNumber" value={form.contactNumber} onChange={handleFormChange} required fullWidth />
+                  <TextField label={t('clinic.email')} name="email" value={form.email} onChange={handleFormChange} required fullWidth />
                   {/* Add more fields for workingHours and doctorsAvailable if needed */}
                 </Stack>
               </DialogContent>
               <DialogActions>
                 <Button type="submit" variant="contained" color="success" disabled={loading}>
-                  {loading ? 'Saving...' : 'Create Clinic'}
+                  {loading ? t('clinic.saving') : t('clinic.create')}
                 </Button>
                 <Button variant="outlined" onClick={() => setAddOpen(false)} disabled={loading}>
-                  Cancel
+                  {t('clinic.cancel')}
                 </Button>
               </DialogActions>
             </form>
@@ -293,7 +302,7 @@ const Clinic = () => {
               <Avatar sx={{ bgcolor: "#1976d2", width: 48, height: 48 }}>
                 <i className="fas fa-clinic-medical" style={{ fontSize: 28, color: "#fff" }}></i>
               </Avatar>
-              <Typography variant="h5" color="primary">{selectedClinic?.name || "Clinic Details"}</Typography>
+              <Typography variant="h5" color="primary">{selectedClinic?.name || t('clinic.details')}</Typography>
             </Box>
           </DialogTitle>
           <DialogContent dividers>
@@ -301,27 +310,27 @@ const Clinic = () => {
               <Box sx={{ p: 2 }}>
                 <Stack spacing={2}>
                   <Box>
-                    <Typography variant="subtitle1" color="text.secondary">General Info</Typography>
+                    <Typography variant="subtitle1" color="text.secondary">{t('clinic.general_info')}</Typography>
                     <Divider sx={{ mb: 1 }} />
-                    <Typography><b>Address:</b> {selectedClinic.address}</Typography>
-                    <Typography><b>City:</b> {selectedClinic.city}</Typography>
-                    <Typography><b>State:</b> {selectedClinic.state}</Typography>
-                    <Typography><b>Zip Code:</b> {selectedClinic.zipCode}</Typography>
-                    <Typography><b>Country:</b> {selectedClinic.country}</Typography>
+                    <Typography><b>{t('clinic.address')}:</b> {selectedClinic.address}</Typography>
+                    <Typography><b>{t('clinic.city')}:</b> {selectedClinic.city}</Typography>
+                    <Typography><b>{t('clinic.state')}:</b> {selectedClinic.state}</Typography>
+                    <Typography><b>{t('clinic.zip_code')}:</b> {selectedClinic.zipCode}</Typography>
+                    <Typography><b>{t('clinic.country')}:</b> {selectedClinic.country}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="subtitle1" color="text.secondary">Contact</Typography>
+                    <Typography variant="subtitle1" color="text.secondary">{t('clinic.contact')}</Typography>
                     <Divider sx={{ mb: 1 }} />
-                    <Typography><b>Contact Number:</b> <Chip label={selectedClinic.contactNumber} color="info" /></Typography>
-                    <Typography><b>Email:</b> <Chip label={selectedClinic.email} color="success" /></Typography>
+                    <Typography><b>{t('clinic.contact_number')}:</b> <Chip label={selectedClinic.contactNumber} color="info" /></Typography>
+                    <Typography><b>{t('clinic.email')}:</b> <Chip label={selectedClinic.email} color="success" /></Typography>
                   </Box>
                   <Box>
-                    <Typography variant="subtitle1" color="text.secondary">Working Hours</Typography>
+                    <Typography variant="subtitle1" color="text.secondary">{t('clinic.working_hours')}</Typography>
                     <Divider sx={{ mb: 1 }} />
                     <Box component="ul" sx={{ pl: 2, mb: 0 }}>
                       {selectedClinic.workingHours && Object.entries(selectedClinic.workingHours).map(([day, hours]) => (
                         <li key={day}>
-                          <Chip label={`${day.charAt(0).toUpperCase() + day.slice(1)}: ${hours}`} color="primary" sx={{ mr: 1, mb: 1 }} />
+                          <Chip label={`${t(`clinic.day_${day.toLowerCase()}`)}: ${hours}`} color="primary" sx={{ mr: 1, mb: 1 }} />
                         </li>
                       ))}
                     </Box>
@@ -329,19 +338,19 @@ const Clinic = () => {
                   <Divider />
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      <b>Created At:</b> {selectedClinic.createdAt ? new Date(selectedClinic.createdAt).toLocaleString() : '-'}<br />
-                      <b>Updated At:</b> {selectedClinic.updatedAt ? new Date(selectedClinic.updatedAt).toLocaleString() : '-'}
+                      <b>{t('clinic.created_at')}:</b> {selectedClinic.createdAt ? new Date(selectedClinic.createdAt).toLocaleString() : '-'}<br />
+                      <b>{t('clinic.updated_at')}:</b> {selectedClinic.updatedAt ? new Date(selectedClinic.updatedAt).toLocaleString() : '-'}
                     </Typography>
                   </Box>
                 </Stack>
               </Box>
             ) : (
-              <Typography>No clinic selected.</Typography>
+              <Typography>{t('clinic.no_clinic_selected')}</Typography>
             )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setViewOpen(false)} color="primary" variant="contained">
-              Close
+              {t('clinic.close')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -349,26 +358,26 @@ const Clinic = () => {
         {/* Edit Clinic Modal (MUI Dialog) */}
         <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="md" fullWidth>
           <form onSubmit={handleEditClinic}>
-            <DialogTitle>Edit Clinic</DialogTitle>
+            <DialogTitle>{t('clinic.edit')}</DialogTitle>
             <DialogContent dividers>
               <Stack spacing={2}>
-                <TextField label="Clinic Name" name="name" value={form.name} onChange={handleFormChange} required fullWidth />
-                <TextField label="Address" name="address" value={form.address} onChange={handleFormChange} required fullWidth />
-                <TextField label="City" name="city" value={form.city} onChange={handleFormChange} required fullWidth />
-                <TextField label="State" name="state" value={form.state} onChange={handleFormChange} required fullWidth />
-                <TextField label="Zip Code" name="zipCode" value={form.zipCode} onChange={handleFormChange} required fullWidth />
-                <TextField label="Country" name="country" value={form.country} onChange={handleFormChange} required fullWidth />
-                <TextField label="Contact Number" name="contactNumber" value={form.contactNumber} onChange={handleFormChange} required fullWidth />
-                <TextField label="Email" name="email" value={form.email} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.name')} name="name" value={form.name} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.address')} name="address" value={form.address} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.city')} name="city" value={form.city} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.state')} name="state" value={form.state} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.zip_code')} name="zipCode" value={form.zipCode} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.country')} name="country" value={form.country} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.contact_number')} name="contactNumber" value={form.contactNumber} onChange={handleFormChange} required fullWidth />
+                <TextField label={t('clinic.email')} name="email" value={form.email} onChange={handleFormChange} required fullWidth />
                 {/* Add more fields for workingHours and doctorsAvailable if needed */}
               </Stack>
             </DialogContent>
             <DialogActions>
               <Button type="submit" variant="contained" color="info" disabled={loading}>
-                {loading ? 'Saving...' : 'Update Clinic'}
+                {loading ? t('clinic.saving') : t('clinic.update')}
               </Button>
               <Button variant="outlined" onClick={() => setEditOpen(false)} disabled={loading}>
-                Cancel
+                {t('clinic.cancel')}
               </Button>
             </DialogActions>
           </form>
@@ -380,9 +389,9 @@ const Clinic = () => {
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
         >
-          <MenuItem onClick={handleMenuView}>View</MenuItem>
-          <MenuItem onClick={handleMenuEdit}>Edit</MenuItem>
-          <MenuItem onClick={handleMenuDelete}>Delete</MenuItem>
+          <MenuItem onClick={handleMenuView}>{t('clinic.view')}</MenuItem>
+          <MenuItem onClick={handleMenuEdit}>{t('clinic.edit')}</MenuItem>
+          <MenuItem onClick={handleMenuDelete}>{t('clinic.delete')}</MenuItem>
         </Menu>
 
       </div>

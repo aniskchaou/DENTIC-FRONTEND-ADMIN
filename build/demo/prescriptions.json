@@ -1,0 +1,49 @@
+[
+  {
+    "id": 1,
+    "patientId": 1,
+    "doctorId": 1,
+    "clinicId": 1,
+    "medications": [
+      {
+        "dosage": "500mg",
+        "duration": 7,
+        "frequency": "Twice a day",
+        "instructions": "Take after meals",
+        "medicationId": 1,
+        "medicationName": "Amoxicillin"
+      }
+    ],
+    "prescriptionDate": "2025-07-01T09:00:00.000Z",
+    "validUntil": "2025-07-14T09:00:00.000Z",
+    "refillAllowed": "Yes",
+    "refillCount": 1,
+    "digitalSignature": "abc123signature",
+    "status": "Active",
+    "createdAt": "2025-08-04T16:53:57.993Z",
+    "updatedAt": "2025-08-04T16:53:57.993Z"
+  },
+  {
+    "id": 2,
+    "patientId": 1,
+    "doctorId": 1,
+    "clinicId": 1,
+    "medications": [
+      {
+        "dosage": "200mg",
+        "duration": 5,
+        "frequency": "Three times a day",
+        "instructions": "Take with water",
+        "medicationId": 1,
+        "medicationName": "Ibuprofen"
+      }
+    ],
+    "prescriptionDate": "2025-07-02T10:30:00.000Z",
+    "validUntil": "2025-07-10T10:30:00.000Z",
+    "refillAllowed": "No",
+    "refillCount": 0,
+    "digitalSignature": "def456signature",
+    "status": "Active",
+    "createdAt": "2025-08-04T16:53:57.993Z",
+    "updatedAt": "2025-08-04T16:53:57.993Z"
+  }]

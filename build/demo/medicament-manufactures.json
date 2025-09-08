@@ -1,0 +1,118 @@
+[
+  {
+    "contactPerson": {
+      "email": "john.doe@pfizer.com",
+      "phone": "+1-202-555-0147",
+      "fullName": "John Doe"
+    },
+    "address": {
+      "city": "New York",
+      "state": "NY",
+      "street": "123 Pharma St",
+      "country": "USA",
+      "postalCode": "10001"
+    },
+    "medicamentsSupplied": [
+      {
+        "name": "Vaccine A",
+        "batchNumber": "VA2025"
+      },
+      {
+        "name": "Painkiller B",
+        "batchNumber": "PB2025"
+      }
+    ],
+    "id": 1,
+    "name": "Pfizer",
+    "phone": "+1-202-555-0123",
+    "email": "contact@pfizer.com",
+    "website": "https://www.pfizer.com",
+    "licenseNumber": "FDA123456",
+    "certifications": [
+      "FDA Approved",
+      "GMP Certified"
+    ],
+    "contractStartDate": "2023-01-01T00:00:00.000Z",
+    "contractEndDate": "2026-12-31T00:00:00.000Z",
+    "status": "Active",
+    "createdAt": "2025-07-08T20:21:51.072Z",
+    "updatedAt": "2025-07-08T20:21:51.072Z"
+  },
+  {
+    "contactPerson": {
+      "email": "john.doe@pfizer.com",
+      "phone": "+1-202-555-0147",
+      "fullName": "John Doe"
+    },
+    "address": {
+      "city": "New York",
+      "state": "NY",
+      "street": "123 Pharma St",
+      "country": "USA",
+      "postalCode": "10001"
+    },
+    "medicamentsSupplied": [
+      {
+        "name": "Vaccine A",
+        "batchNumber": "VA2025"
+      },
+      {
+        "name": "Painkiller B",
+        "batchNumber": "PB2025"
+      }
+    ],
+    "id": 2,
+    "name": "Pfizer",
+    "phone": "+1-202-555-0123",
+    "email": "contact@pfizer.com",
+    "website": "https://www.pfizer.com",
+    "licenseNumber": "FDA123456",
+    "certifications": [
+      "FDA Approved",
+      "GMP Certified"
+    ],
+    "contractStartDate": "2023-01-01T00:00:00.000Z",
+    "contractEndDate": "2026-12-31T00:00:00.000Z",
+    "status": "Active",
+    "createdAt": "2025-07-08T20:26:58.001Z",
+    "updatedAt": "2025-07-08T20:26:58.001Z"
+  },
+  {
+    "contactPerson": {
+      "email": "john.doe@pfizer.com",
+      "phone": "+1-202-555-0147",
+      "fullName": "John Doe"
+    },
+    "address": {
+      "city": "New York",
+      "state": "NY",
+      "street": "123 Pharma St",
+      "country": "USA",
+      "postalCode": "10001"
+    },
+    "medicamentsSupplied": [
+      {
+        "name": "Vaccine A",
+        "batchNumber": "VA2025"
+      },
+      {
+        "name": "Painkiller B",
+        "batchNumber": "PB2025"
+      }
+    ],
+    "id": 3,
+    "name": "Pfizer",
+    "phone": "+1-202-555-0123",
+    "email": "contact@pfizer.com",
+    "website": "https://www.pfizer.com",
+    "licenseNumber": "FDA123456",
+    "certifications": [
+      "FDA Approved",
+      "GMP Certified"
+    ],
+    "contractStartDate": "2023-01-01T00:00:00.000Z",
+    "contractEndDate": "2026-12-31T00:00:00.000Z",
+    "status": "Active",
+    "createdAt": "2025-07-08T20:43:47.508Z",
+    "updatedAt": "2025-07-08T20:43:47.508Z"
+  }]

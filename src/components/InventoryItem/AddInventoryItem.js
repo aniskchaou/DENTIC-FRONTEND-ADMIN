@@ -1,13 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TextField, Button, MenuItem, Stack } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import BASE_URL from '../../main/urls/urls';
 
-const categories = ['Dental Tools', 'Consumables', 'Medicines', 'Equipment', 'Other'];
-const statuses = ['In Stock', 'Low Stock', 'Out of Stock', 'Expired'];
-const units = ['pcs', 'box', 'pack', 'bottle', 'tube', 'ml', 'g', 'kg', 'L', 'other'];
+const categories = [
+  'Dental Tools',
+  'Consumables',
+  'Medicines',
+  'Equipment',
+  'Other'
+];
+const statuses = [
+  'In Stock',
+  'Low Stock',
+  'Out of Stock',
+  'Expired'
+];
+const units = [
+  'pcs',
+  'box',
+  'pack',
+  'bottle',
+  'tube',
+  'ml',
+  'g',
+  'kg',
+  'L',
+  'other'
+];
 
 const AddInventoryItem = ({ closeModal, onSuccess }) => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     category: 'Dental Tools',
@@ -61,7 +85,7 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
   return (
     <form onSubmit={handleSubmit} autoComplete="off">
       <TextField
-        label="Name"
+        label={t('inventory.name')}
         name="name"
         value={form.name}
         onChange={handleChange}
@@ -71,7 +95,7 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
       />
       <TextField
         select
-        label="Category"
+        label={t('inventory.category')}
         name="category"
         value={form.category}
         onChange={handleChange}
@@ -80,11 +104,11 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
         required
       >
         {categories.map(c => (
-          <MenuItem key={c} value={c}>{c}</MenuItem>
+          <MenuItem key={c} value={c}>{t(`inventory.category_${c.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
-        label="Quantity"
+        label={t('inventory.quantity')}
         name="quantity"
         type="number"
         value={form.quantity}
@@ -95,7 +119,7 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
       />
       <TextField
         select
-        label="Unit"
+        label={t('inventory.unit')}
         name="unit"
         value={form.unit}
         onChange={handleChange}
@@ -104,12 +128,12 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
         required
       >
         {units.map(u => (
-          <MenuItem key={u} value={u}>{u}</MenuItem>
+          <MenuItem key={u} value={u}>{t(`inventory.unit_${u.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
         select
-        label="Clinic"
+        label={t('inventory.clinic')}
         name="clinicId"
         value={form.clinicId}
         onChange={handleChange}
@@ -122,11 +146,11 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
       </TextField>
       {form.clinicId && (
         <div style={{ margin: '8px 0', color: '#007bff', fontWeight: 'bold' }}>
-          Selected Clinic: {clinics.find(c => c.id === form.clinicId)?.name || ''}
+          {t('inventory.selected_clinic')}: {clinics.find(c => c.id === form.clinicId)?.name || ''}
         </div>
       )}
       <TextField
-        label="Reorder Level"
+        label={t('inventory.reorder_level')}
         name="reorderLevel"
         type="number"
         value={form.reorderLevel}
@@ -135,7 +159,7 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
         margin="normal"
       />
       <TextField
-        label="Expiry Date"
+        label={t('inventory.expiry_date')}
         name="expiryDate"
         type="date"
         value={form.expiryDate}
@@ -146,7 +170,7 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
       />
       <TextField
         select
-        label="Status"
+        label={t('inventory.status')}
         name="status"
         value={form.status}
         onChange={handleChange}
@@ -154,11 +178,11 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
         margin="normal"
       >
         {statuses.map(s => (
-          <MenuItem key={s} value={s}>{s}</MenuItem>
+          <MenuItem key={s} value={s}>{t(`inventory.status_${s.replace(/\s+/g, '_').toLowerCase()}`)}</MenuItem>
         ))}
       </TextField>
       <TextField
-        label="Notes"
+        label={t('inventory.notes')}
         name="notes"
         value={form.notes}
         onChange={handleChange}
@@ -169,10 +193,10 @@ const AddInventoryItem = ({ closeModal, onSuccess }) => {
       />
       <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
         <Button type="submit" variant="contained" color="primary" disabled={loading}>
-          {loading ? 'Saving...' : 'Create Inventory Item'}
+          {loading ? t('inventory.saving') : t('inventory.create')}
         </Button>
         <Button variant="outlined" onClick={closeModal} disabled={loading}>
-          Cancel
+          {t('inventory.cancel')}
         </Button>
       </Stack>
     </form>

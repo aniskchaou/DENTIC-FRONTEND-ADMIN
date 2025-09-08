@@ -1,0 +1,181 @@
+[
+  {
+    "id": 1,
+    "name": "Downtown Dental Care",
+    "address": "123 Main St",
+    "city": "Metropolis",
+    "state": "Metro State",
+    "zipCode": "12345",
+    "country": "Countryland",
+    "contactNumber": "+1234567890",
+    "email": "downtown@dentalcare.com",
+    "workingHours": {
+      "friday": "08:00-17:00",
+      "monday": "08:00-17:00",
+      "sunday": "Closed",
+      "tuesday": "08:00-17:00",
+      "saturday": "09:00-13:00",
+      "thursday": "08:00-17:00",
+      "wednesday": "08:00-17:00"
+    },
+    "doctorsAvailable": [
+      "11111111-aaaa-bbbb-cccc-111111111111",
+      "22222222-bbbb-cccc-dddd-222222222222"
+    ],
+    "createdAt": "2025-07-08T17:58:22.314Z",
+    "updatedAt": "2025-07-08T17:58:22.314Z"
+  },
+  {
+    "id": 2,
+    "name": "Smile Bright Clinic",
+    "address": "456 Elm St",
+    "city": "Smallville",
+    "state": "Metro State",
+    "zipCode": "54321",
+    "country": "Countryland",
+    "contactNumber": "+1987654321",
+    "email": "smile@brightclinic.com",
+    "workingHours": {
+      "friday": "09:00-18:00",
+      "monday": "09:00-18:00",
+      "sunday": "Closed",
+      "tuesday": "09:00-18:00",
+      "saturday": "10:00-14:00",
+      "thursday": "09:00-18:00",
+      "wednesday": "09:00-18:00"
+    },
+    "doctorsAvailable": [
+      "33333333-cccc-dddd-eeee-333333333333"
+    ],
+    "createdAt": "2025-07-08T17:58:22.314Z",
+    "updatedAt": "2025-07-08T17:58:22.314Z"
+  },
+  {
+    "id": 3,
+    "name": "Downtown Dental Care",
+    "address": "123 Main St",
+    "city": "Metropolis",
+    "state": "Metro State",
+    "zipCode": "12345",
+    "country": "Countryland",
+    "contactNumber": "+1234567890",
+    "email": "downtown@dentalcare.com",
+    "workingHours": {
+      "friday": "08:00-17:00",
+      "monday": "08:00-17:00",
+      "sunday": "Closed",
+      "tuesday": "08:00-17:00",
+      "saturday": "09:00-13:00",
+      "thursday": "08:00-17:00",
+      "wednesday": "08:00-17:00"
+    },
+    "doctorsAvailable": [
+      "11111111-aaaa-bbbb-cccc-111111111111",
+      "22222222-bbbb-cccc-dddd-222222222222"
+    ],
+    "createdAt": "2025-07-08T18:04:49.551Z",
+    "updatedAt": "2025-07-08T18:04:49.551Z"
+  },
+  {
+    "id": 4,
+    "name": "Smile Bright Clinic",
+    "address": "456 Elm St",
+    "city": "Smallville",
+    "state": "Metro State",
+    "zipCode": "54321",
+    "country": "Countryland",
+    "contactNumber": "+1987654321",
+    "email": "smile@brightclinic.com",
+    "workingHours": {
+      "friday": "09:00-18:00",
+      "monday": "09:00-18:00",
+      "sunday": "Closed",
+      "tuesday": "09:00-18:00",
+      "saturday": "10:00-14:00",
+      "thursday": "09:00-18:00",
+      "wednesday": "09:00-18:00"
+    },
+    "doctorsAvailable": [
+      "33333333-cccc-dddd-eeee-333333333333"
+    ],
+    "createdAt": "2025-07-08T18:04:49.551Z",
+    "updatedAt": "2025-07-08T18:04:49.551Z"
+  },
+  {
+    "id": 5,
+    "name": "Downtown Dental Care",
+    "address": "123 Main St",
+    "city": "Metropolis",
+    "state": "Metro State",
+    "zipCode": "12345",
+    "country": "Countryland",
+    "contactNumber": "+1234567890",
+    "email": "downtown@dentalcare.com",
+    "workingHours": {
+      "friday": "08:00-17:00",
+      "monday": "08:00-17:00",
+      "sunday": "Closed",
+      "tuesday": "08:00-17:00",
+      "saturday": "09:00-13:00",
+      "thursday": "08:00-17:00",
+      "wednesday": "08:00-17:00"
+    },
+    "doctorsAvailable": [
+      "11111111-aaaa-bbbb-cccc-111111111111",
+      "22222222-bbbb-cccc-dddd-222222222222"
+    ],
+    "createdAt": "2025-07-08T18:06:47.997Z",
+    "updatedAt": "2025-07-08T18:06:47.997Z"
+  },
+  {
+    "id": 6,
+    "name": "Smile Bright Clinic",
+    "address": "456 Elm St",
+    "city": "Smallville",
+    "state": "Metro State",
+    "zipCode": "54321",
+    "country": "Countryland",
+    "contactNumber": "+1987654321",
+    "email": "smile@brightclinic.com",
+    "workingHours": {
+      "friday": "09:00-18:00",
+      "monday": "09:00-18:00",
+      "sunday": "Closed",
+      "tuesday": "09:00-18:00",
+      "saturday": "10:00-14:00",
+      "thursday": "09:00-18:00",
+      "wednesday": "09:00-18:00"
+    },
+    "doctorsAvailable": [
+      "33333333-cccc-dddd-eeee-333333333333"
+    ],
+    "createdAt": "2025-07-08T18:06:47.997Z",
+    "updatedAt": "2025-07-08T18:06:47.997Z"
+  },
+  {
+    "id": 7,
+    "name": "Downtown Dental Care",
+    "address": "123 Main St",
+    "city": "Metropolis",
+    "state": "Metro State",
+    "zipCode": "12345",
+    "country": "Countryland",
+    "contactNumber": "+1234567890",
+    "email": "downtown@dentalcare.com",
+    "workingHours": {
+      "friday": "08:00-17:00",
+      "monday": "08:00-17:00",
+      "sunday": "Closed",
+      "tuesday": "08:00-17:00",
+      "saturday": "09:00-13:00",
+      "thursday": "08:00-17:00",
+      "wednesday": "08:00-17:00"
+    },
+    "doctorsAvailable": [
+      "11111111-aaaa-bbbb-cccc-111111111111",
+      "22222222-bbbb-cccc-dddd-222222222222"
+    ],
+    "createdAt": "2025-07-08T18:10:02.957Z",
+    "updatedAt": "2025-07-08T18:10:02.957Z"
+  }
+]

@@ -2,17 +2,20 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './AddCertificate.css';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import certificateValidation from '../../main/validations/certificateValidation';
 import patientHTTPService from '../../main/services/patientHTTPService';
 import certificateHTTPService from '../../main/services/certificateHTTPService';
 import certificationtemplatetHTTPServiceCopy from '../../main/services/certificationtemplatetHTTPService copy';
 import showMessage from '../../libraries/messages/messages';
+
 const AddCertificate = (props) => {
-  const { register, handleSubmit, errors } = useForm()
+  const { t } = useTranslation();
+  const { register, handleSubmit, errors } = useForm();
   const [certificate, setCertificate] = useState();
   const [patients, setPatients] = useState([]);
-  const [certificateTemplates, setCertificateTemplates] = useState([])
-  const [certificateContent, setCertificateContentValue] = useState([])
+  const [certificateTemplates, setCertificateTemplates] = useState([]);
+  const [certificateContent, setCertificateContentValue] = useState([]);
 
   const handleInputChange = event => {
     const { name, value } = event.target;
@@ -20,49 +23,40 @@ const AddCertificate = (props) => {
   };
 
   useEffect(() => {
-    //LoadJSFiles()
-    getAllPatients()
-    getAllTemplates()
+    getAllPatients();
+    getAllTemplates();
   }, []);
 
   const getAllTemplates = () => {
-    // setLoading(true);
     certificationtemplatetHTTPServiceCopy.getAllCertificationTemplate()
       .then(response => {
-        console.log(response.data)
         setCertificateTemplates(response.data);
-        // setLoading(false);
       })
       .catch(e => {
-        showMessage('Confirmation', e, 'info')
+        showMessage(t('certificate.confirmation'), e, 'info');
       });
   };
 
-
   const getAllPatients = () => {
-
     patientHTTPService.getAllPatients()
       .then(response => {
         setPatients(response.data);
-
       })
       .catch(e => {
-        // showMessage('Confirmation', e, 'info')
+        // showMessage(t('certificate.confirmation'), e, 'info');
       });
   };
 
   const onSubmit = (data) => {
     certificateHTTPService.createCertificate(data).then(data => {
-      setCertificate(initialState)
-      props.closeModal()
-    })
-
-  }
+      setCertificate(initialState);
+      props.closeModal();
+    });
+  };
 
   const setCertificateContent = () => {
-    certificationtemplatetHTTPServiceCopy.
-    setCertificateContentValue(certificate?.template)
-  }
+    certificationtemplatetHTTPServiceCopy.setCertificateContentValue(certificate?.template);
+  };
 
   const initialState = {
     date: '',
@@ -71,31 +65,49 @@ const AddCertificate = (props) => {
     template: ''
   };
 
-
   return (
     <div className="AddCertificate">
-      <form onSubmit={handleSubmit(onSubmit)} class="form-horizontal" target="_blank" name="p_info" method="post" accept-charset="utf-8">
-        <div class="form-body">
+      <form onSubmit={handleSubmit(onSubmit)} className="form-horizontal" target="_blank" name="p_info" method="post" acceptCharset="utf-8">
+        <div className="form-body">
 
-          <div class="form-group">
-            <label class="col-md-3 control-label"><span class="text-danger"><font  ><font  >*</font></font></span><font  ><font  > Date:</font></font></label>
-            <div class="col-md-12">
-              <input onChange={handleInputChange} value={certificate?.date} ref={register({ required: true })}
-                type="date" id="date" name="date" class="form-control datepicker3 hasDatepicker" autocomplete="off" required="" />
+          <div className="form-group">
+            <label className="col-md-3 control-label">
+              <span className="text-danger">*</span>
+              {t('certificate.date')}
+            </label>
+            <div className="col-md-12">
+              <input
+                onChange={handleInputChange}
+                value={certificate?.date}
+                ref={register({ required: true })}
+                type="date"
+                id="date"
+                name="date"
+                className="form-control datepicker3 hasDatepicker"
+                autoComplete="off"
+                required
+              />
               <div className="error text-danger">
                 {errors.date && certificateValidation.date}
               </div>
             </div>
           </div>
 
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><font  ><font  >Patient:</font></font></label>
-            <div class="col-md-12">
-              <select onChange={handleInputChange} value={certificate?.patient} ref={register({ required: true })}
-                name="patient" id="patient_id" class="form-control" autocomplete="off" required="">
+          <div className="form-group">
+            <label className="col-md-3 control-label">{t('certificate.patient')}</label>
+            <div className="col-md-12">
+              <select
+                onChange={handleInputChange}
+                value={certificate?.patient}
+                ref={register({ required: true })}
+                name="patient"
+                id="patient_id"
+                className="form-control"
+                autoComplete="off"
+                required
+              >
                 {patients.map(response =>
-                  <option value={response?.id}>{response?.namepatient}</option>
+                  <option key={response?.id} value={response?.id}>{response?.namepatient}</option>
                 )}
               </select>
               <div className="error text-danger">
@@ -104,16 +116,21 @@ const AddCertificate = (props) => {
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="col-md-3 control-label"><font  ><font  >Template:</font></font></label>
-            <div class="col-md-12">
-              <select onChange={handleInputChange} onClick={setCertificateContent} value={certificate?.template} ref={register({ required: true })}
-                name="template" class="form-control" rows="3">
+          <div className="form-group">
+            <label className="col-md-3 control-label">{t('certificate.template')}</label>
+            <div className="col-md-12">
+              <select
+                onChange={handleInputChange}
+                onClick={setCertificateContent}
+                value={certificate?.template}
+                ref={register({ required: true })}
+                name="template"
+                className="form-control"
+                rows="3"
+              >
                 {certificateTemplates.map(data =>
-                  <option value={data.id}>{data.name}</option>
-                )
-                }
-
+                  <option key={data.id} value={data.id}>{data.name}</option>
+                )}
               </select>
               <div className="error text-danger">
                 {errors.template && certificateValidation.template}
@@ -121,34 +138,36 @@ const AddCertificate = (props) => {
             </div>
           </div>
 
-
-
-
-
-          <div class="form-group">
-            <label class="col-md-3 control-label"><font  ><font  >Content:</font></font></label>
-            <div class="col-md-12">
-              <textarea onChange={handleInputChange} value={certificateContent} placeholder="Content" ref={register({ required: true })}
-                name="content" class="form-control" rows="3"></textarea>
+          <div className="form-group">
+            <label className="col-md-3 control-label">{t('certificate.content')}</label>
+            <div className="col-md-12">
+              <textarea
+                onChange={handleInputChange}
+                value={certificateContent}
+                placeholder={t('certificate.content')}
+                ref={register({ required: true })}
+                name="content"
+                className="form-control"
+                rows="3"
+              ></textarea>
               <div className="error text-danger">
                 {errors.content && certificateValidation.content}
               </div>
             </div>
           </div>
 
-
-          <div class="form-group">
-            <div class=" col-12">
-              <button name="submit" type="submit" class="btn btn-primary">
-                <i className="fa fa-check"></i><font><font> Save</font></font></button>
-
+          <div className="form-group">
+            <div className="col-12">
+              <button name="submit" type="submit" className="btn btn-primary">
+                <i className="fa fa-check"></i> {t('certificate.save')}
+              </button>
             </div>
           </div>
 
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 AddCertificate.propTypes = {};
