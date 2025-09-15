@@ -2,15 +2,20 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { LinearProgress, Rating, Typography, IconButton, Menu, MenuItem, Box, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, Avatar, Divider, Stack, Skeleton } from '@mui/material';
+import { LinearProgress, Rating, Typography, IconButton, Menu, MenuItem, Box, Chip, Button, Dialog, DialogTitle, DialogContent, DialogActions, Avatar, Divider, Stack, Skeleton, TextField, Tabs, Tab } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip as ChartTooltip, Legend as ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement } from 'chart.js';
 import BASE_URL from '../../main/urls/urls';
 import AddDoctor from './AddDoctor';
 import EditDoctor from './EditDoctor';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
@@ -50,13 +55,45 @@ const Doctors = () => {
     status: "Active"
   });
 
+  // Appointment states
+  const [appointmentOpen, setAppointmentOpen] = useState(false);
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentStart, setAppointmentStart] = useState("");
+  const [appointmentEnd, setAppointmentEnd] = useState("");
+  const [appointmentSuccess, setAppointmentSuccess] = useState("");
+  const [appointmentError, setAppointmentError] = useState("");
+  const [error, setError] = useState("");
+  const [appointmentType, setAppointmentType] = useState("In-Person");
+  const [reasonForVisit, setReasonForVisit] = useState("");
+
+  const [patients, setPatients] = useState([]);
+  const [clinics, setClinics] = useState([]);
+  const [selectedPatientId, setSelectedPatientId] = useState("");
+  const [selectedClinicId, setSelectedClinicId] = useState("");
+
+  const [doctorAppointments, setDoctorAppointments] = useState([]);
+  const [allTodayOpen, setAllTodayOpen] = useState(false);
+  const [allTodayEvents, setAllTodayEvents] = useState([]);
+
+  const [doctorTabIndex, setDoctorTabIndex] = useState(0);
+  const [doctorTabEvents, setDoctorTabEvents] = useState([]);
+
   const roleOptions = ["DOCTOR"];
 
   useEffect(() => {
+    // Fetch doctors
     setLoading(true);
     axios.get(`${BASE_URL}/doctors`)
       .then((res) => setDoctors(res.data))
       .finally(() => setLoading(false));
+
+    // Fetch patients and clinics on initial load
+    axios.get(`${BASE_URL}/patients`).then(res => {
+      setPatients(Array.isArray(res.data) ? res.data : []);
+    });
+    axios.get(`${BASE_URL}/clinics`).then(res => {
+      setClinics(Array.isArray(res.data) ? res.data : []);
+    });
   }, []);
 
     // Refresh doctors list
@@ -176,7 +213,7 @@ const Doctors = () => {
     {
       field: 'actions',
       headerName: t('doctors.actions'),
-      width: 120,
+      width: 160,
       sortable: false,
       filterable: false,
       renderCell: (params) => (
@@ -194,6 +231,17 @@ const Doctors = () => {
             onClick={() => handleGrantAccess(params.row)}
           >
             <LockOpenIcon />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="info"
+            title={t('doctors.view_schedule')}
+            onClick={() => {
+              setCalendarDoctor(params.row);
+              setCalendarOpen(true);
+            }}
+          >
+            <i className="far fa-calendar-alt"></i>
           </IconButton>
         </>
       ),
@@ -322,6 +370,111 @@ const Doctors = () => {
     }
   };
 
+  const localizer = momentLocalizer(moment);
+
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarDoctor, setCalendarDoctor] = useState(null);
+
+  // Fetch appointments when calendar opens
+  useEffect(() => {
+    if (calendarOpen && calendarDoctor?.id) {
+      axios.get(`${BASE_URL}/appointments?doctorId=${calendarDoctor.id}`)
+        .then(res => setDoctorAppointments(Array.isArray(res.data) ? res.data : []));
+    }
+  }, [calendarOpen, calendarDoctor]);
+
+  // Combine available slots and real appointments
+  const getDoctorScheduleEvents = (doctor) => {
+    if (!doctor) return [];
+    const events = [];
+
+    // Add available slots (optional, or remove if you only want appointments)
+    (doctor.availableDays || []).forEach(day => {
+      const dayOfWeek = moment().day(day); // day: "Monday", "Tuesday", etc.
+      (doctor.availableTimeSlots || []).forEach(slot => {
+        // Find next occurrence of the day in the current week
+        const eventDate = today.clone().day(day);
+        if (eventDate.isBefore(today)) eventDate.add(7, 'days');
+        const start = moment(eventDate.format('YYYY-MM-DD') + 'T' + slot.startTime);
+        const end = moment(eventDate.format('YYYY-MM-DD') + 'T' + slot.endTime);
+        events.push({
+          title: `${doctor.fullName} (${doctor.specialization})`,
+          start: start.toDate(),
+          end: end.toDate(),
+          allDay: false,
+        });
+      });
+    });
+
+    // Add real appointments
+    doctorAppointments.forEach(app => {
+      events.push({
+        title: app.reasonForVisit || t('doctors.appointment'),
+        start: new Date(`${app.appointmentDate}T${app.startTime}`),
+        end: new Date(`${app.appointmentDate}T${app.endTime}`),
+        allDay: false,
+        color: "#1976d2"
+      });
+    });
+
+    return events;
+  };
+
+  const today = moment();
+
+  const handleShowAllToday = () => {
+    prepareDoctorTabEvents();
+  };
+
+  // Prepare events for each doctor for today
+  const prepareDoctorTabEvents = async () => {
+    const todayStr = moment().format("YYYY-MM-DD");
+    try {
+      const [appointmentsRes, doctorsRes] = await Promise.all([
+        axios.get(`${BASE_URL}/appointments?date=${todayStr}`),
+        axios.get(`${BASE_URL}/doctors`)
+      ]);
+      const appointments = Array.isArray(appointmentsRes.data) ? appointmentsRes.data : [];
+      const doctorsList = Array.isArray(doctorsRes.data) ? doctorsRes.data : [];
+      // For each doctor, filter appointments and map to events
+      const eventsByDoctor = doctorsList.map(doc => {
+        // Appointments
+        const appointmentEvents = appointments
+          .filter(app => app.doctorId === doc.id)
+          .map(app => ({
+            title: `${app.reasonForVisit || t('doctors.appointment')} - ${doc.fullName}`,
+            start: new Date(`${app.appointmentDate}T${app.startTime}`),
+            end: new Date(`${app.appointmentDate}T${app.endTime}`),
+            allDay: false,
+            color: "#1976d2"
+          }));
+
+        // Available slots for today
+        const todayDayName = moment().format('ddd'); // e.g. "Mon"
+        const slotEvents = (doc.availableDays || []).includes(todayDayName)
+          ? (doc.availableTimeSlots || []).map(slot => ({
+              title: `${doc.fullName} (${doc.specialization}) - Available`,
+              start: new Date(`${todayStr}T${slot.startTime}`),
+              end: new Date(`${todayStr}T${slot.endTime}`),
+              allDay: false,
+              color: "#43a047"
+            }))
+          : [];
+
+        return {
+          doctor: doc,
+          events: [...slotEvents, ...appointmentEvents]
+        };
+      });
+      setDoctorTabEvents(eventsByDoctor);
+      setDoctorTabIndex(0);
+      setAllTodayOpen(true);
+    } catch {
+      setDoctorTabEvents([]);
+      setAllTodayOpen(true);
+    }
+  };
+
   return (
     <div className="card">
       <div className="card-header">
@@ -388,6 +541,15 @@ const Doctors = () => {
             onClick={() => setMatcherOpen(true)}
           >
             {t('doctors.ai_profile_matcher')}
+          </Button>
+          <Button
+            variant="outlined"
+            color="success"
+            startIcon={<CalendarMonthIcon />}
+            sx={{ fontWeight: 600 }}
+            onClick={handleShowAllToday}
+          >
+            {t('doctors.show_today_calendar')}
           </Button>
         </Box>
         {loading ? (
@@ -755,6 +917,210 @@ const Doctors = () => {
               </DialogActions>
             </form>
           </DialogContent>
+        </Dialog>
+
+        {/* Doctor Schedule Calendar Modal */}
+        <Dialog open={calendarOpen} onClose={() => setCalendarOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>
+            {calendarDoctor ? `${calendarDoctor.fullName} - ${t('doctors.schedule')}` : t('doctors.schedule')}
+          </DialogTitle>
+          <DialogContent>
+            <div style={{ height: 500 }}>
+              <Calendar
+                localizer={localizer}
+                events={getDoctorScheduleEvents(calendarDoctor)}
+                startAccessor="start"
+                endAccessor="end"
+                titleAccessor="title"
+                defaultView="week"
+                views={['week', 'day']}
+                style={{ height: 480 }}
+                selectable
+                onSelectSlot={slotInfo => {
+                  setAppointmentDate(moment(slotInfo.start).format("YYYY-MM-DD"));
+                  setAppointmentStart(moment(slotInfo.start).format("HH:mm"));
+                  setAppointmentEnd(moment(slotInfo.end).format("HH:mm"));
+                  setAppointmentOpen(true);
+                  setAppointmentSuccess("");
+                  setAppointmentError("");
+                }}
+              />
+            </div>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
+              {t('doctors.calendar_hint')}
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCalendarOpen(false)} color="primary" variant="contained">
+              {t('doctors.close')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Appointment creation dialog */}
+        <Dialog open={appointmentOpen} onClose={() => setAppointmentOpen(false)} maxWidth="xs" fullWidth>
+          <DialogTitle>
+            <EventAvailableIcon sx={{ mr: 1 }} />
+            {t('doctors.create_appointment')}
+          </DialogTitle>
+          <DialogContent>
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                setAppointmentSuccess("");
+                setAppointmentError("");
+                try {
+                  await axios.post(`${BASE_URL}/appointments`, {
+                    doctorId: calendarDoctor?.id,
+                    patientId: selectedPatientId,
+                    clinicLocationId: selectedClinicId,
+                    appointmentDate,
+                    startTime: appointmentStart,
+                    endTime: appointmentEnd,
+                    status: "Scheduled",
+                    appointmentType,
+                    reasonForVisit
+                  });
+                  setAppointmentSuccess(t('doctors.appointment_success'));
+                  setTimeout(() => setAppointmentOpen(false), 1500);
+                } catch {
+                  setAppointmentError(t('doctors.appointment_error'));
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                <TextField
+                  select
+                  label={t('doctors.patient')}
+                  value={selectedPatientId}
+                  onChange={e => setSelectedPatientId(e.target.value)}
+                  required
+                >
+                  {patients.map(p => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.fullName} {p.medicalRecordNumber ? `(${p.medicalRecordNumber})` : ""}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  select
+                  label={t('doctors.clinic')}
+                  value={selectedClinicId}
+                  onChange={e => setSelectedClinicId(e.target.value)}
+                  required
+                >
+                  {clinics.map(c => (
+                    <MenuItem key={c.id} value={c.id}>
+                      {c.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  label={t('doctors.date')}
+                  type="date"
+                  value={appointmentDate}
+                  onChange={e => setAppointmentDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+                <TextField
+                  label={t('doctors.start_time')}
+                  type="time"
+                  value={appointmentStart}
+                  onChange={e => setAppointmentStart(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+                <TextField
+                  label={t('doctors.end_time')}
+                  type="time"
+                  value={appointmentEnd}
+                  onChange={e => setAppointmentEnd(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+                <TextField
+                  select
+                  label={t('doctors.appointment_type')}
+                  value={appointmentType}
+                  onChange={e => setAppointmentType(e.target.value)}
+                  required
+                >
+                  <MenuItem value="In-Person">{t('doctors.in_person')}</MenuItem>
+                  <MenuItem value="Remote">{t('doctors.remote')}</MenuItem>
+                </TextField>
+                <TextField
+                  label={t('doctors.reason_for_visit')}
+                  value={reasonForVisit}
+                  onChange={e => setReasonForVisit(e.target.value)}
+                  required
+                />
+                {appointmentSuccess && (
+                  <Typography color="success.main">{appointmentSuccess}</Typography>
+                )}
+                {appointmentError && (
+                  <Typography color="error">{appointmentError}</Typography>
+                )}
+                {error && (
+                  <Typography color="error" sx={{ mt: 1 }}>
+                    {error}
+                  </Typography>
+                )}
+              </Box>
+              <DialogActions sx={{ mt: 2 }}>
+                <Button onClick={() => setAppointmentOpen(false)} color="secondary">
+                  {t('doctors.cancel')}
+                </Button>
+                <Button type="submit" color="primary" variant="contained">
+                  {t('doctors.save_appointment')}
+                </Button>
+              </DialogActions>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* All Doctors' Today Calendar Dialog */}
+        <Dialog open={allTodayOpen} onClose={() => setAllTodayOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>{t('doctors.today_schedule_all')}</DialogTitle>
+          <DialogContent>
+            <Tabs
+              value={doctorTabIndex}
+              onChange={(e, idx) => setDoctorTabIndex(idx)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ mb: 2 }}
+            >
+              {doctorTabEvents.map((item, idx) => (
+                <Tab key={item.doctor.id} label={item.doctor.fullName} />
+              ))}
+            </Tabs>
+            <div style={{ height: 500 }}>
+              {doctorTabEvents.length === 0 ? (
+                <Typography color="text.secondary" align="center" sx={{ mt: 20 }}>
+                  {t('doctors.no_appointments_today') || "No appointments scheduled for today."}
+                </Typography>
+              ) : (
+                <Calendar
+                  localizer={localizer}
+                  events={doctorTabEvents[doctorTabIndex]?.events || []}
+                  startAccessor="start"
+                  endAccessor="end"
+                  titleAccessor="title"
+                  defaultView="day"
+                  views={['day']}
+                  style={{ height: 480 }}
+                />
+              )}
+            </div>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 2 }}>
+              {t('doctors.today_calendar_hint')}
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAllTodayOpen(false)} color="primary" variant="contained">
+              {t('doctors.close')}
+            </Button>
+          </DialogActions>
         </Dialog>
       </div>
     </div>

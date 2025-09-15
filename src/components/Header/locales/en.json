@@ -223,6 +223,10 @@
     "close": "Close"
   },
     "doctors": {
+       "show_today_calendar": "Show Today's Calendar",
+    "today_schedule_all": "All Doctors' Schedule Today",
+    "today_calendar_hint": "View all appointments for all doctors scheduled today.",
+    "no_appointments_today": "No appointments scheduled for today.",
   "title": "Doctors",
   "license_number": "License Number",
   "specialization": "Specialization",
@@ -267,7 +271,17 @@
     "match": "Match",
     "best_match": "Best Match",
     "no_suitable_doctor": "No suitable doctor found.",
-    "error_matching_doctor": "Error matching doctor."
+    "error_matching_doctor": "Error matching doctor.",
+    "appointment_type": "Appointment Type",
+    "in_person": "In-Person",
+    "remote": "Remote",
+    "reason_for_visit": "Reason for Visit",
+    "appointment": "Appointment",
+    "appointment_success": "Appointment created successfully!",
+    "appointment_error": "Failed to create appointment.",
+    "save_appointment": "Save Appointment",
+    "create_appointment": "Create Appointment",
+    "calendar_hint": "Click and drag on the calendar to select a time slot and create an appointment."
   },  
   "odontogram": {
     "patient": "Patient",
@@ -1620,6 +1634,8 @@
     "cancel": "Cancel"
   },
   "doctor": {
+    "working_days": "Working Days",
+    "days_off": "Days Off",
      "generate_license_number": "Generate License Number",
     "full_name": "Full Name",
     "license_number": "License Number",

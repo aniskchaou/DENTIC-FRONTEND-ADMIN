@@ -18,6 +18,8 @@ const AddDoctor = ({ closeModal, onCreate }) => {
     experienceYears: '',
     consultationFee: '',
     availableDays: [],
+    workingDays: [],
+    daysOff: [],
     availableTimeSlots: [],
     rating: 0
   });
@@ -52,6 +54,14 @@ const AddDoctor = ({ closeModal, onCreate }) => {
 
   const handleDaysChange = e => {
     setForm(f => ({ ...f, availableDays: e.target.value }));
+  };
+
+  const handleWorkingDaysChange = e => {
+    setForm(f => ({ ...f, workingDays: e.target.value }));
+  };
+
+  const handleDaysOffChange = e => {
+    setForm(f => ({ ...f, daysOff: e.target.value }));
   };
 
   const handleAddTimeSlot = () => {
@@ -146,12 +156,38 @@ const AddDoctor = ({ closeModal, onCreate }) => {
         />
         <TextField
           select
+          label={t('doctor.working_days')}
+          name="workingDays"
+          value={form.workingDays}
+          onChange={handleWorkingDaysChange}
+          SelectProps={{ multiple: true }}
+          fullWidth
+        >
+          {daysOfWeek.map(day => (
+            <MenuItem key={day} value={day}>{t(`doctor.day_${day.toLowerCase()}`)}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
           label={t('doctor.available_days')}
           name="availableDays"
           value={form.availableDays}
           onChange={handleDaysChange}
           SelectProps={{ multiple: true }}
           required
+          fullWidth
+        >
+          {daysOfWeek.map(day => (
+            <MenuItem key={day} value={day}>{t(`doctor.day_${day.toLowerCase()}`)}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label={t('doctor.days_off')}
+          name="daysOff"
+          value={form.daysOff}
+          onChange={handleDaysOffChange}
+          SelectProps={{ multiple: true }}
           fullWidth
         >
           {daysOfWeek.map(day => (
