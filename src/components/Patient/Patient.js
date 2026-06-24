@@ -23,6 +23,7 @@ import axios from '../../libraries/axios/axios';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useTranslation } from 'react-i18next';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 Chart.register(ArcElement, ChartTooltip, ChartLegend, CategoryScale, LinearScale, BarElement, PointElement, LineElement);
 
@@ -52,7 +53,25 @@ const Patient = () => {
   const [riskLoading, setRiskLoading] = useState(false);
   const [riskResult, setRiskResult] = useState(null);
 
+  // Grant Access states
+  const [grantAccessOpen, setGrantAccessOpen] = useState(false);
+  const [grantAccessPatient, setGrantAccessPatient] = useState(null);
+  const [grantForm, setGrantForm] = useState({
+    username: "",
+    password: "",
+    fullName: "",
+    email: "",
+    role: "PATIENT",
+    phone: "",
+    profilePicture: "",
+    dateOfBirth: "",
+    gender: "",
+    status: "Active"
+  });
+
   const { t } = useTranslation();
+
+  const roleOptions = ["PATIENT"];
 
   useEffect(() => {
     LoadJSFiles();
@@ -215,6 +234,14 @@ const Patient = () => {
     <div>
       <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
         <MoreVertIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        color="success"
+        title={t('patient.grant_access')}
+        onClick={() => handleGrantAccess(params.row)}
+      >
+        <LockOpenIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={() => handleMenuAction('view')}>{t('patient.view')}</MenuItem>
@@ -406,6 +433,53 @@ const Patient = () => {
       setRiskResult({ error: 'Error generating risk stratification.' });
     }
     setRiskLoading(false);
+  };
+
+  const generateUsername = (fullName, email, id) => {
+    if (email) return email.split('@')[0];
+    if (fullName) return fullName.replace(/\s+/g, '').toLowerCase();
+    return `patient${id}`;
+  };
+
+  const generatePassword = () => {
+    return Math.random().toString(36).slice(-8);
+  };
+
+  const handleGrantAccess = (patient) => {
+    setGrantAccessPatient(patient);
+    setGrantForm({
+      username: patient.username || (patient.email ? patient.email.split('@')[0] : `patient${patient.id}`),
+      password: "",
+      fullName: patient.fullName,
+      email: patient.email,
+      role: "PATIENT",
+      phone: patient.phone,
+      profilePicture: patient.profilePicture || "http://placehold.it/100x100",
+      dateOfBirth: patient.dateOfBirth || "",
+      gender: patient.gender || "",
+      status: patient.status || "Active"
+    });
+    setGrantAccessOpen(true);
+  };
+
+  const handleGrantFormChange = (e) => {
+    const { name, value } = e.target;
+    setGrantForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleGrantFormSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${BASE_URL}/users`, {
+        ...grantForm,
+        createdAt: grantAccessPatient.createdAt,
+        updatedAt: grantAccessPatient.updatedAt
+      });
+      alert("Access granted and user created!");
+      setGrantAccessOpen(false);
+    } catch (err) {
+      alert("Failed to grant access.");
+    }
   };
 
   return (
@@ -689,6 +763,145 @@ const Patient = () => {
               {t('patient.close')}
             </Button>
           </DialogActions>
+        </Dialog>
+
+        {/* Grant Access Dialog */}
+        <Dialog open={grantAccessOpen} onClose={() => setGrantAccessOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>{t('patient.grant_access')}</DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleGrantFormSubmit}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <input
+                    type="text"
+                    name="username"
+                    value={grantForm.username}
+                    onChange={handleGrantFormChange}
+                    placeholder="Username"
+                    className="form-control"
+                    required
+                  />
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() =>
+                      setGrantForm(prev => ({
+                        ...prev,
+                        username: generateUsername(grantForm.fullName, grantForm.email, grantAccessPatient?.id)
+                      }))
+                    }
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Generate Username
+                  </Button>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <input
+                    type="password"
+                    name="password"
+                    value={grantForm.password}
+                    onChange={handleGrantFormChange}
+                    placeholder="Password"
+                    className="form-control"
+                    required
+                  />
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() =>
+                      setGrantForm(prev => ({
+                        ...prev,
+                        password: generatePassword()
+                      }))
+                    }
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Generate Password
+                  </Button>
+                </Box>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={grantForm.fullName}
+                  onChange={handleGrantFormChange}
+                  placeholder="Full Name"
+                  className="form-control"
+                  required
+                />
+                <input
+                  type="email"
+                  name="email"
+                  value={grantForm.email}
+                  onChange={handleGrantFormChange}
+                  placeholder="Email"
+                  className="form-control"
+                  required
+                />
+                <input
+                  type="text"
+                  name="phone"
+                  value={grantForm.phone}
+                  onChange={handleGrantFormChange}
+                  placeholder="Phone"
+                  className="form-control"
+                />
+                <input
+                  type="text"
+                  name="profilePicture"
+                  value={grantForm.profilePicture}
+                  onChange={handleGrantFormChange}
+                  placeholder="Profile Picture URL"
+                  className="form-control"
+                />
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={grantForm.dateOfBirth ? grantForm.dateOfBirth.substring(0,10) : ""}
+                  onChange={handleGrantFormChange}
+                  className="form-control"
+                />
+                <select
+                  name="gender"
+                  value={grantForm.gender}
+                  onChange={handleGrantFormChange}
+                  className="form-control"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                <select
+                  name="status"
+                  value={grantForm.status}
+                  onChange={handleGrantFormChange}
+                  className="form-control"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="On Leave">On Leave</option>
+                </select>
+                <select
+                  name="role"
+                  value={grantForm.role}
+                  onChange={handleGrantFormChange}
+                  className="form-control"
+                  required
+                >
+                  {roleOptions.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+              </Box>
+              <DialogActions sx={{ mt: 2 }}>
+                <Button onClick={() => setGrantAccessOpen(false)} color="secondary">
+                  {t('patient.cancel')}
+                </Button>
+                <Button type="submit" color="primary" variant="contained">
+                  {t('patient.grant_access')}
+                </Button>
+              </DialogActions>
+            </form>
+          </DialogContent>
         </Dialog>
 
       </div>

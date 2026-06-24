@@ -53,6 +53,10 @@ const Navigation = ({ connected, darkMode }) => {
     ],
     ACCOUNTANT: [
       'dashboard', 'payment', 'expense', 'billing', 'insurance'
+    ],
+    PATIENT: [
+      'dashboard',
+      'messages'
     ]
   };
 

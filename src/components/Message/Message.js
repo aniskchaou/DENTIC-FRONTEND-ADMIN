@@ -27,8 +27,11 @@ import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import SubjectIcon from '@mui/icons-material/Subject';
 import MessageIcon from '@mui/icons-material/Message';
+import SendIcon from '@mui/icons-material/Send';
 import CurrentUser from '../../main/config/user';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
+import BASE_URL from '../../main/urls/urls';
 
 const Message = () => {
   const { t } = useTranslation();
@@ -36,13 +39,35 @@ const Message = () => {
   const [loading, setLoading] = useState(true);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openViewDialog, setOpenViewDialog] = useState(false);
+  const [openNewDialog, setOpenNewDialog] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newMessage, setNewMessage] = useState({
+    doctorId: "",
+    subject: "",
+    message: ""
+  });
+  const [sending, setSending] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState("");
+  const [sendError, setSendError] = useState("");
+  const [doctors, setDoctors] = useState([]);
+
+  // Get current user info from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isPatient = currentUser.role === "PATIENT";
+  const patientEmail = currentUser.email;
 
   useEffect(() => {
     LoadJSFiles();
     getAllMessages();
   }, []);
+
+  useEffect(() => {
+    if (isPatient) {
+      axios.get(`${BASE_URL}/doctors`)
+        .then(res => setDoctors(Array.isArray(res.data) ? res.data : []));
+    }
+  }, [isPatient]);
 
   const getAllMessages = () => {
     setLoading(true);
@@ -76,11 +101,43 @@ const Message = () => {
     setSearchQuery(e.target.value);
   };
 
-  const filteredMessages = messages.filter(message =>
-    message.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    message.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    message.message?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleNewMessageChange = e => {
+    const { name, value } = e.target;
+    setNewMessage(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSendMessage = async e => {
+    e.preventDefault();
+    setSending(true);
+    setSendSuccess("");
+    setSendError("");
+    try {
+      await messageHTTPService.createMessage({
+        doctorId: newMessage.doctorId,
+        subject: newMessage.subject,
+        message: newMessage.message,
+        email: patientEmail,
+        name: currentUser.fullName || currentUser.username || "Patient"
+      });
+      setSendSuccess(t('message.sent_success'));
+      setTimeout(() => setOpenNewDialog(false), 1200);
+      setNewMessage({ doctorId: "", subject: "", message: "" });
+      getAllMessages();
+    } catch {
+      setSendError(t('message.sent_error'));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Filter messages for patient role
+  const filteredMessages = isPatient
+    ? messages.filter(message => message.email === patientEmail)
+    : messages.filter(message =>
+        message.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        message.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        message.message?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
   const columns = [
     { field: 'name', headerName: t('message.from'), width: 200 },
@@ -144,6 +201,18 @@ const Message = () => {
           value={searchQuery}
           onChange={handleSearch}
         />
+
+        {isPatient && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<SendIcon />}
+            sx={{ mb: 2 }}
+            onClick={() => setOpenNewDialog(true)}
+          >
+            {t('message.new_message_to_doctor')}
+          </Button>
+        )}
 
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
@@ -235,6 +304,57 @@ const Message = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* New Message Dialog (for patient) */}
+        {isPatient && (
+          <Dialog open={openNewDialog} onClose={() => setOpenNewDialog(false)} maxWidth="sm" fullWidth>
+            <DialogTitle>{t('message.new_message_to_doctor')}</DialogTitle>
+            <DialogContent>
+              <form onSubmit={handleSendMessage}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                  <TextField
+                    select
+                    label={t('message.select_doctor')}
+                    name="doctorId"
+                    value={newMessage.doctorId}
+                    onChange={handleNewMessageChange}
+                    required
+                  >
+                    {doctors.map(doc => (
+                      <option key={doc.id} value={doc.id}>{doc.fullName}</option>
+                    ))}
+                  </TextField>
+                  <TextField
+                    label={t('message.subject')}
+                    name="subject"
+                    value={newMessage.subject}
+                    onChange={handleNewMessageChange}
+                    required
+                  />
+                  <TextField
+                    label={t('message.message')}
+                    name="message"
+                    value={newMessage.message}
+                    onChange={handleNewMessageChange}
+                    multiline
+                    minRows={3}
+                    required
+                  />
+                  {sendSuccess && <Typography color="success.main">{sendSuccess}</Typography>}
+                  {sendError && <Typography color="error">{sendError}</Typography>}
+                </Box>
+                <DialogActions sx={{ mt: 2 }}>
+                  <Button onClick={() => setOpenNewDialog(false)} color="secondary">
+                    {t('message.cancel')}
+                  </Button>
+                  <Button type="submit" color="primary" variant="contained" disabled={sending}>
+                    {t('message.send')}
+                  </Button>
+                </DialogActions>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
