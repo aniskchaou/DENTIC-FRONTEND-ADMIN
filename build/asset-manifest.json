@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.77d65e16.css",
-    "main.js": "/static/js/main.d380811c.js",
-    "static/js/583.f1872ab6.chunk.js": "/static/js/583.f1872ab6.chunk.js",
-    "static/js/196.de2bbb1d.chunk.js": "/static/js/196.de2bbb1d.chunk.js",
-    "static/js/878.7ca966df.chunk.js": "/static/js/878.7ca966df.chunk.js",
+    "main.css": "/static/css/main.f4c7a962.css",
+    "main.js": "/static/js/main.03ef12f9.js",
+    "static/js/368.a9da6875.chunk.js": "/static/js/368.a9da6875.chunk.js",
+    "static/js/249.bd15d0b4.chunk.js": "/static/js/249.bd15d0b4.chunk.js",
+    "static/js/313.956d7999.chunk.js": "/static/js/313.956d7999.chunk.js",
     "static/media/remote-installation.md": "/static/media/remote-installation.f8cd03f6daa0701c2553.md",
     "static/media/change-log.md": "/static/media/change-log.6b05216c8e1f26555350.md",
     "static/media/used-technologies.md": "/static/media/used-technologies.8b301126df09a97bb5bd.md",
@@ -36,15 +36,10 @@
     "static/media/staff-management.md": "/static/media/staff-management.522839462b08d744b27b.md",
     "static/media/server-requirements.md": "/static/media/server-requirements.742fbce225b90472f839.md",
     "static/media/introduction.md": "/static/media/introduction.66cc2c4cc3dba989d71b.md",
-    "static/media/contact-communication.md": "/static/media/contact-communication.31d6cfe0d16ae931b73c.md",
-    "main.77d65e16.css.map": "/static/css/main.77d65e16.css.map",
-    "main.d380811c.js.map": "/static/js/main.d380811c.js.map",
-    "583.f1872ab6.chunk.js.map": "/static/js/583.f1872ab6.chunk.js.map",
-    "196.de2bbb1d.chunk.js.map": "/static/js/196.de2bbb1d.chunk.js.map",
-    "878.7ca966df.chunk.js.map": "/static/js/878.7ca966df.chunk.js.map"
+    "static/media/contact-communication.md": "/static/media/contact-communication.31d6cfe0d16ae931b73c.md"
   },
   "entrypoints": [
-    "static/css/main.77d65e16.css",
-    "static/js/main.d380811c.js"
+    "static/css/main.f4c7a962.css",
+    "static/js/main.03ef12f9.js"
   ]
 }

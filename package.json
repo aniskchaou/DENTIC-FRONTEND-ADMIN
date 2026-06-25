@@ -32,7 +32,7 @@
     "cornerstone-wado-image-loader": "^4.13.2",
     "date-fns": "^2.30.0",
     "dicom-parser": "^1.8.21",
-    "express": "^4.17.1",
+    "express": "^4.22.2",
     "file-saver": "^2.0.5",
     "fullcalendar": "^5.6.0",
     "html2canvas": "^1.4.1",
@@ -73,7 +73,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "serve": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts start",
+    "serve": "cross-env PORT=3001 NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "set NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "test": "set NODE_OPTIONS=--openssl-legacy-provider &&  react-scripts test",
     "eject": "set NODE_OPTIONS=--openssl-legacy-provider &&  react-scripts eject"
@@ -101,6 +101,7 @@
     "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
-    "babel-loader": "^10.0.0"
+    "babel-loader": "^10.0.0",
+    "cross-env": "^10.1.0"
   }
 }

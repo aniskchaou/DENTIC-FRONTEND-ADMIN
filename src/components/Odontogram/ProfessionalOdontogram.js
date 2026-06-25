@@ -58,6 +58,93 @@ const statusColor = {
   missing: 'gray'
 };
 
+// ── Clinical odontogram constants ──────────────────────────────────────────
+// FDI numbers indexed by tooth array position (0-31)
+const FDI_NUMBERS = [
+  18, 17, 16, 15, 14, 13, 12, 11,  // upper right (Q1) – displayed left
+  21, 22, 23, 24, 25, 26, 27, 28,  // upper left  (Q2) – displayed right
+  48, 47, 46, 45, 44, 43, 42, 41,  // lower right (Q4) – displayed left
+  31, 32, 33, 34, 35, 36, 37, 38,  // lower left  (Q3) – displayed right
+];
+
+const TOOTH_WIDTHS  = { Molar: 52, Premolar: 38, Canine: 30, Incisor: 28 };
+const TOOTH_HEIGHTS = { Molar: 42, Premolar: 42, Canine: 46, Incisor: 42 };
+const TOOTH_GAP     = 2;
+
+// Enamel-realistic base colors per status
+const SURFACE_BASE = {
+  healthy: '#f0ece0',   // warm ivory enamel
+  decayed: '#b8814a',   // caries brown
+  filled:  '#c8d4e0',   // amalgam silver-blue
+  missing: '#d8d0c8',
+};
+const SURFACE_MARKED  = '#1a5fa8';
+const ENAMEL_STROKE   = '#8a9ba8';
+const FISSURE_COLOR   = '#a09080';
+
+// ── Anatomically realistic tooth crown outlines (occlusal view) ───────────
+const getToothOutlinePath = (type, W, H) => {
+  switch (type) {
+
+    case 'Molar': {
+      // Wide rounded-rectangle with subtle cusp bumps at all 4 corners
+      const r = 9;
+      return [
+        `M ${r},1`,
+        `L ${W-r},1 Q ${W-1},1 ${W-1},${r+1}`,
+        `L ${W-1},${H/2-5} Q ${W+3},${H/2} ${W-1},${H/2+5}`,  // right cusp bump
+        `L ${W-1},${H-r-1} Q ${W-1},${H-1} ${W-r},${H-1}`,
+        `L ${r},${H-1} Q 1,${H-1} 1,${H-r-1}`,
+        `L 1,${H/2+5} Q ${-3},${H/2} 1,${H/2-5}`,             // left cusp bump
+        `L 1,${r+1} Q 1,1 ${r},1 Z`
+      ].join(' ');
+    }
+
+    case 'Premolar': {
+      // Figure-of-8 oval – two distinct cusp lobes (buccal + lingual)
+      const cx = W/2, cy = H/2;
+      const rx = W*0.42, ry = H*0.46, k = 0.5523;
+      return [
+        `M ${cx},${cy-ry}`,
+        `C ${cx+rx*k},${cy-ry} ${cx+rx},${cy-ry*k} ${cx+rx},${cy}`,
+        `C ${cx+rx},${cy+ry*k} ${cx+rx*k},${cy+ry} ${cx},${cy+ry}`,
+        `C ${cx-rx*k},${cy+ry} ${cx-rx},${cy+ry*k} ${cx-rx},${cy}`,
+        `C ${cx-rx},${cy-ry*k} ${cx-rx*k},${cy-ry} ${cx},${cy-ry} Z`
+      ].join(' ');
+    }
+
+    case 'Canine': {
+      // Diamond: pointed lingual tip (top), wide rounded buccal base (bottom)
+      const cx = W/2;
+      return [
+        `M ${cx},2`,
+        `Q ${W*0.82},${H*0.18} ${W-2},${H*0.46}`,
+        `Q ${W-2},${H-5} ${W-4},${H-2}`,
+        `Q ${cx},${H+2} 4,${H-2}`,
+        `Q 2,${H-5} 2,${H*0.46}`,
+        `Q ${W*0.18},${H*0.18} ${cx},2 Z`
+      ].join(' ');
+    }
+
+    case 'Incisor':
+    default: {
+      // Trapezoid: wide buccal base (bottom), narrower lingual top – shovel-shaped
+      const lo = W * 0.20;                  // lingual offset (each side)
+      return [
+        `M ${lo+3},3`,
+        `Q ${W/2},1 ${W-lo-3},3`,           // lingual edge (gently curved inward)
+        `Q ${W-2},6 ${W-2},${H*0.30}`,      // upper-right corner
+        `L ${W-2},${H-5}`,
+        `Q ${W-2},${H-1} ${W-5},${H-1}`,    // buccal right corner
+        `L 5,${H-1}`,
+        `Q 2,${H-1} 2,${H-5}`,              // buccal left corner
+        `L 2,${H*0.30}`,
+        `Q 2,6 ${lo+3},3 Z`                 // upper-left corner
+      ].join(' ');
+    }
+  }
+};
+
 const getJawTeeth = (teeth, start, end, yOffset) =>
   Array.from({ length: end - start + 1 }, (_, i) => {
     const t = teeth[start + i];
@@ -238,104 +325,194 @@ Treatment: ${tooth.treatmentSummary || '-'}
     `.trim();
   };
 
-  // SVG for tooth with color and cross for missing
-  const toothSVG = (type, status, id, isSelected) => {
-    let fill =
-      status === 'healthy'
-        ? statusColors.healthy
-        : status === 'decayed'
-        ? statusColors.decayed
-        : status === 'filled'
-        ? statusColors.filled
-        : status === 'missing'
-        ? statusColors.missing
-        : '#fff';
+  // ── 3D realistic 5-surface tooth ─────────────────────────────────────────
+  const toothSVG = (tooth) => {
+    const W  = TOOTH_WIDTHS[tooth.type]  || 28;
+    const H  = TOOTH_HEIGHTS[tooth.type] || 36;
+    const ix = Math.round(W * 0.27);
+    const iy = Math.round(H * 0.27);
+    const clipId   = `tc-${tooth.id}`;
+    const grad3d   = `tg3-${tooth.id}`;
+    const gradEdge = `tge-${tooth.id}`;
 
-    let numberColor = '#ff3b3b';
+    const isSelected  = selectedTooth && selectedTooth.id === tooth.id;
+    const strokeColor = isSelected ? '#e65100' : '#6a7d8a';
+    const strokeW     = isSelected ? 3 : 1.2;
+    const base = SURFACE_BASE[tooth.status] || '#f0ece0';
+    const sf   = (s) => tooth.surfaces[s] ? SURFACE_MARKED : base;
+    const path = getToothOutlinePath(tooth.type, W, H);
 
-    // Cross for missing
-    const cross = (
-      <>
-        <line x1="8" y1="8" x2="32" y2="32" stroke="#f44336" strokeWidth="3" />
-        <line x1="32" y1="8" x2="8" y2="32" stroke="#f44336" strokeWidth="3" />
-      </>
-    );
-
-    if (type === 'Molar') {
+    if (tooth.status === 'missing') {
       return (
-        <svg width="40" height="40" viewBox="0 0 40 40">
-          <ellipse cx="20" cy="20" rx="15" ry="12" fill={fill} stroke="#000" strokeWidth="2"/>
-          {status === 'missing' && cross}
-          <title>{getToothTooltip({id, status, ...teeth[id-1]})}</title>
-          <text x="20" y="36" textAnchor="middle" fontSize="10" fill={numberColor} fontWeight="bold">{id}</text>
+        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} overflow="visible">
+          <path d={path} fill="#ddd" stroke="#aaa" strokeWidth={1.5} />
+          <line x1={4} y1={4} x2={W-4} y2={H-4} stroke="#cc4444" strokeWidth={2.5} />
+          <line x1={W-4} y1={4} x2={4} y2={H-4} stroke="#cc4444" strokeWidth={2.5} />
         </svg>
       );
     }
-    if (type === 'Premolar') {
-      return (
-        <svg width="40" height="40" viewBox="0 0 40 40">
-          <ellipse cx="20" cy="20" rx="10" ry="13" fill={fill} stroke="#000" strokeWidth="2"/>
-          {status === 'missing' && cross}
-          <title>{getToothTooltip({id, status, ...teeth[id-1]})}</title>
-          <text x="20" y="36" textAnchor="middle" fontSize="10" fill={numberColor} fontWeight="bold">{id}</text>
-        </svg>
-      );
-    }
-    if (type === 'Canine') {
-      return (
-        <svg width="40" height="40" viewBox="0 0 40 40">
-          <path d="M20 8 Q25 20 20 32 Q15 20 20 8" fill={fill} stroke="#000" strokeWidth="2"/>
-          {status === 'missing' && cross}
-          <title>{getToothTooltip({id, status, ...teeth[id-1]})}</title>
-          <text x="20" y="36" textAnchor="middle" fontSize="10" fill={numberColor} fontWeight="bold">{id}</text>
-        </svg>
-      );
-    }
-    // Incisor
+
     return (
-      <svg width="40" height="40" viewBox="0 0 40 40">
-        <rect x="13" y="10" width="14" height="20" rx="7" fill={fill} stroke="#000" strokeWidth="2"/>
-        {status === 'missing' && cross}
-        <title>{getToothTooltip({id, status, ...teeth[id-1]})}</title>
-        <text x="20" y="36" textAnchor="middle" fontSize="10" fill={numberColor} fontWeight="bold">{id}</text>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} overflow="visible">
+        <defs>
+          <clipPath id={clipId}><path d={path} /></clipPath>
+          {/* Strong specular highlight – simulates porcelain/enamel gloss */}
+          <radialGradient id={grad3d} cx="30%" cy="25%" r="58%">
+            <stop offset="0%"   stopColor="#ffffff" stopOpacity="1.00" />
+            <stop offset="22%"  stopColor="#ffffff" stopOpacity="0.80" />
+            <stop offset="55%"  stopColor="#f5efe0" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#c8b898" stopOpacity="0.05" />
+          </radialGradient>
+          {/* Peripheral shadow for depth */}
+          <radialGradient id={gradEdge} cx="50%" cy="50%" r="50%">
+            <stop offset="55%"  stopColor="#000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0.30" />
+          </radialGradient>
+        </defs>
+
+        <path d={path} fill={base} stroke="none" />
+
+        <g clipPath={`url(#${clipId})`}>
+          <polygon points={`0,0 0,${H} ${ix},${H-iy} ${ix},${iy}`}
+            fill={sf('mesial')} stroke="none" style={{cursor:'pointer'}}
+            onClick={(e)=>{e.stopPropagation();handleSurfaceClickFn(tooth,'mesial');}} />
+          <polygon points={`${W},0 ${W},${H} ${W-ix},${H-iy} ${W-ix},${iy}`}
+            fill={sf('distal')} stroke="none" style={{cursor:'pointer'}}
+            onClick={(e)=>{e.stopPropagation();handleSurfaceClickFn(tooth,'distal');}} />
+          <polygon points={`0,0 ${W},0 ${W-ix},${iy} ${ix},${iy}`}
+            fill={sf('lingual')} stroke="none" style={{cursor:'pointer'}}
+            onClick={(e)=>{e.stopPropagation();handleSurfaceClickFn(tooth,'lingual');}} />
+          <polygon points={`0,${H} ${W},${H} ${W-ix},${H-iy} ${ix},${H-iy}`}
+            fill={sf('buccal')} stroke="none" style={{cursor:'pointer'}}
+            onClick={(e)=>{e.stopPropagation();handleSurfaceClickFn(tooth,'buccal');}} />
+          <rect x={ix} y={iy} width={W-2*ix} height={H-2*iy}
+            fill={sf('occlusal')} stroke="none" style={{cursor:'pointer'}}
+            onClick={(e)=>{e.stopPropagation();handleSurfaceClickFn(tooth,'occlusal');}} />
+        </g>
+
+        <g clipPath={`url(#${clipId})`} style={{pointerEvents:'none'}}>
+          {tooth.type === 'Molar' && (<>
+            <path d={`M ${W*.30},${H*.27} Q ${W*.50},${H*.42} ${W*.70},${H*.27}`}
+              fill="none" stroke={FISSURE_COLOR} strokeWidth={1.5} opacity={.65}/>
+            <path d={`M ${W*.30},${H*.73} Q ${W*.50},${H*.58} ${W*.70},${H*.73}`}
+              fill="none" stroke={FISSURE_COLOR} strokeWidth={1.5} opacity={.65}/>
+            <line x1={W*.50} y1={H*.27} x2={W*.50} y2={H*.73}
+              stroke={FISSURE_COLOR} strokeWidth={1.2} opacity={.60}/>
+            <ellipse cx={W*.27} cy={H*.24} rx={W*.11} ry={H*.09} fill="#fff" opacity=".50"/>
+            <ellipse cx={W*.73} cy={H*.24} rx={W*.11} ry={H*.09} fill="#fff" opacity=".50"/>
+            <ellipse cx={W*.27} cy={H*.76} rx={W*.11} ry={H*.09} fill="#fff" opacity=".40"/>
+            <ellipse cx={W*.73} cy={H*.76} rx={W*.11} ry={H*.09} fill="#fff" opacity=".40"/>
+          </>)}
+          {tooth.type === 'Premolar' && (<>
+            <line x1={W*.50} y1={H*.20} x2={W*.50} y2={H*.80}
+              stroke={FISSURE_COLOR} strokeWidth={1.2} opacity={.60}/>
+            <ellipse cx={W*.50} cy={H*.26} rx={W*.14} ry={H*.10} fill="#fff" opacity=".52"/>
+            <ellipse cx={W*.50} cy={H*.74} rx={W*.14} ry={H*.10} fill="#fff" opacity=".42"/>
+          </>)}
+          {tooth.type === 'Canine' && (
+            <ellipse cx={W*.50} cy={H*.30} rx={W*.16} ry={H*.11} fill="#fff" opacity=".50"/>
+          )}
+          {tooth.type === 'Incisor' && (
+            <ellipse cx={W*.50} cy={H*.32} rx={W*.28} ry={H*.10} fill="#fff" opacity=".52"/>
+          )}
+        </g>
+
+        <path d={path} fill={`url(#${grad3d})`}   stroke="none" style={{pointerEvents:'none'}}/>
+        <path d={path} fill={`url(#${gradEdge})`} stroke="none" style={{pointerEvents:'none'}}/>
+        <path d={path} fill="none" stroke={strokeColor} strokeWidth={strokeW} style={{pointerEvents:'none'}}/>
       </svg>
     );
   };
 
-  // Render arch with tooltip and color
+  // ── Realistic U-arch jaw renderer ──────────────────────────────────────
   const renderArch = (teethSlice, arch) => {
-    const archRadius = 200;
-    const archCenterX = 300;
-    const archCenterY = arch === 'upper' ? 320 : 260;
+    const cx  = 360;
+    const rxA = 255;                               // arch half-width (≈ outer gum)
+    const ryA = 290;                               // arch depth
+    const cyA = arch === 'upper' ? 450 : 538;      // molar baseline y
+
+    // Gum horseshoe: teeth sit right at the outer edge
+    const rxO = 285,  ryO = 328;                   // outer gum
+    const rxI = 218,  ryI = 248;                   // inner palate (close to teeth)
+
+    const gumPath = arch === 'upper'
+      ? `M ${cx-rxO},${cyA} A ${rxO},${ryO} 0 0,1 ${cx+rxO},${cyA} L ${cx+rxI},${cyA} A ${rxI},${ryI} 0 0,0 ${cx-rxI},${cyA} Z`
+      : `M ${cx-rxO},${cyA} A ${rxO},${ryO} 0 0,0 ${cx+rxO},${cyA} L ${cx+rxI},${cyA} A ${rxI},${ryI} 0 0,1 ${cx-rxI},${cyA} Z`;
+
+    const palatePath = arch === 'upper'
+      ? `M ${cx-rxI},${cyA} A ${rxI},${ryI} 0 0,1 ${cx+rxI},${cyA} Z`
+      : `M ${cx-rxI},${cyA} A ${rxI},${ryI} 0 0,0 ${cx+rxI},${cyA} Z`;
+
+    const gGumId = `gg-${arch}`;
+
+    // Single full fill – smooth radial gradient replaces 3 separate shapes
+    const fullFill = arch === 'upper'
+      ? `M ${cx-rxO},${cyA} A ${rxO},${ryO} 0 0,1 ${cx+rxO},${cyA} Z`
+      : `M ${cx-rxO},${cyA} A ${rxO},${ryO} 0 0,0 ${cx+rxO},${cyA} Z`;
+    const numTeeth  = teethSlice.length;
+
     return (
       <g>
-        {teethSlice.map((tooth, idx) => {
-          const angle =
-            arch === 'upper'
-              ? Math.PI * (1 - idx / 15)
-              : -Math.PI * (idx / 15);
-          const x = archCenterX + archRadius * Math.cos(angle);
-          const y = archCenterY + archRadius * Math.sin(angle);
+        <defs>
+          {/* Smooth single radial gradient: light centre → dark outer edge */}
+          <radialGradient id={gGumId} gradientUnits="userSpaceOnUse"
+            cx={cx} cy={cyA} r={rxO}>
+            <stop offset="0%"   stopColor="#d0a0a8" />
+            <stop offset="70%"  stopColor="#c09098" />
+            <stop offset="83%"  stopColor="#8a3848" />
+            <stop offset="92%"  stopColor="#6a2030" />
+            <stop offset="100%" stopColor="#481018" />
+          </radialGradient>
+        </defs>
 
+        {/* Single fill – no hard boundary between palate and gum */}
+        <path d={fullFill} fill={`url(#${gGumId})`} />
+
+        {teethSlice.map((tooth, idx) => {
+          const globalIdx  = arch === 'upper' ? idx : 16 + idx;
+          const fdiNum     = FDI_NUMBERS[globalIdx];
+          const W          = TOOTH_WIDTHS[tooth.type]  || 28;
+          const H          = TOOTH_HEIGHTS[tooth.type] || 36;
           const isSelected = selectedTooth && selectedTooth.id === tooth.id;
 
+          // Angle from π (left molar) → 0 (right molar)
+          const alpha = Math.PI * (1 - idx / (numTeeth - 1));
+
+          const tx = cx + rxA * Math.cos(alpha);
+          const ty = arch === 'upper'
+            ? cyA - ryA * Math.sin(alpha)
+            : cyA + ryA * Math.sin(alpha);
+
+          const outRad = Math.atan2(ty - cyA, tx - cx);
+          const rotDeg = outRad * 180 / Math.PI - 90;
+
+          // FDI number – just outside the outer gum boundary
+          const numOff = H / 2 + 32;
+          const numX   = tx + numOff * Math.cos(outRad);
+          const numY   = ty + numOff * Math.sin(outRad);
+
+          const numColor = isSelected ? '#e65100'
+            : (idx < 3 || idx > 12) ? '#1a3fa8'
+            : (idx < 5 || idx > 10) ? '#7030a0'
+            : (idx === 5 || idx === 10) ? '#c06000'
+            : '#007030';
+
           return (
-            <g
-              key={tooth.id}
-              transform={`translate(${x},${y})`}
-              style={{ cursor: 'pointer' }}
-              onClick={() => handleToothDetails(tooth)}
-              onMouseEnter={e => {
-                // Optional: highlight on hover
-                e.currentTarget.querySelector('ellipse,rect,path').setAttribute('stroke', '#1976d2');
-                e.currentTarget.querySelector('ellipse,rect,path').setAttribute('stroke-width', '3');
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.querySelector('ellipse,rect,path').setAttribute('stroke', '#000');
-                e.currentTarget.querySelector('ellipse,rect,path').setAttribute('stroke-width', '2');
-              }}
-            >
-              {toothSVG(tooth.type, tooth.status, tooth.id, isSelected)}
+            <g key={tooth.id}>
+              <text x={numX} y={numY}
+                textAnchor="middle" dominantBaseline="middle"
+                fontSize={11} fontWeight="bold" fontFamily="Arial, sans-serif"
+                fill={numColor}
+              >
+                {fdiNum}
+              </text>
+              <g
+                transform={`translate(${tx},${ty}) rotate(${rotDeg}) translate(${-W/2},${-H/2})`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleToothDetails(tooth)}
+              >
+                {toothSVG(tooth)}
+              </g>
             </g>
           );
         })}
@@ -387,7 +564,7 @@ Treatment: ${tooth.treatmentSummary || '-'}
     );
   };
 
-  // Surface selection
+  // Surface selection (for modal checkboxes)
   const handleSurfaceToggle = (surface) => {
     setTeeth((prev) =>
       prev.map((tooth) =>
@@ -400,6 +577,18 @@ Treatment: ${tooth.treatmentSummary || '-'}
               },
             }
           : tooth
+      )
+    );
+  };
+
+  // Called from within the tooth SVG: select tooth + toggle that surface
+  const handleSurfaceClickFn = (tooth, surface) => {
+    setSelectedTooth(tooth);
+    setTeeth((prev) =>
+      prev.map((t) =>
+        t.id === tooth.id
+          ? { ...t, surfaces: { ...t.surfaces, [surface]: !t.surfaces[surface] } }
+          : t
       )
     );
   };
@@ -1051,19 +1240,44 @@ Treatment: ${tooth.treatmentSummary || '-'}
         }}>
           <div style={{ width: '100%', overflowX: 'auto', display: 'flex', justifyContent: 'center', textAlign: 'center' }}>
             <svg
-              width="800"
-              height="700"
-              viewBox="-70 0 800 700"
+              width="720"
+              height="1100"
+              viewBox="0 0 720 1100"
               className="odontogram-svg odontogram"
-              style={{ display: 'block', background: '#fff' }}
+              style={{ display: 'block', background: '#f5f8fc', borderRadius: 14, border: '1px solid #d0d8e0' }}
             >
-              {/* Jaw labels */}
-              <text x="320" y="50" textAnchor="middle" fontSize="22" fill="#007bff" fontWeight="bold">Upper Jaw</text>
-              <text x="320" y="610" textAnchor="middle" fontSize="22" fill="#007bff" fontWeight="bold">Lower Jaw</text>
-              <text x="80" y="370" textAnchor="middle" fontSize="18" fill="#007bff" fontWeight="bold" transform="rotate(-90 80,370)">Left</text>
-              <text x="720" y="520" textAnchor="middle" fontSize="18" fill="#007bff" fontWeight="bold" transform="rotate(90 720,370)">Right</text>
+              {/* ── Jaw labels ── */}
+              <text x="360" y="22" textAnchor="middle" fontSize="14" fill="#1565c0" fontWeight="bold" fontFamily="Arial, sans-serif">Upper Jaw</text>
+              <text x="360" y="1075" textAnchor="middle" fontSize="14" fill="#1565c0" fontWeight="bold" fontFamily="Arial, sans-serif">Lower Jaw</text>
+
+              {/* ── Side labels ── */}
+              <text x="18"  y="494" textAnchor="middle" fontSize="12" fill="#1565c0" fontWeight="bold" fontFamily="Arial, sans-serif">Right</text>
+              <text x="702" y="494" textAnchor="middle" fontSize="12" fill="#1565c0" fontWeight="bold" fontFamily="Arial, sans-serif">Left</text>
+
+              {/* ── Midline ── */}
+              <line x1="360" y1="443" x2="360" y2="545" stroke="rgba(255,255,255,0.5)" strokeWidth={1.5} strokeDasharray="4,3" />
+
+              {/* ── Arches ── */}
               {renderArch(teeth.slice(0, 16), 'upper')}
               {renderArch(teeth.slice(16), 'lower')}
+
+              {/* ── Legend ── */}
+              {[
+                { color: '#f7f2e8', label: 'Healthy' },
+                { color: '#c8915a', label: 'Decayed' },
+                { color: '#ccd9e8', label: 'Filled' },
+                { color: '#ddd',    label: 'Missing', cross: true },
+                { color: SURFACE_MARKED, label: 'Surface marked' },
+              ].map((item, idx) => (
+                <g key={idx} transform={`translate(${10 + idx * 138}, 1085)`}>
+                  <rect x={0} y={0} width={13} height={13} fill={item.color} stroke="#455a64" strokeWidth={1} />
+                  {item.cross && (<>
+                    <line x1={2} y1={2} x2={11} y2={11} stroke="#e53935" strokeWidth={1.5} />
+                    <line x1={11} y1={2} x2={2} y2={11} stroke="#e53935" strokeWidth={1.5} />
+                  </>)}
+                  <text x={17} y={11} fontSize={10} fill="#333" fontFamily="Arial, sans-serif">{item.label}</text>
+                </g>
+              ))}
             </svg>
           </div>
           <div style={{ width: '100%', textAlign: 'center', marginTop: '16px' }}>
