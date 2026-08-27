@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Button, Typography, Grid, Container, Card, CardContent, Divider, Avatar,
-  AppBar, Toolbar, IconButton, MenuItem, Menu, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Select, InputLabel, FormControl, Stack, Snackbar, Alert, LinearProgress
+  AppBar, Toolbar, IconButton, MenuItem, Menu, Chip, Dialog, DialogContent, DialogActions,
+  TextField, Select, InputLabel, FormControl, Stack, Snackbar, Alert, LinearProgress,
+  Stepper, Step, StepLabel
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChatIcon from '@mui/icons-material/Chat';
 import TranslateIcon from '@mui/icons-material/Translate';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useHistory, Link } from 'react-router-dom';
 import axios from 'axios';
 import BASE_URL from '../../main/urls/urls';
@@ -37,6 +40,38 @@ const openingHours = [
   { day: "Sunday", hours: "Closed" },
 ];
 
+const FALLBACK_ABOUT_US = {
+  description: 'Dentic Clinic is dedicated to providing the highest quality dental care in a comfortable and friendly environment. Our experienced team uses the latest technology to ensure your smile is always at its best.',
+  highlights: [
+    'Experienced and caring dentists',
+    'Modern equipment & techniques',
+    'Flexible appointment scheduling',
+    'Family-friendly atmosphere',
+    'Emergency dental care',
+  ],
+};
+
+const FALLBACK_DOCTORS = [
+  { id: 1, fullName: 'Dr. Sarah Mitchell', specialization: 'General Dentist' },
+  { id: 2, fullName: 'Dr. James Chen',     specialization: 'Orthodontist' },
+  { id: 3, fullName: 'Dr. Emily Torres',   specialization: 'Periodontist' },
+  { id: 4, fullName: 'Dr. Ahmed Malik',    specialization: 'Endodontist' },
+];
+
+const FALLBACK_STAFF = [
+  { id: 1, fullName: 'Laura Adams',   role: 'Receptionist' },
+  { id: 2, fullName: 'Mark Johnson',  role: 'Assistant' },
+  { id: 3, fullName: 'Priya Sharma',  role: 'Admin' },
+  { id: 4, fullName: 'Carlos Rivera', role: 'Accountant' },
+];
+
+const FALLBACK_MEMBERSHIPS = [
+  { id: 1, membershipPlan: 'Basic',     paymentStatus: 'Active', validityPeriod: { startDate: '2025-01-01', endDate: '2025-12-31' }, renewalDate: '2025-12-01', lastPaymentAmount: 29.99,  benefits: ['1 Free Cleaning/year', '10% Off Treatments', 'Priority Booking'] },
+  { id: 2, membershipPlan: 'Premium',   paymentStatus: 'Active', validityPeriod: { startDate: '2025-01-01', endDate: '2025-12-31' }, renewalDate: '2025-12-01', lastPaymentAmount: 59.99,  benefits: ['2 Free Cleanings/year', '20% Off Treatments', 'Priority Booking', 'Free X-Ray'] },
+  { id: 3, membershipPlan: 'Family',    paymentStatus: 'Active', validityPeriod: { startDate: '2025-01-01', endDate: '2025-12-31' }, renewalDate: '2025-12-01', lastPaymentAmount: 99.99,  benefits: ['3 Free Cleanings/year', '30% Off All Treatments', 'VIP Booking', 'Free X-Rays', 'Emergency Support'] },
+  { id: 4, membershipPlan: 'Corporate', paymentStatus: 'Active', validityPeriod: { startDate: '2025-01-01', endDate: '2025-12-31' }, renewalDate: '2025-12-01', lastPaymentAmount: 199.99, benefits: ['Unlimited Cleanings', '40% Off All Treatments', 'Dedicated Coordinator', 'Free X-Rays', '24/7 Emergency Support', 'Whitening Included'] },
+];
+
 const languages = [
   { code: 'en', label: 'English', icon: '🇬🇧' },
   { code: 'fr', label: 'Français', icon: '🇫🇷' },
@@ -58,6 +93,20 @@ const HomePage = () => {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language);
   const [langMenuAnchor, setLangMenuAnchor] = useState(null);
+  const [moreMenuAnchor, setMoreMenuAnchor] = useState(null);
+
+  const morePages = [
+    { label: 'Blog',           href: '/blog' },
+    { label: 'Reviews',        href: '/reviews' },
+    { label: 'FAQ',            href: '/faq' },
+    { label: 'Before & After', href: '/before-after' },
+    { label: 'Financing',      href: '/financing' },
+    { label: 'Emergency',      href: '/emergency' },
+    { label: 'New Patient',    href: '/new-patient' },
+    { label: 'Careers',        href: '/careers' },
+    { label: 'AI Assistant',   href: '/ai' },
+    { label: 'Locations',      href: '/locations' },
+  ];
 
   const handleLangClick = (event) => setLangMenuAnchor(event.currentTarget);
   const handleLangClose = () => setLangMenuAnchor(null);
@@ -79,10 +128,7 @@ const HomePage = () => {
   const [loadingServices, setLoadingServices] = useState(true);
 
   // About Us state
-  const [aboutUs, setAboutUs] = useState({
-    description: '',
-    highlights: [],
-  });
+  const [aboutUs, setAboutUs] = useState(FALLBACK_ABOUT_US);
   const [loadingAbout, setLoadingAbout] = useState(true);
 
   // Contact info state
@@ -95,13 +141,13 @@ const HomePage = () => {
       phone: '',
     },
     openHours: [
-      { day: "Monday", hours: "" },
-      { day: "Tuesday", hours: "" },
-      { day: "Wednesday", hours: "" },
-      { day: "Thursday", hours: "" },
-      { day: "Friday", hours: "" },
-      { day: "Saturday", hours: "" },
-      { day: "Sunday", hours: "" },
+      { day: "Monday",    hours: "08:00 - 18:00" },
+      { day: "Tuesday",   hours: "08:00 - 18:00" },
+      { day: "Wednesday", hours: "08:00 - 18:00" },
+      { day: "Thursday",  hours: "08:00 - 18:00" },
+      { day: "Friday",    hours: "08:00 - 18:00" },
+      { day: "Saturday",  hours: "09:00 - 16:00" },
+      { day: "Sunday",    hours: "Closed" },
     ]
   });
   const [editingHours, setEditingHours] = useState(false);
@@ -109,7 +155,7 @@ const HomePage = () => {
   const [savingHours, setSavingHours] = useState(false);
 
   // Memberships state
-  const [memberships, setMemberships] = useState([]);
+  const [memberships, setMemberships] = useState(FALLBACK_MEMBERSHIPS);
   const [loadingMemberships, setLoadingMemberships] = useState(true);
 
   // Remove static doctors and staffs arrays
@@ -117,16 +163,21 @@ const HomePage = () => {
   // const staffs = [...]
 
   // Add state for doctors and staffs from backend
-  const [doctors, setDoctors] = useState([]);
-  const [staffs, setStaffs] = useState([]);
+  const [doctors, setDoctors] = useState(FALLBACK_DOCTORS);
+  const [staffs, setStaffs] = useState(FALLBACK_STAFF);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [loadingStaffs, setLoadingStaffs] = useState(true);
 
-  // Add these states at the top of HomePage component:
-  const [openPatientModal, setOpenPatientModal] = useState(false);
-  const [openAppointmentModal, setOpenAppointmentModal] = useState(false);
+  // Booking stepper state
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingStep, setBookingStep] = useState(0);
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
   const [patientForm, setPatientForm] = useState({
     fullName: '',
+    phone: '',
+    email: '',
+    dateOfBirth: '',
     medicalRecordNumber: '',
     insuranceId: '',
     bloodType: '',
@@ -135,7 +186,6 @@ const HomePage = () => {
     currentMedications: [],
     emergencyContact: { name: '', phone: '', relationship: '' }
   });
-  const [savedPatient, setSavedPatient] = useState(null);
   const [appointmentForm, setAppointmentForm] = useState({
     doctorId: '',
     clinicLocationId: '',
@@ -179,14 +229,11 @@ const HomePage = () => {
       setLoadingAbout(true);
       try {
         const res = await axios.get(BASE_URL + '/aboutus');
-        if (res.data && res.data.aboutUs) {
+        if (res.data && res.data.aboutUs && res.data.aboutUs.description) {
           setAboutUs(res.data.aboutUs);
         }
       } catch (e) {
-        setAboutUs({
-          description: '',
-          highlights: [],
-        });
+        setAboutUs(FALLBACK_ABOUT_US);
       }
       setLoadingAbout(false);
     };
@@ -220,13 +267,10 @@ const HomePage = () => {
       setLoadingMemberships(true);
       try {
         const res = await axios.get(BASE_URL + '/memberships');
-        if (Array.isArray(res.data)) {
-          setMemberships(res.data.slice(0, 4));
-        } else if (Array.isArray(res.data.memberships)) {
-          setMemberships(res.data.memberships.slice(0, 4));
-        }
+        const data = Array.isArray(res.data) ? res.data : (Array.isArray(res.data.memberships) ? res.data.memberships : []);
+        setMemberships(data.length > 0 ? data.slice(0, 4) : FALLBACK_MEMBERSHIPS);
       } catch (e) {
-        setMemberships([]);
+        setMemberships(FALLBACK_MEMBERSHIPS);
       }
       setLoadingMemberships(false);
     };
@@ -237,13 +281,10 @@ const HomePage = () => {
       setLoadingDoctors(true);
       try {
         const res = await axios.get(BASE_URL + '/doctors');
-        if (Array.isArray(res.data)) {
-          setDoctors(res.data.slice(0, 4));
-        } else if (Array.isArray(res.data.doctors)) {
-          setDoctors(res.data.doctors.slice(0, 4));
-        }
+        const data = Array.isArray(res.data) ? res.data : (Array.isArray(res.data.doctors) ? res.data.doctors : []);
+        setDoctors(data.length > 0 ? data.slice(0, 4) : FALLBACK_DOCTORS);
       } catch (e) {
-        setDoctors([]);
+        setDoctors(FALLBACK_DOCTORS);
       }
       setLoadingDoctors(false);
     };
@@ -254,30 +295,26 @@ const HomePage = () => {
       setLoadingStaffs(true);
       try {
         const res = await axios.get(BASE_URL + '/staff');
-        if (Array.isArray(res.data)) {
-          setStaffs(res.data.slice(0, 4));
-        } else if (Array.isArray(res.data.staffs)) {
-          setStaffs(res.data.staffs.slice(0, 4));
-        }
+        const data = Array.isArray(res.data) ? res.data : (Array.isArray(res.data.staffs) ? res.data.staffs : []);
+        setStaffs(data.length > 0 ? data.slice(0, 4) : FALLBACK_STAFF);
       } catch (e) {
-        setStaffs([]);
+        setStaffs(FALLBACK_STAFF);
       }
       setLoadingStaffs(false);
     };
     fetchStaffs();
   }, []);
 
-  // Fetch doctors and clinics for selects
   useEffect(() => {
-    if (openAppointmentModal) {
-      axios.get(BASE_URL + '/doctors').then(res => {
-        setDoctorsList(Array.isArray(res.data) ? res.data : res.data.doctors || []);
-      });
-      axios.get(BASE_URL + '/clinics').then(res => {
-        setClinicsList(Array.isArray(res.data) ? res.data : res.data.clinics || []);
-      });
+    if (bookingOpen) {
+      axios.get(BASE_URL + '/doctors')
+        .then(res => setDoctorsList(Array.isArray(res.data) ? res.data : (res.data.doctors || [])))
+        .catch(() => {});
+      axios.get(BASE_URL + '/clinics')
+        .then(res => setClinicsList(Array.isArray(res.data) ? res.data : (res.data.clinics || [])))
+        .catch(() => {});
     }
-  }, [openAppointmentModal]);
+  }, [bookingOpen]);
 
   const handleMenu = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
@@ -314,40 +351,29 @@ const HomePage = () => {
     setSavingHours(false);
   };
 
-  // Handler for Book Appointment button
   const handleBookVisit = () => {
-    setOpenPatientModal(true);
+    setPatientForm({ fullName: '', phone: '', email: '', dateOfBirth: '', medicalRecordNumber: '', insuranceId: '', bloodType: '', allergies: [], medicalHistory: [], currentMedications: [], emergencyContact: { name: '', phone: '', relationship: '' } });
+    setAppointmentForm({ doctorId: '', clinicLocationId: '', appointmentDate: '', startTime: '', endTime: '', status: 'Scheduled', appointmentType: 'In-Person', reasonForVisit: '', notes: '' });
+    setBookingStep(0);
+    setBookingSuccess(false);
+    setBookingOpen(true);
   };
 
-  // Save patient and go to appointment modal
-  const handleSavePatient = async () => {
-    try {
-      // Save patient to backend
-      const res = await axios.post(BASE_URL + '/patients', patientForm);
-      setSavedPatient(res.data);
-      setOpenPatientModal(false);
-      setOpenAppointmentModal(true);
-    } catch (e) {
-      setSnackbar({ open: true, message: 'Failed to save patient', severity: 'error' });
-    }
-  };
+  const handleBookingNext = () => setBookingStep(s => s + 1);
+  const handleBookingBack = () => setBookingStep(s => s - 1);
+  const handleBookingClose = () => { setBookingOpen(false); setBookingSuccess(false); setBookingStep(0); };
 
-  // Save appointment and return to home
-  const handleSaveAppointment = async () => {
+  const handleBookingSubmit = async () => {
+    setBookingSubmitting(true);
     try {
-      const payload = {
-        ...appointmentForm,
-        patientId: savedPatient.id,
-      };
-      await axios.post(BASE_URL + '/appointments', payload);
-      setOpenAppointmentModal(false);
-      setSnackbar({ open: true, message: 'Appointment created successfully!', severity: 'success' });
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1200);
+      const patRes = await axios.post(BASE_URL + '/patients', patientForm);
+      await axios.post(BASE_URL + '/appointments', { ...appointmentForm, patientId: patRes.data.id });
+      setBookingSuccess(true);
+      setSnackbar({ open: true, message: 'Appointment booked successfully!', severity: 'success' });
     } catch (e) {
-      setSnackbar({ open: true, message: 'Failed to create appointment', severity: 'error' });
+      setSnackbar({ open: true, message: 'Failed to book appointment. Please try again.', severity: 'error' });
     }
+    setBookingSubmitting(false);
   };
 
   // Chatbot handler
@@ -419,6 +445,28 @@ const HomePage = () => {
                 </Button>
               )
             )}
+            {/* More pages dropdown */}
+            <Button
+              color="inherit"
+              sx={{ fontWeight: 500, fontSize: 16, textTransform: 'none' }}
+              onClick={(e) => setMoreMenuAnchor(e.currentTarget)}
+            >
+              More ▾
+            </Button>
+            <Menu
+              anchorEl={moreMenuAnchor}
+              open={Boolean(moreMenuAnchor)}
+              onClose={() => setMoreMenuAnchor(null)}
+              PaperProps={{ sx: { mt: 1, borderRadius: 2, boxShadow: 4, minWidth: 180 } }}
+            >
+              {morePages.map((p) => (
+                <MenuItem key={p.href} onClick={() => setMoreMenuAnchor(null)} sx={{ p: 0 }}>
+                  <Link to={p.href} style={{ textDecoration: 'none', color: 'inherit', width: '100%', padding: '8px 16px', display: 'block' }}>
+                    {p.label}
+                  </Link>
+                </MenuItem>
+              ))}
+            </Menu>
             {/* Fancy Language ComboBox at end of menu */}
             <IconButton
               color="inherit"
@@ -668,11 +716,11 @@ const HomePage = () => {
           {(clinicSettings.openHours || []).map((item, idx) => (
             <Box key={item.day} sx={{ mb: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
               <Typography variant="subtitle1" fontWeight={600} sx={{ minWidth: 140, textAlign: 'right' }}>
-                {t(`home.day_${item.day.toLowerCase().replace(/[^a-z]/g, '')}`)}
+                {item.day}
               </Typography>
               <Chip
                 label={item.hours}
-                color={item.hours === t("home.closed") ? 'error' : 'primary'}
+                color={item.hours === 'Closed' ? 'error' : 'primary'}
                 variant="outlined"
                 sx={{
                   fontWeight: 600,
@@ -986,151 +1034,394 @@ const HomePage = () => {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: '#222', color: '#fff', py: 3, mt: 8 }}>
-        <Container maxWidth="md">
-          <Typography align="center" variant="body2">
-            &copy; {new Date().getFullYear()} Dentic Clinic. {t("home.rights")}
-          </Typography>
+      <Box sx={{ bgcolor: '#0d1b2a', color: '#c9d6df', mt: 8 }}>
+
+        {/* Top band */}
+        <Box sx={{ background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 60%, #42a5f5 100%)', py: 5 }}>
+          <Container maxWidth="lg">
+            <Grid container spacing={4} alignItems="center" justifyContent="space-between">
+              <Grid item xs={12} md={6}>
+                <Typography variant="h4" fontWeight={800} sx={{ color: '#fff', letterSpacing: 0.5, mb: 1 }}>
+                  🦷 DenticClinic
+                </Typography>
+                <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.85)', maxWidth: 420, lineHeight: 1.7 }}>
+                  Modern, compassionate dental care for the whole family. We combine cutting-edge technology with a gentle touch to keep your smile at its best.
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', mb: 1.5 }}>
+                  Ready to book your next visit?
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={handleBookVisit}
+                  sx={{ bgcolor: '#fff', color: '#1565c0', fontWeight: 700, px: 4, borderRadius: 3, fontSize: 15, '&:hover': { bgcolor: '#e3f2fd' } }}
+                >
+                  Book Appointment
+                </Button>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Main footer columns */}
+        <Container maxWidth="lg" sx={{ py: 6 }}>
+          <Grid container spacing={5}>
+
+            {/* Col 1 — Contact */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', mb: 2, letterSpacing: 0.5 }}>
+                Contact Us
+              </Typography>
+              {[
+                { icon: '📍', text: clinicSettings.system.address || '123 Smile Street, Happy City' },
+                { icon: '📞', text: clinicSettings.system.phone  || '+1 234 567 890' },
+                { icon: '✉️', text: clinicSettings.system.email  || 'info@denticclinic.com' },
+              ].map(({ icon, text }) => (
+                <Box key={text} sx={{ display: 'flex', gap: 1.5, mb: 1.5, alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: 16, lineHeight: 1.6 }}>{icon}</span>
+                  <Typography variant="body2" sx={{ color: '#a8bccf', lineHeight: 1.6 }}>{text}</Typography>
+                </Box>
+              ))}
+            </Grid>
+
+            {/* Col 2 — Quick Links */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', mb: 2, letterSpacing: 0.5 }}>
+                Quick Links
+              </Typography>
+              {[
+                { label: 'About Us',      href: '#about' },
+                { label: 'Our Services',  href: '#services' },
+                { label: 'Our Doctors',   href: '#doctors' },
+                { label: 'Memberships',   href: '#memberships' },
+                { label: 'Contact',       href: '#contact' },
+                { label: 'Patient Login', href: '/login' },
+              ].map(({ label, href }) => (
+                <Box key={label} sx={{ mb: 1 }}>
+                  <Link
+                    to={href.startsWith('/') ? href : undefined}
+                    href={href.startsWith('#') ? href : undefined}
+                    onClick={href.startsWith('#') ? () => { const el = document.querySelector(href); if (el) el.scrollIntoView({ behavior: 'smooth' }); } : undefined}
+                    style={{ color: '#a8bccf', textDecoration: 'none', fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <span style={{ color: '#42a5f5', fontSize: 12 }}>▶</span> {label}
+                  </Link>
+                </Box>
+              ))}
+            </Grid>
+
+            {/* Col 3 — Opening Hours */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', mb: 2, letterSpacing: 0.5 }}>
+                Opening Hours
+              </Typography>
+              {(clinicSettings.openHours || []).map(({ day, hours }) => (
+                <Box key={day} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#a8bccf' }}>{day}</Typography>
+                  <Typography variant="body2" sx={{ color: hours === 'Closed' ? '#ef9a9a' : '#81d4fa', fontWeight: 600 }}>{hours}</Typography>
+                </Box>
+              ))}
+            </Grid>
+
+            {/* Col 4 — Services */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#fff', mb: 2, letterSpacing: 0.5 }}>
+                Our Services
+              </Typography>
+              {[
+                'General Dentistry',
+                'Cosmetic Dentistry',
+                'Dental Implants',
+                'Orthodontics',
+                'Pediatric Dentistry',
+                'Emergency Care',
+              ].map(s => (
+                <Box key={s} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#42a5f5', flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ color: '#a8bccf' }}>{s}</Typography>
+                </Box>
+              ))}
+            </Grid>
+
+          </Grid>
         </Container>
+
+        {/* Bottom bar */}
+        <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.08)', py: 2.5 }}>
+          <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: '#6b8a9e', textAlign: { xs: 'center', sm: 'left' } }}>
+                &copy; {new Date().getFullYear()} DenticClinic. All rights reserved.
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {['Privacy Policy', 'Terms of Service', 'Accessibility'].map(label => (
+                  <Typography key={label} variant="body2" sx={{ color: '#6b8a9e', cursor: 'pointer', '&:hover': { color: '#42a5f5' }, transition: 'color 0.2s' }}>
+                    {label}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </Container>
+        </Box>
+
       </Box>
 
-      {/* Patient Modal JSX */}
-      <Dialog open={openPatientModal} onClose={() => setOpenPatientModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Patient</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="Full Name" value={patientForm.fullName} onChange={e => setPatientForm(f => ({ ...f, fullName: e.target.value }))} fullWidth required />
-            <TextField label="Medical Record Number" value={patientForm.medicalRecordNumber} onChange={e => setPatientForm(f => ({ ...f, medicalRecordNumber: e.target.value }))} fullWidth />
-            <TextField label="Insurance ID" value={patientForm.insuranceId} onChange={e => setPatientForm(f => ({ ...f, insuranceId: e.target.value }))} fullWidth />
-            <FormControl fullWidth>
-              <InputLabel>Blood Type</InputLabel>
-              <Select
-                label="Blood Type"
-                value={patientForm.bloodType}
-                onChange={e => setPatientForm(f => ({ ...f, bloodType: e.target.value }))}
+      {/* Booking Stepper Dialog */}
+      <Dialog
+        open={bookingOpen}
+        onClose={handleBookingClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}
+      >
+        {bookingSuccess ? (
+          /* ── Success screen ── */
+          <Box sx={{ textAlign: 'center', py: 10, px: 4 }}>
+            <CheckCircleIcon sx={{ fontSize: 90, color: '#4caf50', mb: 2 }} />
+            <Typography variant="h4" fontWeight={700} sx={{ color: '#1976d2', mb: 1 }}>
+              Appointment Booked!
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 5 }}>
+              We will confirm your appointment shortly. Check your email for details.
+            </Typography>
+            <Button variant="contained" color="primary" size="large" onClick={handleBookingClose} sx={{ px: 6, borderRadius: 3, fontWeight: 700 }}>
+              Done
+            </Button>
+          </Box>
+        ) : (
+          <>
+            {/* Gradient header + stepper */}
+            <Box sx={{ background: 'linear-gradient(100deg, #1565c0 0%, #1976d2 60%, #42a5f5 100%)', px: 3, pt: 3, pb: 2.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5 }}>
+                <Typography variant="h5" fontWeight={800} sx={{ color: '#fff', letterSpacing: 0.5 }}>
+                  🦷 Book an Appointment
+                </Typography>
+                <IconButton onClick={handleBookingClose} size="small" sx={{ color: '#fff', bgcolor: 'rgba(255,255,255,0.15)', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}>
+                  <span style={{ fontSize: 20, lineHeight: 1, fontWeight: 700 }}>&times;</span>
+                </IconButton>
+              </Box>
+              <Stepper
+                activeStep={bookingStep}
+                alternativeLabel
+                sx={{
+                  '& .MuiStepLabel-label':           { color: 'rgba(255,255,255,0.55)', fontSize: 12, mt: '4px' },
+                  '& .MuiStepLabel-label.Mui-active':    { color: '#fff', fontWeight: 700 },
+                  '& .MuiStepLabel-label.Mui-completed': { color: 'rgba(255,255,255,0.85)' },
+                  '& .MuiStepIcon-root':              { color: 'rgba(255,255,255,0.2)' },
+                  '& .MuiStepIcon-root.Mui-active':   { color: '#fff' },
+                  '& .MuiStepIcon-root.Mui-completed':{ color: '#81c784' },
+                  '& .MuiStepIcon-text':              { fill: '#1565c0' },
+                  '& .MuiStepConnector-line':         { borderColor: 'rgba(255,255,255,0.2)' },
+                }}
               >
-                {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(bt => (
-                  <MenuItem key={bt} value={bt}>{bt}</MenuItem>
+                {['Personal Info', 'Medical Details', 'Appointment', 'Confirm'].map(label => (
+                  <Step key={label}><StepLabel>{label}</StepLabel></Step>
                 ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Allergies (comma separated)"
-              value={patientForm.allergies.join(', ')}
-              onChange={e => setPatientForm(f => ({ ...f, allergies: e.target.value.split(',').map(a => a.trim()).filter(Boolean) }))}
-              fullWidth
-            />
-            <TextField
-              label="Emergency Contact Name"
-              value={patientForm.emergencyContact.name}
-              onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, name: e.target.value } }))}
-              fullWidth
-            />
-            <TextField
-              label="Emergency Contact Phone"
-              value={patientForm.emergencyContact.phone}
-              onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, phone: e.target.value } }))}
-              fullWidth
-            />
-            <TextField
-              label="Emergency Contact Relationship"
-              value={patientForm.emergencyContact.relationship}
-              onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, relationship: e.target.value } }))}
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenPatientModal(false)} color="primary" variant="outlined">Cancel</Button>
-          <Button onClick={handleSavePatient} color="primary" variant="contained">Next</Button>
-        </DialogActions>
-      </Dialog>
+              </Stepper>
+            </Box>
 
-      {/* Appointment Modal JSX */}
-      <Dialog open={openAppointmentModal} onClose={() => setOpenAppointmentModal(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Book Appointment</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <FormControl fullWidth>
-              <InputLabel>Doctor</InputLabel>
-              <Select
-                id="appointment-doctor-select" // Add this line
-                label="Doctor"
-                value={appointmentForm.doctorId}
-                onChange={e => setAppointmentForm(f => ({ ...f, doctorId: e.target.value }))}
-              >
-                {doctorsList.map(doc => (
-                  <MenuItem key={doc.id} value={doc.id}>{doc.fullName}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Clinic Location</InputLabel>
-              <Select
-                label="Clinic Location"
-                value={appointmentForm.clinicLocationId}
-                onChange={e => setAppointmentForm(f => ({ ...f, clinicLocationId: e.target.value }))}
-              >
-                {clinicsList.map(clinic => (
-                  <MenuItem key={clinic.id} value={clinic.id}>{clinic.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Appointment Date"
-              type="date"
-              value={appointmentForm.appointmentDate}
-              onChange={e => setAppointmentForm(f => ({ ...f, appointmentDate: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              label="Start Time"
-              type="time"
-              value={appointmentForm.startTime}
-              onChange={e => setAppointmentForm(f => ({ ...f, startTime: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              label="End Time"
-              type="time"
-              value={appointmentForm.endTime}
-              onChange={e => setAppointmentForm(f => ({ ...f, endTime: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <FormControl fullWidth>
-              <InputLabel>Type</InputLabel>
-              <Select
-                label="Type"
-                value={appointmentForm.appointmentType}
-                onChange={e => setAppointmentForm(f => ({ ...f, appointmentType: e.target.value }))}
-              >
-                <MenuItem value="In-Person">In-Person</MenuItem>
-                <MenuItem value="Telemedicine">Telemedicine</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              label="Reason for Visit"
-              value={appointmentForm.reasonForVisit}
-              onChange={e => setAppointmentForm(f => ({ ...f, reasonForVisit: e.target.value }))}
-              fullWidth
-            />
-            <TextField
-              label="Notes"
-              value={appointmentForm.notes}
-              onChange={e => setAppointmentForm(f => ({ ...f, notes: e.target.value }))}
-              fullWidth
-              multiline
-              rows={2}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAppointmentModal(false)} color="primary" variant="outlined">Cancel</Button>
-          <Button onClick={handleSaveAppointment} color="primary" variant="contained">Book</Button>
-        </DialogActions>
+            <DialogContent sx={{ p: { xs: 3, md: 4 }, minHeight: 360 }}>
+
+              {/* ── Step 0: Personal Info ── */}
+              {bookingStep === 0 && (
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1976d2', mb: 1 }}>👤 Your Information</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Fields marked * are required to proceed.
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Full Name *" value={patientForm.fullName} onChange={e => setPatientForm(f => ({ ...f, fullName: e.target.value }))} fullWidth autoFocus />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Phone Number" value={patientForm.phone} onChange={e => setPatientForm(f => ({ ...f, phone: e.target.value }))} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Email Address" value={patientForm.email} onChange={e => setPatientForm(f => ({ ...f, email: e.target.value }))} fullWidth type="email" />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Date of Birth" value={patientForm.dateOfBirth} onChange={e => setPatientForm(f => ({ ...f, dateOfBirth: e.target.value }))} fullWidth type="date" InputLabelProps={{ shrink: true }} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Medical Record Number" value={patientForm.medicalRecordNumber} onChange={e => setPatientForm(f => ({ ...f, medicalRecordNumber: e.target.value }))} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Insurance ID" value={patientForm.insuranceId} onChange={e => setPatientForm(f => ({ ...f, insuranceId: e.target.value }))} fullWidth />
+                  </Grid>
+                </Grid>
+              )}
+
+              {/* ── Step 1: Medical Details ── */}
+              {bookingStep === 1 && (
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1976d2', mb: 1 }}>🏥 Medical Information</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>All fields are optional — skip if not applicable.</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Blood Type</InputLabel>
+                      <Select label="Blood Type" value={patientForm.bloodType} onChange={e => setPatientForm(f => ({ ...f, bloodType: e.target.value }))}>
+                        {['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(bt => <MenuItem key={bt} value={bt}>{bt}</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Allergies (comma separated)"
+                      value={patientForm.allergies.join(', ')}
+                      onChange={e => setPatientForm(f => ({ ...f, allergies: e.target.value.split(',').map(a => a.trim()).filter(Boolean) }))}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#555', mt: 1, mb: 1 }}>Emergency Contact</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField label="Contact Name" value={patientForm.emergencyContact.name} onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, name: e.target.value } }))} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField label="Contact Phone" value={patientForm.emergencyContact.phone} onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, phone: e.target.value } }))} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField label="Relationship" value={patientForm.emergencyContact.relationship} onChange={e => setPatientForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, relationship: e.target.value } }))} fullWidth />
+                  </Grid>
+                </Grid>
+              )}
+
+              {/* ── Step 2: Appointment Details ── */}
+              {bookingStep === 2 && (
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1976d2', mb: 1 }}>📅 Appointment Details</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Choose your doctor, preferred date, and time.</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Select Doctor *</InputLabel>
+                      <Select label="Select Doctor *" value={appointmentForm.doctorId} onChange={e => setAppointmentForm(f => ({ ...f, doctorId: e.target.value }))}>
+                        {(doctorsList.length > 0 ? doctorsList : FALLBACK_DOCTORS).map(doc => (
+                          <MenuItem key={doc.id} value={doc.id}>
+                            {doc.fullName}{doc.specialization ? ` — ${doc.specialization}` : ''}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Appointment Type *</InputLabel>
+                      <Select label="Appointment Type *" value={appointmentForm.appointmentType} onChange={e => setAppointmentForm(f => ({ ...f, appointmentType: e.target.value }))}>
+                        <MenuItem value="In-Person">🏥 In-Person</MenuItem>
+                        <MenuItem value="Telemedicine">💻 Telemedicine</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      label="Appointment Date *"
+                      type="date"
+                      value={appointmentForm.appointmentDate}
+                      onChange={e => setAppointmentForm(f => ({ ...f, appointmentDate: e.target.value }))}
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField label="Start Time *" type="time" value={appointmentForm.startTime} onChange={e => setAppointmentForm(f => ({ ...f, startTime: e.target.value }))} InputLabelProps={{ shrink: true }} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField label="End Time" type="time" value={appointmentForm.endTime} onChange={e => setAppointmentForm(f => ({ ...f, endTime: e.target.value }))} InputLabelProps={{ shrink: true }} fullWidth />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Reason for Visit" value={appointmentForm.reasonForVisit} onChange={e => setAppointmentForm(f => ({ ...f, reasonForVisit: e.target.value }))} fullWidth multiline rows={2} />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField label="Additional Notes" value={appointmentForm.notes} onChange={e => setAppointmentForm(f => ({ ...f, notes: e.target.value }))} fullWidth multiline rows={2} />
+                  </Grid>
+                </Grid>
+              )}
+
+              {/* ── Step 3: Review & Confirm ── */}
+              {bookingStep === 3 && (
+                <Box>
+                  <Typography variant="h6" fontWeight={600} sx={{ color: '#1976d2', mb: 3 }}>✅ Review your Booking</Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 2.5, borderRadius: 3, borderColor: '#90caf9', height: '100%' }}>
+                        <Typography variant="subtitle2" sx={{ color: '#1976d2', fontWeight: 700, mb: 1.5, fontSize: 14 }}>Patient Details</Typography>
+                        {[
+                          ['Name',       patientForm.fullName],
+                          ['Phone',      patientForm.phone],
+                          ['Email',      patientForm.email],
+                          ['DOB',        patientForm.dateOfBirth],
+                          ['Blood Type', patientForm.bloodType],
+                          ['Allergies',  patientForm.allergies.join(', ')],
+                        ].filter(([, v]) => v).map(([k, v]) => (
+                          <Typography key={k} variant="body2" sx={{ mb: 0.5 }}><b>{k}:</b> {v}</Typography>
+                        ))}
+                      </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Card variant="outlined" sx={{ p: 2.5, borderRadius: 3, borderColor: '#90caf9', height: '100%' }}>
+                        <Typography variant="subtitle2" sx={{ color: '#1976d2', fontWeight: 700, mb: 1.5, fontSize: 14 }}>Appointment</Typography>
+                        {[
+                          ['Doctor', (doctorsList.length > 0 ? doctorsList : FALLBACK_DOCTORS).find(d => String(d.id) === String(appointmentForm.doctorId))?.fullName],
+                          ['Type',   appointmentForm.appointmentType],
+                          ['Date',   appointmentForm.appointmentDate],
+                          ['Time',   appointmentForm.startTime ? `${appointmentForm.startTime}${appointmentForm.endTime ? ' → ' + appointmentForm.endTime : ''}` : null],
+                          ['Reason', appointmentForm.reasonForVisit],
+                          ['Notes',  appointmentForm.notes],
+                        ].filter(([, v]) => v).map(([k, v]) => (
+                          <Typography key={k} variant="body2" sx={{ mb: 0.5 }}><b>{k}:</b> {v}</Typography>
+                        ))}
+                      </Card>
+                    </Grid>
+                  </Grid>
+                  <Alert severity="info" sx={{ mt: 2.5, borderRadius: 2 }}>
+                    By confirming, you agree to our booking policy. A confirmation will be sent to your email or phone.
+                  </Alert>
+                </Box>
+              )}
+
+            </DialogContent>
+
+            <DialogActions sx={{ px: { xs: 3, md: 4 }, pb: 3, pt: 1, justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button onClick={handleBookingClose} variant="text" color="inherit" sx={{ color: '#888' }}>Cancel</Button>
+                {bookingStep > 0 && (
+                  <Button onClick={handleBookingBack} variant="outlined" color="primary" sx={{ borderRadius: 2 }}>← Back</Button>
+                )}
+              </Box>
+              <Box>
+                {bookingStep < 3 ? (
+                  <Button
+                    onClick={handleBookingNext}
+                    variant="contained"
+                    color="primary"
+                    disabled={bookingStep === 0 && !patientForm.fullName.trim()}
+                    sx={{ px: 4, borderRadius: 2, fontWeight: 700 }}
+                  >
+                    Next →
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleBookingSubmit}
+                    variant="contained"
+                    disabled={bookingSubmitting || !appointmentForm.doctorId || !appointmentForm.appointmentDate || !appointmentForm.startTime}
+                    sx={{ px: 5, borderRadius: 2, fontWeight: 700, bgcolor: '#2e7d32', '&:hover': { bgcolor: '#1b5e20' }, color: '#fff' }}
+                  >
+                    {bookingSubmitting ? 'Booking…' : '✓ Confirm Booking'}
+                  </Button>
+                )}
+              </Box>
+            </DialogActions>
+            {bookingSubmitting && <LinearProgress />}
+          </>
+        )}
       </Dialog>
 
       {/* Chatbot Box (not modal) */}

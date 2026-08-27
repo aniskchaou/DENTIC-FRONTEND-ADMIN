@@ -38,6 +38,11 @@ const TreatmentPlan = sequelize.define("treatment_plan", {
     type: DataTypes.DATE,
     defaultValue: Sequelize.NOW,
   },
+  // Extended fields
+  alternatives: { type: DataTypes.TEXT, allowNull: true, comment: "Comma-separated or JSON alternative treatments" },
+  priority: { type: DataTypes.ENUM("low", "normal", "high", "urgent"), defaultValue: "normal" },
+  estimatedCost: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
+  notes: { type: DataTypes.TEXT, allowNull: true },
 });
 
 module.exports = TreatmentPlan;

@@ -102,6 +102,7 @@ const Register = () => {
             <Typography variant="body2" sx={{ mb: 1 }}>Role</Typography>
             <select name="role" value={user.role} onChange={handleInputChange} style={{ width: '100%', padding: '12px', borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}>
               <option value="">Select role</option>
+              <option value="patient">Patient</option>
               <option value="doctor">Doctor</option>
               <option value="accountant">Accountant</option>
               <option value="staff">Staff</option>

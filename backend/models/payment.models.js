@@ -66,6 +66,10 @@ const Payment = sequelize.define("payment", {
       allowNull: true,
       comment: "Optional additional details related to the payment",
     },
+    isReconciled: { type: DataTypes.BOOLEAN, defaultValue: false },
+    reconciledAt: { type: DataTypes.DATE, allowNull: true },
+    reconciledBy: { type: DataTypes.INTEGER, allowNull: true },
+    reconciliationNote: { type: DataTypes.TEXT, allowNull: true },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: Sequelize.NOW,

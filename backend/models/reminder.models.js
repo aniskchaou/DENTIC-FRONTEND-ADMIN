@@ -30,6 +30,11 @@ const Reminder = sequelize.define('Reminder', {
     allowNull: true,
     comment: 'Associated appointment ID'
   },
+  reminderType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: 'e.g. Recall, Appointment, Follow-up'
+  },
   status: {
     type: DataTypes.ENUM('pending', 'sent', 'failed'),
     defaultValue: 'pending',

@@ -33,7 +33,12 @@ const Procedure = sequelize.define("procedure", {
     type: DataTypes.ENUM("Scheduled", "Completed", "Canceled"),
     defaultValue: "Scheduled",
     comment: "Status of the procedure",
-  }
+  },
+  priority: { type: DataTypes.ENUM("low", "normal", "high", "urgent"), defaultValue: "normal" },
+  cost: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
+  patientId: { type: DataTypes.INTEGER, allowNull: true },
+  doctorId: { type: DataTypes.INTEGER, allowNull: true },
+  toothNumber: { type: DataTypes.INTEGER, allowNull: true },
 });
 
 module.exports = Procedure;

@@ -294,11 +294,28 @@ exports.profileMatcher = async (req, res) => {
  */
 exports.voiceNotes = async (req, res) => {
   try {
-    // AI logic (demo)
-    const notes = "Patient presents with mild pain in lower molar. Recommend X-ray and possible filling.";
-    res.send({ notes });
+    if (!req.file) return res.status(400).json({ message: "No audio file provided. Send file as multipart/form-data field 'audio'." });
+    const { Readable } = require("stream");
+    const stream = Readable.from(req.file.buffer);
+    stream.path = req.file.originalname || "audio.webm"; // Whisper needs a filename with extension
+    const openaiClient = new (require("openai"))({ apiKey: OPENAI_API_KEY });
+    const transcription = await openaiClient.audio.transcriptions.create({
+      model: "whisper-1",
+      file: stream,
+      response_format: "text",
+    });
+    // Format the raw transcription into a structured clinical note
+    const structured = await openaiClient.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a dental clinical note assistant. Convert the raw voice transcription into a structured clinical note using SOAP format. Be concise and professional." },
+        { role: "user", content: transcription },
+      ],
+      max_tokens: 600,
+    });
+    res.send({ transcription, notes: structured.choices[0].message.content });
   } catch (err) {
-    res.status(500).send({ message: "AI error", error: err.toString() });
+    res.status(500).send({ message: "Voice transcription error", error: err.toString() });
   }
 };
 

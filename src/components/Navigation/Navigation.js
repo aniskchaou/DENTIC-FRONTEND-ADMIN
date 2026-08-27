@@ -39,25 +39,59 @@ function getCurrentUser() {
 }
 
 const Navigation = ({ connected, darkMode }) => {
-  // Helper: get allowed menu keys by role
+  // Helper: get allowed menu keys by role. 'ALL' = unrestricted. 'SECTION_ALL' = all items in sections allowed via allowedRoles.
   const roleMenuMap = {
-    ADMIN: 'ALL',
+    ADMIN: 'SECTION_ALL',     // sees all clinic sections (ADMIN added to their allowedRoles)
+    SUPERADMIN: [
+      'dashboard',
+      'superadmin/dashboard', 'superadmin/clinics', 'superadmin/users',
+      'superadmin/plans', 'superadmin/coupons', 'superadmin/refunds',
+      'superadmin/invoices', 'superadmin/platform', 'superadmin/audit-logs',
+      'superadmin/support-tickets', 'superadmin/notification-templates',
+    ],
+    CLINIC_OWNER: 'SECTION_ALL',
     DOCTOR: [
-      'dashboard', 'Odontogram', 'rendezvous', 'quick-test', 'certificate', 'medicaments', 'medicament-category', 'medicament-manufacture', 'prescription', 'certificates', 'analytics', 'procedure', 'operation', 'diagnosis', 'dental-imaging', 'insurance', 'telemedicine', 'treatment-plan'
+      'dashboard', 'Odontogram', 'rendezvous', 'quick-test',
+      'patient', 'messages', 'certificate', 'medicaments', 'medicament-category', 'medicament-manufacture', 'prescription',
+      'procedure', 'operation', 'diagnosis', 'dental-imaging', 'insurance', 'telemedicine', 'treatment-plan', 'dicom-viewer',
+      'doctor/clinical-notes', 'doctor/periodontal-chart', 'doctor/clinical-referrals', 'doctor/patient-timeline', 'doctor/ai-hub',
+      'clinic/recalls', 'treatment-coord/case-acceptance', 'treatment-coord/pipeline',
+    ],
+    DENTAL_ASSISTANT: [
+      'dashboard', 'rendezvous', 'patient', 'messages',
+      'dental-imaging', 'dicom-viewer',
+      'doctor/patient-timeline',
+      'dental/vitals',
     ],
     STAFF: [
-      'dashboard', 'rendezvous', 'quick-test', 'patient'
+      'dashboard', 'rendezvous', 'quick-test', 'patient', 'messages',
+      'payment', 'invoice', 'billing',
+      'receptionist/check-in', 'clinic/waitlist',
+      'receptionist/patient-forms', 'receptionist/admin-documents',
+      'receptionist/communications', 'receptionist/receipts',
     ],
     TECHNICAL: [
-      'dashboard', 'inventory-item', 'equipment-maintenance'
+      'dashboard', 'inventory-item', 'equipment-maintenance',
     ],
     ACCOUNTANT: [
-      'dashboard', 'payment', 'expense', 'billing', 'insurance'
+      'dashboard', 'payment', 'expense', 'billing', 'invoice', 'insurance',
+      'sale-analytics', 'clinic/outstanding', 'clinic/patient-refunds',
+      'accountant/financial-reports', 'accountant/reconciliation', 'accountant/payment-methods',
+      'insurance/claims', 'insurance/ai-hub',
+    ],
+    INSURANCE_COORD: [
+      'dashboard', 'insurance', 'insurance/claims', 'insurance/ai-hub',
+    ],
+    TREATMENT_COORD: [
+      'dashboard', 'treatment-plan', 'clinic/recalls', 'messages',
+      'treatment-coord/case-acceptance', 'treatment-coord/pipeline', 'treatment-coord/ai-hub',
     ],
     PATIENT: [
-      'dashboard',
-      'messages'
-    ]
+      'dashboard', 'messages',
+      'patient/my-appointments', 'patient/my-invoices',
+      'patient/education', 'patient/ai-assistant',
+      'patient/payments', 'patient/prescriptions',
+    ],
   };
 
   // Helper: flatten menu items to keys for filtering
@@ -69,20 +103,25 @@ const Navigation = ({ connected, darkMode }) => {
 
   function filterMenuByRole(menu, role) {
     if (roleMenuMap[role] === 'ALL') return menu;
-    const allowed = roleMenuMap[role] || [];
+    const allowed = roleMenuMap[role];
+    if (!allowed) return [];
     return menu
-      .map(section => ({
-        ...section,
-        items: section.items
-          .map(item => {
-            if (item.dropdown) {
-              const filteredChildren = item.children.filter(child => allowed.includes(getMenuKey(child)));
-              return filteredChildren.length > 0 ? { ...item, children: filteredChildren } : null;
-            }
-            return allowed.includes(getMenuKey(item)) ? item : null;
-          })
-          .filter(Boolean)
-      }))
+      .filter(section => !section.allowedRoles || section.allowedRoles.includes(role))
+      .map(section => {
+        if (allowed === 'SECTION_ALL') return section;
+        return {
+          ...section,
+          items: section.items
+            .map(item => {
+              if (item.dropdown) {
+                const filteredChildren = item.children.filter(child => allowed.includes(getMenuKey(child)));
+                return filteredChildren.length > 0 ? { ...item, children: filteredChildren } : null;
+              }
+              return allowed.includes(getMenuKey(item)) ? item : null;
+            })
+            .filter(Boolean)
+        };
+      })
       .filter(section => section.items.length > 0);
   }
   // Confirmation modal state for web_front
@@ -170,6 +209,7 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: "CMS",
+      allowedRoles: ['CLINIC_OWNER', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -185,6 +225,7 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: t("nav.analytics"),
+      allowedRoles: ['CLINIC_OWNER', 'ACCOUNTANT', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -199,6 +240,7 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: t("nav.clinic"),
+      allowedRoles: ['CLINIC_OWNER', 'DOCTOR', 'TREATMENT_COORD', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -217,6 +259,7 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: t("nav.diagnostics"),
+      allowedRoles: ['CLINIC_OWNER', 'DOCTOR', 'DENTAL_ASSISTANT', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -228,11 +271,20 @@ const Navigation = ({ connected, darkMode }) => {
             { to: "/diagnosis", label: t("nav.diagnosis"), icon: "fa-diagnoses" },
             { to: "/dental-imaging", label: t("nav.dental_imaging"), icon: "fa-x-ray" }
           ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-heartbeat",
+          label: "Patient Vitals",
+          children: [
+            { to: "/dental/vitals", label: "Record Vitals", icon: "fa-heartbeat" }
+          ]
         }
       ]
     },
     {
       section: t("nav.records"),
+      allowedRoles: ['CLINIC_OWNER', 'DOCTOR', 'ACCOUNTANT', 'INSURANCE_COORD', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -247,6 +299,7 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: t("nav.inventory"),
+      allowedRoles: ['CLINIC_OWNER', 'TECHNICAL', 'ADMIN'],
       items: [
         {
           dropdown: true,
@@ -261,21 +314,287 @@ const Navigation = ({ connected, darkMode }) => {
     },
     {
       section: "Marketing",
+      allowedRoles: ['CLINIC_OWNER', 'ADMIN'],
       items: [
         { to: "/marketing", icon: "fa-bullhorn", label: "Marketing" }
       ]
     },
     {
       section: "Dicom Viewer",
+      allowedRoles: ['CLINIC_OWNER', 'DOCTOR', 'DENTAL_ASSISTANT', 'ADMIN'],
       items: [
         { to: "/dicom-viewer", icon: "fa-x-ray", label: "Dicom Viewer" }
       ]
     },
     {
       section: t("nav.settings"),
+      allowedRoles: ['CLINIC_OWNER', 'ADMIN'],
       items: [
         { to: "/configuration", icon: "fa-cogs", label: t("nav.settings") },
         { to: "/help", icon: "fa-question-circle", label: t("nav.help") }
+      ]
+    },
+    {
+      section: "Super Admin",
+      allowedRoles: ['SUPERADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-shield",
+          label: "Super Admin",
+          children: [
+            { to: "/superadmin/dashboard", label: "SA Dashboard", icon: "fa-tachometer" },
+            { to: "/superadmin/clinics", label: "Clinic Management", icon: "fa-hospital" },
+            { to: "/superadmin/users", label: "User Management", icon: "fa-users-cog" },
+            { to: "/superadmin/plans", label: "Subscription Plans", icon: "fa-layer-group" },
+            { to: "/superadmin/coupons", label: "Coupons", icon: "fa-tag" },
+            { to: "/superadmin/refunds", label: "Refunds", icon: "fa-undo" },
+            { to: "/superadmin/invoices", label: "SaaS Invoices", icon: "fa-file-invoice-dollar" },
+            { to: "/superadmin/platform", label: "Platform Settings", icon: "fa-sliders-h" },
+            { to: "/superadmin/audit-logs", label: "Audit Logs", icon: "fa-history" },
+            { to: "/superadmin/support-tickets", label: "Support Tickets", icon: "fa-life-ring" },
+            { to: "/superadmin/notification-templates", label: "Notification Templates", icon: "fa-bell" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Clinic Owner",
+      allowedRoles: ['CLINIC_OWNER', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-building",
+          label: "Clinic Setup",
+          children: [
+            { to: "/clinic/locations", label: "Locations & Branding", icon: "fa-map-marker" },
+            { to: "/clinic/holidays", label: "Holidays & Closures", icon: "fa-calendar-times" },
+            { to: "/clinic/appointment-rules", label: "Appointment Rules", icon: "fa-sliders" },
+            { to: "/clinic/appointment-types", label: "Appointment Types", icon: "fa-tags" },
+            { to: "/clinic/rooms", label: "Rooms & Chairs", icon: "fa-door-open" },
+            { to: "/clinic/employee-invites", label: "Invite Employees", icon: "fa-envelope" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-stethoscope",
+          label: "Operations",
+          children: [
+            { to: "/clinic/operational-dashboard", label: "Operational Dashboard", icon: "fa-tachometer-alt" },
+            { to: "/clinic/waitlist", label: "Waitlist", icon: "fa-list-ol" },
+            { to: "/clinic/recalls", label: "Recall Management", icon: "fa-sync-alt" },
+            { to: "/clinic/patient-refunds", label: "Patient Refunds", icon: "fa-undo-alt" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-chart-bar",
+          label: "Analytics & Finance",
+          children: [
+            { to: "/clinic/analytics", label: "Business Analytics", icon: "fa-chart-line" },
+            { to: "/clinic/outstanding", label: "Outstanding Balances", icon: "fa-exclamation-circle" },
+            { to: "/clinic/pricing", label: "Treatment Pricing", icon: "fa-dollar-sign" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-robot",
+          label: "AI Configuration",
+          children: [
+            { to: "/clinic/ai-config", label: "AI Settings & Usage", icon: "fa-brain" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Dentist / Doctor",
+      allowedRoles: ['CLINIC_OWNER', 'DOCTOR', 'DENTAL_ASSISTANT', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-stethoscope",
+          label: "Clinical Tools",
+          children: [
+            { to: "/doctor/clinical-notes", label: "Clinical Notes", icon: "fa-file-medical" },
+            { to: "/doctor/periodontal-chart", label: "Periodontal Chart", icon: "fa-teeth" },
+            { to: "/doctor/clinical-referrals", label: "Referrals", icon: "fa-share-square" },
+            { to: "/doctor/patient-timeline", label: "Patient Timeline", icon: "fa-history" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-robot",
+          label: "AI Assistant",
+          children: [
+            { to: "/doctor/ai-hub", label: "Doctor AI Hub", icon: "fa-brain" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Receptionist / Front Desk",
+      allowedRoles: ['CLINIC_OWNER', 'STAFF', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-calendar-check",
+          label: "Appointments",
+          children: [
+            { to: "/receptionist/check-in", label: "Check-In Board", icon: "fa-door-open" },
+            { to: "/clinic/waitlist", label: "Waitlist", icon: "fa-list-ol" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-user-circle",
+          label: "Patient Admin",
+          children: [
+            { to: "/receptionist/patient-forms", label: "Patient Forms", icon: "fa-file-alt" },
+            { to: "/receptionist/admin-documents", label: "Documents", icon: "fa-folder-open" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-comments",
+          label: "Communication",
+          children: [
+            { to: "/receptionist/communications", label: "Communication Center", icon: "fa-paper-plane" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-file-invoice-dollar",
+          label: "Payments",
+          children: [
+            { to: "/receptionist/receipts", label: "Receipt Manager", icon: "fa-receipt" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Billing / Accountant",
+      allowedRoles: ['CLINIC_OWNER', 'ACCOUNTANT', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-chart-bar",
+          label: "Reports",
+          children: [
+            { to: "/accountant/financial-reports", label: "Financial Reports", icon: "fa-chart-line" },
+            { to: "/sale-analytics", label: "Sale Analytics", icon: "fa-chart-pie" },
+            { to: "/clinic/outstanding", label: "Outstanding Balances", icon: "fa-exclamation-circle" },
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-sync",
+          label: "Reconciliation",
+          children: [
+            { to: "/accountant/reconciliation", label: "Payment Reconciliation", icon: "fa-check-double" },
+            { to: "/accountant/payment-methods", label: "Payment Methods", icon: "fa-credit-card" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-file-invoice",
+          label: "Transactions",
+          children: [
+            { to: "/payment", label: "Payments", icon: "fa-money-bill" },
+            { to: "/billing", label: "Billing", icon: "fa-file-invoice-dollar" },
+            { to: "/invoice", label: "Invoices", icon: "fa-receipt" },
+            { to: "/expense", label: "Expenses", icon: "fa-minus-circle" },
+            { to: "/clinic/patient-refunds", label: "Refunds", icon: "fa-undo" },
+          ]
+        }
+      ]
+    },
+    {
+      section: "Insurance Coordinator",
+      allowedRoles: ['CLINIC_OWNER', 'ACCOUNTANT', 'INSURANCE_COORD', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-shield-alt",
+          label: "Claims",
+          children: [
+            { to: "/insurance/claims", label: "Insurance Claims", icon: "fa-file-medical-alt" },
+            { to: "/insurance", label: "Insurance Providers", icon: "fa-building" },
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-robot",
+          label: "AI Tools",
+          children: [
+            { to: "/insurance/ai-hub", label: "Insurance AI Hub", icon: "fa-brain" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Treatment Coordinator",
+      allowedRoles: ['CLINIC_OWNER', 'TREATMENT_COORD', 'DOCTOR', 'ADMIN'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-tasks",
+          label: "Case Management",
+          children: [
+            { to: "/treatment-coord/case-acceptance", label: "Case Acceptance", icon: "fa-check-circle" },
+            { to: "/treatment-coord/pipeline", label: "Treatment Pipeline", icon: "fa-project-diagram" },
+            { to: "/treatment-plan", label: "Treatment Plans", icon: "fa-notes-medical" },
+            { to: "/clinic/recalls", label: "Recall Management", icon: "fa-redo" },
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-robot",
+          label: "AI Assistant",
+          children: [
+            { to: "/treatment-coord/ai-hub", label: "Treatment Coord AI", icon: "fa-brain" }
+          ]
+        }
+      ]
+    },
+    {
+      section: "Patient Portal",
+      allowedRoles: ['PATIENT'],
+      items: [
+        {
+          dropdown: true,
+          icon: "fa-calendar",
+          label: "My Appointments",
+          children: [
+            { to: "/patient/my-appointments", label: "My Appointments", icon: "fa-calendar-check" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-file-invoice",
+          label: "My Finances",
+          children: [
+            { to: "/patient/my-invoices", label: "My Invoices", icon: "fa-receipt" },
+            { to: "/patient/payments", label: "My Payments", icon: "fa-dollar" },
+            { to: "/patient/prescriptions", label: "My Prescriptions", icon: "fa-medkit" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-book-open",
+          label: "Resources",
+          children: [
+            { to: "/patient/education", label: "Educational Content", icon: "fa-graduation-cap" },
+            { to: "/messages", label: "Messages", icon: "fa-envelope" }
+          ]
+        },
+        {
+          dropdown: true,
+          icon: "fa-robot",
+          label: "AI Assistant",
+          children: [
+            { to: "/patient/ai-assistant", label: "Patient AI Assistant", icon: "fa-brain" }
+          ]
+        }
       ]
     }
   ];

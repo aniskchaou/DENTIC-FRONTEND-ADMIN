@@ -1,14 +1,4 @@
-let chatPipeline;
-let pipelineLoaded = false;
-
-async function loadPipeline() {
-  if (!pipelineLoaded) {
-    const { pipeline } = await import('@xenova/transformers');
-    chatPipeline = await pipeline('text-generation', 'Xenova/gpt2'); // or another supported model
-    pipelineLoaded = true;
-  }
-}
-loadPipeline();
+const pipelineLoaded = true;
 
 /**
  * @swagger
@@ -37,18 +27,16 @@ loadPipeline();
  *                   type: string
  */
 exports.chat = async (req, res) => {
-  if (!pipelineLoaded) {
-    await loadPipeline();
-    if (!pipelineLoaded) {
-      return res.status(503).send({ message: "AI model loading, try again soon." });
-    }
-  }
   const { message } = req.body;
   try {
-    const result = await chatPipeline(message, { max_new_tokens: 50 });
-    res.send({ response: result[0].generated_text });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: message }],
+      max_tokens: 200,
+    });
+    res.send({ response: completion.choices[0].message.content });
   } catch (err) {
-    res.status(500).send({ message: "AI error", error: err });
+    res.status(500).send({ message: 'AI error', error: err.message });
   }
 };
 
@@ -239,17 +227,7 @@ exports.ondotogramSuggestion = async (req, res) => {
 const OpenAI = require("openai");
 const { OPENAI_API_KEY } = require("../../config/openai.config");
 
-let qaPipeline;
-let qaLoaded = false;
-
-async function loadQAPipeline() {
-  if (!qaLoaded) {
-    const { pipeline } = await import('@xenova/transformers');
-    qaPipeline = await pipeline('question-answering', 'Xenova/distilbert-base-cased-distilled-squad');
-    qaLoaded = true;
-  }
-}
-loadQAPipeline();
+const qaLoaded = true;
 
 exports.clinicQA = async (req, res) => {
   try {

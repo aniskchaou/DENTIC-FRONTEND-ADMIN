@@ -17,13 +17,31 @@ exports.findAllUsers = (condition,res) => {
         });
 }
 const bcrypt = require('bcrypt');
+const { Op } = require('sequelize');
 exports.loginUser = async (username, password, res) => {
     try {
-        const data = await User.findOne({ where: { username: username } });
+        // allow login with either username or email
+        const data = await User.findOne({
+            where: {
+                [Op.or]: [
+                    { username: username },
+                    { email: username }
+                ]
+            }
+        });
         if (!data) {
             return res.send({ message: 'Invalid username or password' });
         }
-        const match = await bcrypt.compare(password, data.password);
+        // lazy migration: handle passwords stored as plain-text before bcrypt was added
+        let match;
+        if (data.password && data.password.startsWith('$2')) {
+            match = await bcrypt.compare(password, data.password);
+        } else {
+            match = (data.password === password);
+            if (match) {
+                await data.update({ password: await bcrypt.hash(password, 10) });
+            }
+        }
         if (!match) {
             return res.send({ message: 'Invalid username or password' });
         }

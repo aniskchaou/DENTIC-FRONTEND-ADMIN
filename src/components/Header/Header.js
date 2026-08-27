@@ -45,7 +45,8 @@ i18n
     },
     lng: 'en',
     fallbackLng: 'en',
-    interpolation: { escapeValue: false }
+    interpolation: { escapeValue: false },
+    initImmediate: false  // synchronous init so translations are ready before first render
   });
 
 
@@ -241,8 +242,7 @@ const Header = ({ connected, handleClick }) => {
     const { t } = useTranslation();
 
     return (
-        <div id="right-panel" className={`right-panel${darkMode ? ' dark-mode' : ''}`} style={{ display: (connected ? 'block' : 'none') }}>
-            <header id="header" className="header">
+        <header id="header" className={`header${darkMode ? ' dark-mode' : ''}`} style={{ display: (connected ? 'block' : 'none') }}>
                 <div
                     style={{
                         display: 'flex',
@@ -636,7 +636,6 @@ const Header = ({ connected, handleClick }) => {
                     </div>
                 </div>
             </header>
-        </div>
     )
 };
 

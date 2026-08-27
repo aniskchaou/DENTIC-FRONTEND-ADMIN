@@ -43,6 +43,14 @@ var Appointement = sequelize.define("appointment", {
     type: DataTypes.STRING, // Store as string
     allowNull: true,
   },
+  // Receptionist workflow timestamps
+  confirmedAt: { type: DataTypes.DATE, allowNull: true },
+  checkedInAt: { type: DataTypes.DATE, allowNull: true },
+  checkedOutAt: { type: DataTypes.DATE, allowNull: true },
+  cancelledAt: { type: DataTypes.DATE, allowNull: true },
+  cancellationReason: { type: DataTypes.STRING, allowNull: true },
+  // Room assignment (FK to rooms model)
+  assignedRoomId: { type: DataTypes.INTEGER, allowNull: true },
   createdAt: {
     type: DataTypes.STRING,
     allowNull: false,

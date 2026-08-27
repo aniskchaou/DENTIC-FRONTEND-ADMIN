@@ -67,15 +67,24 @@ const Login = ({ handleClick }) => {
           localStorage.setItem('connected', CurrentUser.CONNECTED_USER);
           handleClick(true);
           setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
+          const role = (response.data.role || '').toLowerCase();
+          const destination = role === 'patient' ? '/patient/my-appointments' : '/dashboard';
           setTimeout(() => {
-            history.push("/dashboard");
+            history.push(destination);
           }, 800);
         } else {
           setSnackbar({ open: true, message: 'Login failed. Please check your credentials.', severity: 'error' });
         }
       }
     } catch (error) {
-      setSnackbar({ open: true, message: 'Login failed. Please check your credentials.', severity: 'error' });
+      const isNetworkDown = !error.response;
+      setSnackbar({
+        open: true,
+        message: isNetworkDown
+          ? 'Cannot reach the server. Make sure the backend is running on port 5000.'
+          : 'Login failed. Please check your credentials.',
+        severity: 'error',
+      });
     }
   };
 
@@ -109,7 +118,7 @@ const Login = ({ handleClick }) => {
         </Stack>
         <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 24 }}>
           <TextField
-            label={t('login.username')}
+            label="Username or Email"
             name="username"
             fullWidth
             margin="normal"
@@ -145,6 +154,9 @@ const Login = ({ handleClick }) => {
           >
             {t('login.sign_in')}
           </Button>
+          <div style={{ textAlign: 'right', marginBottom: 4 }}>
+            <Link to="/forgot-password" style={{ fontSize: 13, color: '#1976d2', textDecoration: 'none' }}>Forgot password?</Link>
+          </div>
           <Link to="/register" style={{ textDecoration: 'none' }}>
             <Button
               type="button"

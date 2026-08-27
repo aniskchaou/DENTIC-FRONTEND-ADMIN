@@ -171,6 +171,23 @@ exports.deleteAll = (req, res) => {
     deleteAllClinics(res);
 };
 
+const Clinic = require("../../models/clinic.models");
+
+exports.suspend = async (req, res) => {
+    const { id } = req.params;
+    const clinic = await Clinic.findByPk(id);
+    if (!clinic) return res.status(404).json({ message: "Clinic not found." });
+    await clinic.update({ status: "Suspended" });
+    res.json({ message: "Clinic suspended." });
+};
+
+exports.unsuspend = async (req, res) => {
+    const { id } = req.params;
+    const clinic = await Clinic.findByPk(id);
+    if (!clinic) return res.status(404).json({ message: "Clinic not found." });
+    await clinic.update({ status: "Active" });
+    res.json({ message: "Clinic reactivated." });
+};
 
 /**
  * @swagger

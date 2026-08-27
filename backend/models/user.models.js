@@ -47,8 +47,18 @@ module.exports = User;
 
 User.addSeedUsers = async function(userSeeds) {
   try {
-    await User.bulkCreate(userSeeds, { ignoreDuplicates: true });
-    console.log('Seed users added successfully.');
+    const bcrypt = require('bcrypt');
+    for (const seed of userSeeds) {
+      const existing = await User.findOne({ where: { username: seed.username } });
+      if (!existing) {
+        // new user: hash and insert
+        await User.create({ ...seed, password: await bcrypt.hash(seed.password, 10) });
+      } else if (!existing.password.startsWith('$2')) {
+        // existing user has plain-text password: fix it
+        await existing.update({ password: await bcrypt.hash(seed.password, 10) });
+      }
+    }
+    console.log('Seed users added/updated successfully.');
   } catch (error) {
     console.error('Error adding seed users:', error);
   }

@@ -207,3 +207,72 @@ exports.login = (req, res) => {
     };
     loginUser(user.username, user.password, res);
 };
+
+const User = require("../../models/user.models");
+const bcrypt = require("bcrypt");
+
+// PUT /users/:id/disable  –  set status to Disabled
+exports.disable = async (req, res) => {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found." });
+    await user.update({ status: "Disabled" });
+    res.json({ message: "User disabled." });
+};
+
+// PUT /users/:id/enable  –  restore status to Active
+exports.enable = async (req, res) => {
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found." });
+    await user.update({ status: "Active" });
+    res.json({ message: "User enabled." });
+};
+
+// PUT /users/:id/permissions  –  overwrite permissions on linked staff record
+exports.assignPermissions = async (req, res) => {
+    const { permissions } = req.body;
+    if (!Array.isArray(permissions))
+        return res.status(400).json({ message: "permissions must be an array." });
+    const Staff = require("../../models/staff.models");
+    const [updated] = await Staff.update({ permissions }, { where: { userId: req.params.id } });
+    if (!updated) return res.status(404).json({ message: "No staff record found for this user." });
+    res.json({ message: "Permissions updated." });
+};
+
+// POST /users/:id/reset-password  –  admin sets a new password without needing the old one
+exports.adminResetPassword = async (req, res) => {
+    const { newPassword } = req.body;
+    if (!newPassword) return res.status(400).json({ message: "newPassword is required." });
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found." });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashed });
+    res.json({ message: "Password reset by admin." });
+};
+
+// POST /users/:id/impersonate  –  superadmin gets a temporary session as another user (audit-logged)
+exports.impersonate = async (req, res) => {
+    const target = await User.findByPk(req.params.id);
+    if (!target) return res.status(404).json({ message: "User not found." });
+    // Log the impersonation action
+    const AuditLog = require("../../models/audit.log.models");
+    await AuditLog.create({
+        userId: req.body.adminId || null,
+        username: req.body.adminUsername || "superadmin",
+        role: "SUPERADMIN",
+        action: "IMPERSONATE",
+        entity: "user",
+        entityId: target.id,
+        ipAddress: req.ip,
+        details: { targetUsername: target.username, targetRole: target.role },
+    }).catch(() => {});
+    // Return the target user's profile as if they logged in (no real JWT in this demo)
+    res.json({
+        id: target.id,
+        username: target.username,
+        role: target.role,
+        email: target.email,
+        impersonatedBy: req.body.adminUsername || "superadmin",
+        _impersonation: true,
+    });
+};
+
